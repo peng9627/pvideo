@@ -5,8 +5,9 @@ import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
-from pycore.data.entity import globalvar as gl
+from pycore.data.entity import globalvar as gl, config
 from pycore.utils import http_utils
+from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
@@ -86,12 +87,12 @@ def send_code():
             result = '{"state":2}'
         else:
             code = StringUtils.randomNum(6)
-            # enc = StringUtils.md5(
-            #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
-            # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
-            # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
-            #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
-            #                                   None)
+            enc = StringUtils.md5(
+                config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
+            content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
+            msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
+                                                                                   "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
+                                              None)
             gl.get_v("redis").setex(account_name + "_code", code, 120)
             logger.info(code)
             result = '{"state":0}'
