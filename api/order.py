@@ -1,0 +1,89 @@
+# coding=utf-8
+import time
+import traceback
+
+from flask import request
+from pycore.data.database import mysql_connection
+from pycore.data.entity import globalvar as gl
+from pycore.utils.logger_utils import LoggerUtils
+from pycore.utils.stringutils import StringUtils
+
+from data.database import data_account, data_goods, data_gold, data_order
+from mode import pay_type
+from mode.order import Order
+
+logger = LoggerUtils('api.order').logger
+
+
+def create():
+    result = '{"state":-1}'
+    data = request.form
+    if "HTTP_AUTH" in request.headers.environ:
+        sessionid = request.headers.environ['HTTP_AUTH']
+        redis = gl.get_v("redis")
+        if not redis.exists(sessionid):
+            result = '{"state":2}'
+        else:
+            sessions = redis.getobj(sessionid)
+            account_id = sessions["id"]
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                account = data_account.query_account_by_id(connection, account_id)
+                if account is not None:
+                    goods_id = data["goods_id"]
+                    goods = data_goods.goods_by_id(connection, goods_id)
+                    if account.gold >= goods.amount:
+                        data_account.update_gold(connection, -goods.amount, account.id)
+                        data_gold.create_gold(connection, 4, 0, account.id, -goods.amount)
+                        order_no = StringUtils.randomStr(32)
+                        while data_order.order_by_order_no(connection, order_no) is not None:
+                            order_no = StringUtils.randomStr(32)
+                        order = Order()
+                        order.order_no = order_no
+                        order.create_time = int(time.time())
+                        order.account_id = account.id
+                        order.amount = goods.amount
+                        order.goods_id = goods.id
+                        order.pay_type = pay_type.OFFLINE
+                        order.details = goods.name
+                        data_order.create_order(connection, order)
+                        data_order.pay_order(connection, order.order_no)
+                        result = '{"state":0}'
+                    else:
+                        result = '{"state":3}'
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+    else:
+        result = '{"state":1}'
+    return result
+
+
+def list():
+    result = '{"state":-1}'
+    data = request.form
+    if "HTTP_AUTH" in request.headers.environ:
+        sessionid = request.headers.environ['HTTP_AUTH']
+        redis = gl.get_v("redis")
+        if not redis.exists(sessionid):
+            result = '{"state":2}'
+        else:
+            sessions = redis.getobj(sessionid)
+            account_id = sessions["id"]
+            connection = None
+            page = int(data["page"])
+            try:
+                connection = mysql_connection.get_conn()
+                orders = data_order.order_list(connection, account_id, page)
+                result = '{"state":0, "data":[%s]}' % ",".join(orders)
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+    else:
+        result = '{"state":1}'
+    return result

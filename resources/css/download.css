@@ -1,0 +1,108 @@
+* {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+}
+html {
+  font-family: "微软雅黑";
+}
+.layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  z-index: 1500;
+  text-align: right;
+  background: rgba(0, 0, 0, 0.8);
+  display: none;
+}
+.layer img {
+  max-width: 80%;
+}
+.layer .close {
+  clear: both;
+  display: block;
+  text-align: center;
+  position: absolute;
+  buttom: 2.5rem;
+  left: 0;
+  right: 0;
+  top: 70%;
+  margin: auto;
+  z-index: 10000000;
+}
+.layer .close img {
+  width: 3.33333333rem;
+}
+.back {
+  background: red;
+  display: block;
+  padding: 0.83333333rem;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 100000;
+  color: #fff;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.5);
+  display: none;
+}
+.bgBox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 1;
+}
+.bgBox img {
+  width: 100%;
+  height: 100%;
+}
+.logo img {
+  max-width: 80%;
+  position: absolute;
+  top: 17%;
+  left: 0;
+  right: 0;
+  animation-delay: 1s;
+  z-index: 211;
+  display: block;
+  margin: auto;
+}
+.girlBox img {
+  max-height: 70%;
+  left: 0;
+  right: 0;
+  margin: auto;
+  position: absolute;
+  z-index: 10;
+}
+.download {
+  position: absolute;
+  bottom: 5%;
+  left: 0;
+  right: 0;
+  z-index: 300;
+  text-align: center;
+}
+.download img {
+  max-width: 35%;
+}
+@keyframes floating {
+  0% {
+    max-width: 78%;
+    top: 8%;
+  }
+  50% {
+    max-width: 80%;
+    top: 8.2%;
+  }
+  100% {
+    max-width: 78%;
+    top: 8%;
+  }
+}
