@@ -19,3 +19,19 @@ def create_gold(connection, type, source, user_id, gold):
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
+
+
+def gold_sum(connection, id, type, time_stamp):
+    result = 0
+    try:
+        sql = config.get("sql", "sql_gold_sum")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, (id, type, time_stamp))
+            r = cursor.fetchone()
+            if r is not None:
+                result = r["result"]
+                if result is None:
+                    result = 0
+    except:
+        logger.exception(traceback.format_exc())
+    return result

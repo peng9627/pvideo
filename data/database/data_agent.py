@@ -109,3 +109,59 @@ def agent_set(connection, user_id, contact, old_contact):
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
+
+
+def agent_user_count(connection, id):
+    result = 0
+    try:
+        sql = config.get("sql", "sql_agent_user_count")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, '%' + str(id) + '%')
+            r = cursor.fetchone()
+            if r is not None:
+                result = r["result"]
+    except:
+        logger.exception(traceback.format_exc())
+    return result
+
+
+def agent_directly_count(connection, id):
+    result = 0
+    try:
+        sql = config.get("sql", "sql_agent_directly_count")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, id)
+            r = cursor.fetchone()
+            if r is not None:
+                result = r["result"]
+    except:
+        logger.exception(traceback.format_exc())
+    return result
+
+
+def agent_today_new(connection, id, time_stamp):
+    result = 0
+    try:
+        sql = config.get("sql", "sql_agent_today_new")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, ('%' + str(id) + '%', time_stamp))
+            r = cursor.fetchone()
+            if r is not None:
+                result = r["result"]
+    except:
+        logger.exception(traceback.format_exc())
+    return result
+
+
+def agent_today_active(connection, id, time_stamp):
+    result = 0
+    try:
+        sql = config.get("sql", "sql_agent_today_active")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, ('%' + str(id) + '%', time_stamp))
+            r = cursor.fetchone()
+            if r is not None:
+                result = r["result"]
+    except:
+        logger.exception(traceback.format_exc())
+    return result
