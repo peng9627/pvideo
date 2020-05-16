@@ -14,7 +14,7 @@ def platform_list():
     result = '{"state":-1}'
     # connection = None
     try:
-        infile = open('/Users/pengyi/PycharmProjects/h5video/conf/live_platform.json')
+        infile = open('./conf/live_platform.json')
         result = '{"state":0, "data":%s}' % infile.read()
         infile.close()
         # connection = mysql_connection.get_conn()
