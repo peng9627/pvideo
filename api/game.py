@@ -23,7 +23,7 @@ def games():
     try:
         datas = []
         try:
-            infile = open('/Users/pengyi/PycharmProjects/h5video/conf/douyu_type.json')
+            infile = open('./conf/douyu_type.json')
             videos = json.load(infile)
             infile.close()
             for g in videos:

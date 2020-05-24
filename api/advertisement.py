@@ -1,17 +1,11 @@
-import re
-import time
 import traceback
 
-from flask import request, session, make_response
+from flask import request
 from pycore.data.database import mysql_connection
-from pycore.data.entity import config, globalvar as gl
-from pycore.utils import http_utils
-from pycore.utils.http_utils import HttpUtils
+from pycore.data.entity import globalvar as gl
 from pycore.utils.logger_utils import LoggerUtils
-from pycore.utils.stringutils import StringUtils
 
-from data.database import data_account, data_advertisement, data_advertisement_click
-from mode.account import Account
+from data.database import data_advertisement, data_advertisement_click
 
 logger = LoggerUtils('api.advertisement').logger
 

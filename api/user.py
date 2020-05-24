@@ -33,41 +33,93 @@ def login():
     try:
         connection = mysql_connection.get_conn()
         account_name = str(data['account'])
-        code = str(data['code'])
-        share_code = ''
-        if "share_code" in data:
-            share_code = str(data['share_code'])
-        share_ip = ''
-        if "share_ip" in data:
-            share_ip = str(data['share_ip'])
-        redis = gl.get_v("redis")
-        if not redis.exists(account_name + '_code'):
+        pwd = str(data['pwd'])
+        account = data_account.query_account_by_account_name(connection, account_name)
+        if account is None:
             result = '{"state":1}'
-        elif code != redis.get(account_name + '_code'):
+        elif StringUtils.md5(pwd + account.salt) != account.pwd:
             result = '{"state":2}'
+        elif account.account_status != 0:
+            result = '{"state":3}'
         else:
-            redis.delobj(account_name + "_code")
-            account = data_account.query_account_by_account_name(connection, account_name)
-            last_time = time.time()
-            last_address = http_utils.getClientIP(request.headers.environ)
-            if account is None:
+            data_account.update_login(time.time(), connection, http_utils.getClientIP(request.headers.environ),
+                                      account.id)
+            result = '{"state":0,"auth":"' + login_success(gl.get_v("redis"), account) + '"}'
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    return result
+
+
+def register():
+    result = '{"state":-1}'
+    connection = None
+    data = request.form
+    try:
+        connection = mysql_connection.get_conn()
+        account_name = str(data['account'])
+        pwd = str(data['pwd'])
+        username = re.compile(r"[0-9a-zA-Z_]{8,16}")
+        if username.match(account_name):
+            code = str(data['code'])
+            if not gl.get_v("redis").exists(account_name + '_code'):
+                result = '{"state":1}'
+            elif code != gl.get_v("redis").get(account_name + '_code'):
+                result = '{"state":2}'
+            elif data_account.exist(connection, account_name):
+                result = '{"state":3}'
+            else:
+                share_code = ''
+                if "share_code" in data:
+                    share_code = str(data['share_code'])
+                share_ip = ''
+                if "share_ip" in data:
+                    share_ip = str(data['share_ip'])
                 account = Account()
                 account.account_name = account_name
                 account.nickname = "zz" + account_name[-4:]
                 account.create_time = int(time.time())
+                account.salt = StringUtils.randomStr(32)
+                account.pwd = StringUtils.md5(pwd + account.salt)
                 account.code = StringUtils.randomStr(4).upper()
                 while data_account.exist_code(connection, account.code):
                     account.code = StringUtils.randomStr(4).upper()
+                last_address = http_utils.getClientIP(request.headers.environ)
                 data_account.create_account(connection, account, last_address, share_code, share_ip)
-                account = data_account.query_account_by_account_name(connection, account_name)
-                result = '{"state":0,"auth":"' + login_success(redis, account) + '"}'
+                result = '{"state":0}'
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    return result
 
-            elif account.account_status != 0:
-                result = '{"state":3}'
+
+def change_pwd():
+    result = '{"state":-1}'
+    connection = None
+    data = request.form
+    try:
+        connection = mysql_connection.get_conn()
+        account_name = str(data['account'])
+        pwd = str(data['pwd'])
+        username = re.compile(r"[0-9a-zA-Z_]{8,16}")
+        if username.match(account_name):
+            code = str(data['code'])
+            if not gl.get_v("redis").exists(account_name + '_code'):
+                result = '{"state":1}'
+            elif code != gl.get_v("redis").get(account_name + '_code'):
+                result = '{"state":2}'
             else:
-                data_account.update_login(last_time, connection, last_address, account.id)
-                result = '{"state":0,"auth":"' + login_success(redis, account) + '"}'
-                login_success(redis, account)
+                account = data_account.query_account_by_account_name(connection, account_name)
+                if account is None:
+                    result = '{"state":3}'
+                else:
+                    pwd = StringUtils.md5(pwd + account.salt)
+                    data_account.update_pwd(connection, pwd, account.id)
+                    result = '{"state":0}'
     except:
         logger.exception(traceback.format_exc())
     finally:
@@ -81,7 +133,7 @@ def send_code():
     data = request.form
     account_name = str(data['account'])
     try:
-        if not re.match(r"^1[35678]\d{9}$", account_name):
+        if not re.match(r"^1[3456789]\d{9}$", account_name):
             result = '{"state":1}'
         elif gl.get_v("redis").exists(account_name + '_code'):
             result = '{"state":2}'

@@ -4,6 +4,8 @@ class Account(object):
     def __init__(self):
         self.id = 0
         self.account_name = None
+        self.pwd = None
+        self.salt = None
         self.head = None
         self.nickname = ''
         self.sex = 0

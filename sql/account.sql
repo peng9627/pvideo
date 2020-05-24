@@ -5,6 +5,8 @@ CREATE TABLE `account`
 (
     `id`             INT(11) PRIMARY KEY                     NOT NULL AUTO_INCREMENT UNIQUE,
     `account_name`   VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL UNIQUE,
+    `pwd`            VARCHAR(255) COLLATE utf8mb4_unicode_ci,
+    `salt`           VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `head`           VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `nickname`       VARCHAR(6) COLLATE utf8mb4_unicode_ci   NOT NULL,
     `sex`            INT(1) UNSIGNED  DEFAULT 0,

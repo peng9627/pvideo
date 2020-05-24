@@ -4,6 +4,8 @@ import importlib
 from pycore.data.entity import config
 from flask import Blueprint, session, redirect, render_template
 
+from api import index
+
 api = Blueprint('api', __name__, template_folder='../templates', static_folder='../resources')
 
 
@@ -35,3 +37,8 @@ def download():
         code = "10000"
     return render_template('/download.html', code=code, android_url=config.get("server", "android_url"),
                            ios_url=config.get("server", "ios_url"))
+
+
+@api.route('/index', methods=['GET'])
+def funindex():
+    return index.index()

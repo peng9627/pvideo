@@ -17,8 +17,8 @@ def create_account(connection, account, last_address, share_code, share_ip):
         sql = config.get("sql", "sql_create_account")
         with connection.cursor() as cursor:
             cursor.execute(sql,
-                           (account.account_name, account.nickname, account.create_time, account.code,
-                            account.create_time, last_address))
+                           (account.account_name, account.pwd, account.salt, account.nickname, account.create_time,
+                            account.code, account.create_time, last_address))
             connection.commit()
             account = query_account_by_account_name(connection, account.account_name)
             if account is not None:
@@ -47,6 +47,8 @@ def query_account_by_account_name(connection, account_name):
                 account = Account()
                 account.id = int(result["id"])
                 account.account_name = result["account_name"]
+                account.pwd = result["pwd"]
+                account.salt = result["salt"]
                 if result["head"] is not None:
                     account.head = result["head"]
                 account.nickname = result["nickname"]
@@ -74,6 +76,8 @@ def query_account_by_code(connection, code):
                 account = Account()
                 account.id = int(result["id"])
                 account.account_name = result["account_name"]
+                account.pwd = result["pwd"]
+                account.salt = result["salt"]
                 if result["head"] is not None:
                     account.head = result["head"]
                 account.nickname = result["nickname"]
@@ -101,6 +105,8 @@ def query_account_by_id(connection, id):
                 account = Account()
                 account.id = int(result["id"])
                 account.account_name = result["account_name"]
+                account.pwd = result["pwd"]
+                account.salt = result["salt"]
                 if result["head"] is not None:
                     account.head = result["head"]
                 account.nickname = result["nickname"]
@@ -126,6 +132,29 @@ def update_login(t, connection, address, account):
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
+
+
+def update_pwd(connection, pwd, account_id):
+    try:
+        sql = config.get("sql", "sql_update_pwd")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, (pwd, account_id))
+            connection.commit()
+    except:
+        connection.rollback()
+        logger.exception(traceback.format_exc())
+
+
+def exist(connection, account):
+    try:
+        sql = config.get("sql", "sql_exist")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, account)
+            result = cursor.fetchone()
+            return result["result"] != 0
+    except:
+        logger.exception(traceback.format_exc())
+    return False
 
 
 def exist_code(connection, code):

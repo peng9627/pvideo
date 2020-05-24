@@ -67,7 +67,7 @@ def query_video_search(connection, content, page, pagesize=20):
                 v.address = result["address"]
                 v.horizontal = result["horizontal"]
                 v.vertical = result["vertical"]
-                video_list.append(v)
+                video_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
     return video_list
