@@ -1,11 +1,13 @@
+import json
 import traceback
+from urllib import unquote
 
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_live_url
+from data.database import data_live_url, data_delete_room
 
 logger = LoggerUtils('api.live').logger
 
@@ -45,7 +47,14 @@ def lives():
             s1 = url.address.split("://")
             s2 = s1[1].index("/")
             js = HttpUtils(s1[1][0:s2]).get("/" + s1[1][s2 + 1:].replace("json.txt", address), None)
-            result = '{"state":0, "data":%s}' % js
+            delete_rooms = data_delete_room.delete_room_list(connection)
+            live_datas = json.loads(js)
+            need_lives = []
+            for live in live_datas["zhubo"]:
+                live["title"] = unquote(live["title"])
+                if live["title"] not in delete_rooms:
+                    need_lives.append(json.dumps(live))
+            result = '{"state":0, "data":[%s]}' % (','.join(need_lives))
             break
     except:
         logger.exception(traceback.format_exc())

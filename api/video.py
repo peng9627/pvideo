@@ -1,10 +1,12 @@
+import json
 import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
+from pycore.data.entity import globalvar as gl
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_video_type, data_video
+from data.database import data_video_type, data_video, data_video_praise, data_video_comment
 
 logger = LoggerUtils('api.video').logger
 
@@ -42,6 +44,21 @@ def query_video():
     return result
 
 
+def recommend():
+    result = '{"state":-1}'
+    connection = None
+    try:
+        connection = mysql_connection.get_conn()
+        videos = data_video.recommend(connection)
+        result = '{"state":0, "data":[%s]}' % ",".join(videos)
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    return result
+
+
 def search():
     result = '{"state":-1}'
     connection = None
@@ -52,6 +69,60 @@ def search():
         connection = mysql_connection.get_conn()
         videos = data_video.query_video_search(connection, content, page)
         result = '{"state":0, "data":[%s]}' % ",".join(videos)
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    return result
+
+
+def query_details():
+    result = '{"state":-1}'
+    connection = None
+    data = request.form
+    try:
+        video_id = data["video_id"]
+        connection = mysql_connection.get_conn()
+        praises = data_video_praise.video_praise_count(connection, '%,' + str(video_id))
+        comments = data_video_comment.video_comment_count(connection, video_id)
+        praised = False
+        if "HTTP_AUTH" in request.headers.environ:
+            sessionid = request.headers.environ['HTTP_AUTH']
+            redis = gl.get_v("redis")
+            if redis.exists(sessionid):
+                sessions = redis.getobj(sessionid)
+                account_id = sessions["id"]
+                praised = data_video_praise.exist(connection, str(account_id) + "," + video_id)
+        result = '{"state":0, "data":{"praises":%d, "comments":%d, "praised":%d}}' % (
+            praises, comments, 1 if praised else 0)
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    return result
+
+
+def query_info():
+    result = '{"state":-1}'
+    connection = None
+    data = request.form
+    try:
+        video_id = data["video_id"]
+        connection = mysql_connection.get_conn()
+        video_data = data_video.info(connection, video_id)
+        video_data["praises"] = data_video_praise.video_praise_count(connection, '%,' + str(video_id))
+        praised = False
+        if "HTTP_AUTH" in request.headers.environ:
+            sessionid = request.headers.environ['HTTP_AUTH']
+            redis = gl.get_v("redis")
+            if redis.exists(sessionid):
+                sessions = redis.getobj(sessionid)
+                account_id = sessions["id"]
+                praised = data_video_praise.exist(connection, str(account_id) + "," + video_id)
+        video_data["praised"] = 1 if praised else 0
+        result = '{"state":0, "data":%s}' % json.dumps(video_data)
     except:
         logger.exception(traceback.format_exc())
     finally:

@@ -39,12 +39,36 @@ def query_video_list(connection, type, page, pagesize=20):
             for result in r:
                 v = Video()
                 v.id = result["id"]
+                v.type = result["type"]
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = result["address"]
-                v.horizontal = result["horizontal"]
-                v.vertical = result["vertical"]
+                v.address = config.get("server", "video_video_domain") + result["address"]
+                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
+                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
+                video_list.append(json.dumps(v.__dict__))
+    except:
+        logger.exception(traceback.format_exc())
+    return video_list
+
+
+def recommend(connection):
+    video_list = []
+    try:
+        with connection.cursor() as cursor:
+            sql = config.get("sql", "sql_video_recommend")
+            cursor.execute(sql)
+            r = cursor.fetchall()
+            for result in r:
+                v = Video()
+                v.id = result["id"]
+                v.type = result["type"]
+                v.title = result["title"]
+                v.create_time = result["create_time"]
+                v.play_count = result["play_count"]
+                v.address = config.get("server", "video_video_domain") + result["address"]
+                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
+                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
                 video_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -61,12 +85,13 @@ def query_video_search(connection, content, page, pagesize=20):
             for result in r:
                 v = Video()
                 v.id = result["id"]
+                v.type = result["type"]
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = result["address"]
-                v.horizontal = result["horizontal"]
-                v.vertical = result["vertical"]
+                v.address = config.get("server", "video_video_domain") + result["address"]
+                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
+                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
                 video_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -84,12 +109,13 @@ def query_video_by_ids(connection, ids):
             for result in r:
                 v = Video()
                 v.id = result["id"]
+                v.type = result["type"]
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = result["address"]
-                v.horizontal = result["horizontal"]
-                v.vertical = result["vertical"]
+                v.address = config.get("server", "video_video_domain") + result["address"]
+                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
+                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
                 video_list.append(v)
     except:
         logger.exception(traceback.format_exc())
@@ -105,3 +131,53 @@ def video_add_count(connection, id):
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
+
+
+def info(connection, video_id):
+    video_info = {}
+    try:
+        sql = config.get("sql", "sql_video_info")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, video_id)
+            result = cursor.fetchone()
+            if result is not None:
+                video_info["type"] = result["type"]
+                video_info["title"] = result["title"]
+                video_info["create_time"] = result["create_time"]
+                video_info["play_count"] = result["play_count"]
+    except:
+        logger.exception(traceback.format_exc())
+    return video_info
+#
+# def video_add_comment(connection, id):
+#     try:
+#         sql = config.get("sql", "sql_video_add_comment")
+#         with connection.cursor() as cursor:
+#             cursor.execute(sql, id)
+#             connection.commit()
+#     except:
+#         connection.rollback()
+#         logger.exception(traceback.format_exc())
+#
+#
+# def video_add_praise(connection, id):
+#     try:
+#         sql = config.get("sql", "sql_video_add_praise")
+#         with connection.cursor() as cursor:
+#             cursor.execute(sql, id)
+#             connection.commit()
+#     except:
+#         connection.rollback()
+#         logger.exception(traceback.format_exc())
+#
+#
+# def video_cancel_praise(connection, id):
+#     try:
+#         sql = config.get("sql", "sql_video_cancel_praise")
+#         with connection.cursor() as cursor:
+#             cursor.execute(sql, id)
+#             connection.commit()
+#     except:
+#         connection.rollback()
+#         logger.exception(traceback.format_exc())
+#

@@ -7,7 +7,7 @@ CREATE TABLE `video`
     `type`        INT(11)             NOT NULL,
     `title`       VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `create_time` INT(10) UNSIGNED DEFAULT 0,
-    `play_count`  INT(11)          DEFAULT 0,
+    `play_count`  INT(11) UNSIGNED DEFAULT 0,
     `address`     VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `horizontal`  VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `vertical`    VARCHAR(255) COLLATE utf8mb4_unicode_ci
