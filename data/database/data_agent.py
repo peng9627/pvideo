@@ -61,6 +61,32 @@ def add_min(connection, pid):
         logger.exception(traceback.format_exc())
 
 
+def use_min(connection, user_id, min):
+    try:
+        sql = config.get("sql", "sql_use_min") % (min, user_id)
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            connection.commit()
+    except:
+        connection.rollback()
+        logger.exception(traceback.format_exc())
+
+
+def query_min(connection, user_id):
+    result = 0
+    try:
+        sql = config.get("sql", "sql_query_min")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, user_id)
+            r = cursor.fetchone()
+            if r is not None:
+                result = r["min"]
+    except:
+        connection.rollback()
+        logger.exception(traceback.format_exc())
+    return result
+
+
 def agent_contact(connection, id):
     result = None
     try:

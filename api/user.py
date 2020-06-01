@@ -235,3 +235,32 @@ def give_gold():
     else:
         result = '{"state":1}'
     return result
+
+
+def check_time():
+    result = '{"state":-1}'
+    data = request.form
+    use_time = int(data["time"])
+    if "HTTP_AUTH" in request.headers.environ:
+        sessionid = request.headers.environ['HTTP_AUTH']
+        redis = gl.get_v("redis")
+        if not redis.exists(sessionid):
+            result = '{"state":2}'
+        else:
+            sessions = redis.getobj(sessionid)
+            account_id = sessions["id"]
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                if use_time > 0:
+                    data_agent.use_min(connection, account_id, use_time)
+                surplus_time = data_agent.query_min(connection, account_id)
+                result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+    else:
+        result = '{"state":1}'
+    return result

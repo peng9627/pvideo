@@ -1,13 +1,32 @@
 import json
 import traceback
 
+from flask import request
 from pycore.data.database import mysql_connection
 from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_live_url, data_advertisement, data_video, data_vip_video
+from data.database import data_live_url, data_advertisement, data_video, data_vip_video, data_app_version
 
 logger = LoggerUtils('api.index').logger
+
+
+def version():
+    result = '{"state":-1}'
+    connection = None
+    data = request.form
+    try:
+        connection = mysql_connection.get_conn()
+        platform = data["platform"]
+        version_type = data["type"]
+        app_version = data_app_version.query_app_version(connection, version_type, platform)
+        result = '{"state":0,"data":%s}' % app_version
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    return result
 
 
 def index():
