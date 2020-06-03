@@ -252,9 +252,12 @@ def check_time():
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                if use_time > 0:
-                    data_agent.use_min(connection, account_id, use_time)
-                surplus_time = data_agent.query_min(connection, account_id)
+                if data_vip.is_vip(connection, account_id):
+                    surplus_time = 100000
+                else:
+                    if use_time > 0:
+                        data_agent.use_min(connection, account_id, use_time)
+                    surplus_time = data_agent.query_min(connection, account_id)
                 result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
             except:
                 logger.exception(traceback.format_exc())

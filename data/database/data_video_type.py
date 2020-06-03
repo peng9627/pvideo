@@ -21,7 +21,8 @@ def query_types(connection):
                 v = VideoType()
                 v.id = result["id"]
                 v.title = result["title"]
-                v.create_time = result["pid"]
+                v.pid = result["pid"]
+                v.pic = result["pic"]
                 video_types.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())

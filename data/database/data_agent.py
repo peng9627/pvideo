@@ -49,9 +49,8 @@ def add_agent(connection, agent):
     return result
 
 
-def add_min(connection, pid):
+def add_min(connection, pid, add_min):
     try:
-        add_min = int(config.get("server", "share_add_min"))
         sql = config.get("sql", "sql_add_min") % (add_min, add_min, pid)
         with connection.cursor() as cursor:
             cursor.execute(sql)

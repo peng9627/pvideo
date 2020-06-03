@@ -5,7 +5,8 @@ CREATE TABLE `video_type`
 (
     `id`    INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
     `title` VARCHAR(255) COLLATE utf8mb4_unicode_ci,
-    `pid`   INT(11) DEFAULT 0
+    `pid`   INT(11) DEFAULT 0,
+    `pic`   VARCHAR(255) COLLATE utf8mb4_unicode_ci
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4

@@ -1,6 +1,7 @@
 # coding=utf-8
 import Queue
 import json
+import random
 import socket
 import struct
 import threading
@@ -20,8 +21,6 @@ class ClientReceive(object):
         self.conns = None
         self.address = None
         self.userId = None
-        self.messageQueue = None
-        self.messageHandle = None
         self.lock = threading.Lock()
         self.sendQueue = BatchQueue()
         self._close = False
@@ -29,6 +28,8 @@ class ClientReceive(object):
         self.times = 0
         self.ttime = int(time.time())
         self.redis = gl.get_v("redis")
+        self.fire = 0
+        self.room = None
 
     def receive(self, conn, address):
         """
@@ -47,7 +48,7 @@ class ClientReceive(object):
                 ttime = int(time.time())
                 if ttime == self.ttime:
                     self.times += 1
-                    if self.times == 3:
+                    if self.times == 10:
                         break
                 else:
                     self.times = 0
@@ -67,6 +68,16 @@ class ClientReceive(object):
                         nick = base_message["nick"]
                         content = base_message["content"]
                         self.sendToAll(json.dumps({"type": 1, "content": nick + " : " + content}))
+                    elif 2 == base_message["type"]:
+                        nick = base_message["nick"]
+                        self.sendToAll(json.dumps({"type": 1, "content": nick + "点赞了主播"}))
+                        if self.room is not None:
+                            self.fire += random.randint(300, 800)
+                            gl.get_v("fire")[self.room] += self.fire
+                    elif 3 == base_message["type"]:
+                        self.room = base_message["room"]
+                        self.fire = random.randint(300, 800)
+                        gl.get_v("fire")[self.room] += self.fire
                     else:
                         logger.info("client close")
                 else:
@@ -81,11 +92,11 @@ class ClientReceive(object):
             self.close()
 
     def close(self):
+        gl.get_v("fire")[self.room] -= self.fire
+        self.fire = 0
         if self._close:
             return
         self._close = True
-        if self.messageHandle is not None:
-            self.messageHandle.close()
         try:
             if self.conns is not None:
                 self.conns.shutdown(socket.SHUT_RDWR)

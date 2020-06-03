@@ -19,6 +19,7 @@ app = Flask(__name__)
 redis = RedisUtils()
 gl.set_v("redis", redis)
 gl.set_v("clients", {})
+gl.set_v("fire", {})
 app.secret_key = "l0pgtb2k4lfstpuau672q4f67c7cyrsj"
 log_fmt = '%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s'
 formatter = logging.Formatter(log_fmt)

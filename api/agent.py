@@ -7,8 +7,9 @@ from pycore.data.entity import config, globalvar as gl
 from pycore.utils import http_utils, time_utils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_agent, data_account, data_gold
+from data.database import data_agent, data_account, data_gold, data_vip
 from mode.agent.agent import Agent
+from mode.vip import Vip
 
 logger = LoggerUtils('api.agent').logger
 
@@ -63,10 +64,36 @@ def bind():
                 agent.total_commission = init_count
                 agent.contact = pagent.contact
                 data_agent.add_agent(connection, agent)
-                data_agent.add_min(connection, pagent.user_id)
 
-                data_account.update_gold(connection, int(config.get("server", "share_add_gold")), pagent.user_id)
-                data_gold.create_gold(connection, 2, 0, pagent.user_id, int(config.get("server", "share_add_gold")))
+                add_min = int(config.get("server", "share_add_min"))
+                if 0 < add_min:
+                    data_agent.add_min(connection, pagent.user_id, add_min)
+                add_gold = int(config.get("server", "share_add_gold"))
+                if 0 < add_gold:
+                    data_account.update_gold(connection, add_gold, pagent.user_id)
+                    data_gold.create_gold(connection, 2, 0, pagent.user_id, add_gold)
+                share_add_vip_day = int(config.get("server", "share_add_vip_day"))
+                if 0 < share_add_vip_day:
+                    xj = data_agent.agent_directly_count(connection, pagent.user_id)
+                    if 2 == xj:
+                        share_add_vip_day = 5
+                    elif xj > 2:
+                        share_add_vip_day = 10
+                    create_time = int(time.time())
+                    last_end_time = data_vip.vip_end_time(connection, pagent.user_id)
+                    if last_end_time > create_time:
+                        start_time = last_end_time
+                    else:
+                        start_time = create_time
+                    end_time = share_add_vip_day * 86400 + start_time
+                    vip = Vip()
+                    vip.account_id = pagent.user_id
+                    vip.create_time = create_time
+                    vip.start_time = start_time
+                    vip.end_time = end_time
+                    vip.order_no = ''
+                    vip.operation_account = agent.user_id
+                    data_vip.create_vip(connection, vip)
                 result = '{"state":0}'
 
     except:

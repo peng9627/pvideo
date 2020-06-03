@@ -1,14 +1,26 @@
 import json
 import traceback
+import random
+from urllib import unquote
 
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
+from pycore.data.entity import globalvar as gl
 
-from data.database import data_live_url, data_advertisement, data_video, data_vip_video, data_app_version
+from data.database import data_live_url, data_advertisement, data_video, data_vip_video, data_app_version, \
+    data_delete_room
 
 logger = LoggerUtils('api.index').logger
+
+
+def lives_reversed_cmp(x, y):
+    if int(x["fire"]) < int(y["fire"]):
+        return 1
+    if int(x["fire"]) > int(y["fire"]):
+        return -1
+    return 0
 
 
 def version():
@@ -47,13 +59,21 @@ def index():
             s1 = url.address.split("://")
             s2 = s1[1].index("/")
             js = HttpUtils(s1[1][0:s2]).get("/" + s1[1][s2 + 1:].replace("json.txt", "jsonxiaoxiannu.txt"), None)
-            lives = json.loads(js)["zhubo"]
-            if len(lives) > 6:
-                lives = lives[0:6]
-                js = json.dumps(lives)
+            live_datas = json.loads(js)["zhubo"]
+            delete_rooms = data_delete_room.delete_room_list(connection)
+            need_lives = []
+            for live in live_datas:
+                live["title"] = unquote(live["title"])
+                if live["title"] not in delete_rooms:
+                    if live["title"] in gl.get_v("fire"):
+                        live["fire"] = gl.get_v("fire")[live["title"]]
+                    else:
+                        live["fire"] = random.randint(200, 500)
+                    need_lives.append(live)
+            need_lives = sorted(need_lives, cmp=lives_reversed_cmp)[0:6]
             break
         result = '{"state":0, "lives":%s, "ads1":[%s], "ads2":[%s], "vip_videos":[%s], "short_videos":[%s], ' \
-                 '"videos":[%s]}' % (js, ",".join(advertisement1), ",".join(advertisement2), ",".join(vip_videos),
+                 '"videos":[%s]}' % (json.dumps(need_lives), ",".join(advertisement1), ",".join(advertisement2), ",".join(vip_videos),
                                      ",".join(short_videos), ",".join(videos))
     except:
         logger.exception(traceback.format_exc())
