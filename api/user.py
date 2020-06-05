@@ -258,6 +258,9 @@ def check_time():
                     if use_time > 0:
                         data_agent.use_min(connection, account_id, use_time)
                     surplus_time = data_agent.query_min(connection, account_id)
+                    if surplus_time < 0:
+                        data_agent.use_min(connection, account_id, -surplus_time)
+                        surplus_time = 0
                 result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
             except:
                 logger.exception(traceback.format_exc())

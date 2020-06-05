@@ -10,7 +10,7 @@ from pycore.utils.logger_utils import LoggerUtils
 from pycore.data.entity import globalvar as gl
 
 from data.database import data_live_url, data_advertisement, data_video, data_vip_video, data_app_version, \
-    data_delete_room
+    data_delete_room, data_notice
 
 logger = LoggerUtils('api.index').logger
 
@@ -47,21 +47,24 @@ def index():
     try:
         connection = mysql_connection.get_conn()
         urls = data_live_url.query(connection)
-        js = ''
         advertisement1 = data_advertisement.query_advertisements(connection, 1)
         advertisement2 = data_advertisement.query_advertisements(connection, 2)
+        notice_s = ''
+        notice = data_notice.query(connection, 1)
+        if notice is not None:
+            notice_s = notice.content
         vip_videos = data_vip_video.query(connection)
         if len(vip_videos) > 4:
             vip_videos = vip_videos[0:4]
         short_videos = data_video.query_video_list(connection, 21, 1, 6)
         videos = data_video.query_video_list(connection, -1, 1, 6)
+        need_lives = []
         for url in urls:
             s1 = url.address.split("://")
             s2 = s1[1].index("/")
             js = HttpUtils(s1[1][0:s2]).get("/" + s1[1][s2 + 1:].replace("json.txt", "jsonxiaoxiannu.txt"), None)
             live_datas = json.loads(js)["zhubo"]
             delete_rooms = data_delete_room.delete_room_list(connection)
-            need_lives = []
             for live in live_datas:
                 live["title"] = unquote(live["title"])
                 if live["title"] not in delete_rooms:
@@ -72,9 +75,10 @@ def index():
                     need_lives.append(live)
             need_lives = sorted(need_lives, cmp=lives_reversed_cmp)[0:6]
             break
-        result = '{"state":0, "lives":%s, "ads1":[%s], "ads2":[%s], "vip_videos":[%s], "short_videos":[%s], ' \
-                 '"videos":[%s]}' % (json.dumps(need_lives), ",".join(advertisement1), ",".join(advertisement2), ",".join(vip_videos),
-                                     ",".join(short_videos), ",".join(videos))
+        result = '{"state":0, "notice":"%s", "lives":%s, "ads1":[%s], "ads2":[%s], "vip_videos":[%s], "short_videos":[%s], ' \
+                 '"videos":[%s]}' % (
+                     notice_s, json.dumps(need_lives), ",".join(advertisement1), ",".join(advertisement2),
+                     ",".join(vip_videos), ",".join(short_videos), ",".join(videos))
     except:
         logger.exception(traceback.format_exc())
     finally:
