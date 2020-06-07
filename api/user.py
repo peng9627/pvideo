@@ -241,9 +241,9 @@ def check_time():
     result = '{"state":-1}'
     data = request.form
     use_time = int(data["time"])
+    redis = gl.get_v("redis")
     if "HTTP_AUTH" in request.headers.environ:
         sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
         if not redis.exists(sessionid):
             result = '{"state":2}'
         else:
@@ -267,6 +267,20 @@ def check_time():
             finally:
                 if connection is not None:
                     connection.close()
+    elif "HTTP_DEVICE" in request.headers.environ:
+        device = request.headers.environ['HTTP_DEVICE']
+        if redis.exists("device_info_" + device):
+            device_info = redis.getobj("device_info_" + device)
+        else:
+            device_info = {}
+            device_info["surplus_time"] = int(config.get("server", "default_min"))
+        if use_time > 0:
+            device_info["surplus_time"] -= use_time
+            if device_info["surplus_time"] < 0:
+                device_info["surplus_time"] = 0
+        redis.setobj("device_info_" + device, device_info)
+        result = '{"state":0,"data":{"surplus_time":%d, "total_time":%s}}' % (
+            device_info["surplus_time"], config.get("server", "default_min"))
     else:
         result = '{"state":1}'
     return result

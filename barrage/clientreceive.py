@@ -70,14 +70,20 @@ class ClientReceive(object):
                         self.sendToAll(json.dumps({"type": 1, "content": nick + " : " + content}))
                     elif 2 == base_message["type"]:
                         nick = base_message["nick"]
-                        self.sendToAll(json.dumps({"type": 1, "content": nick + "点赞了主播"}))
+                        self.sendToAll(json.dumps({"type": 1, "content": nick + u"点赞了主播"}))
                         if self.room is not None:
                             self.fire += random.randint(300, 800)
-                            gl.get_v("fire")[self.room] += self.fire
+                            if self.room in gl.get_v("fire"):
+                                gl.get_v("fire")[self.room] += self.fire
+                            else:
+                                gl.get_v("fire")[self.room] = self.fire
                     elif 3 == base_message["type"]:
                         self.room = base_message["room"]
                         self.fire = random.randint(300, 800)
-                        gl.get_v("fire")[self.room] += self.fire
+                        if self.room in gl.get_v("fire"):
+                            gl.get_v("fire")[self.room] += self.fire
+                        else:
+                            gl.get_v("fire")[self.room] = self.fire
                     else:
                         logger.info("client close")
                 else:
@@ -92,7 +98,8 @@ class ClientReceive(object):
             self.close()
 
     def close(self):
-        gl.get_v("fire")[self.room] -= self.fire
+        if self.room in gl.get_v("fire"):
+            gl.get_v("fire")[self.room] -= self.fire
         self.fire = 0
         if self._close:
             return

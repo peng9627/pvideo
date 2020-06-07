@@ -16,9 +16,19 @@ logger = LoggerUtils('api.live').logger
 
 
 def platform_reversed_cmp(x, y):
-    if int(x["Number"]) < int(y["Number"]):
+    intx = 0
+    xs = x["Number"]
+    if xs is not None and len(xs) > 0:
+        intx = int(x["Number"])
+
+    inty = 0
+    ys = y["Number"]
+    if ys is not None and len(ys) > 0:
+        inty = int(y["Number"])
+
+    if intx < inty:
         return 1
-    if int(x["Number"]) > int(y["Number"]):
+    if intx > inty:
         return -1
     return 0
 

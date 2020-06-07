@@ -26,10 +26,10 @@ def query_video_list(connection, type, page, pagesize=20):
     video_list = []
     try:
         with connection.cursor() as cursor:
-            if -1 == type:
+            if -2 == type:
                 sql = config.get("sql", "sql_video_count")
                 cursor.execute(sql, ((page - 1) * pagesize, pagesize))
-            elif 0 == type:
+            elif -1 == type:
                 sql = config.get("sql", "sql_video_newest")
                 cursor.execute(sql, ((page - 1) * pagesize, pagesize))
             else:
