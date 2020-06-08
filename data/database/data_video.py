@@ -43,9 +43,21 @@ def query_video_list(connection, type, page, pagesize=20):
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = config.get("server", "video_video_domain") + result["address"]
-                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
-                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
+                address = result["address"]
+                if address.find('://') >= 0:
+                    v.address = address
+                else:
+                    v.address = config.get("server", "video_video_domain") + address
+                horizontal = result["horizontal"]
+                if horizontal.find('://') >= 0:
+                    v.horizontal = horizontal
+                else:
+                    v.horizontal = config.get("server", "video_img_domain") + horizontal
+                vertical = result["vertical"]
+                if vertical.find('://') >= 0:
+                    v.vertical = vertical
+                else:
+                    v.vertical = config.get("server", "video_img_domain") + vertical
                 video_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -66,9 +78,21 @@ def recommend(connection):
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = config.get("server", "video_video_domain") + result["address"]
-                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
-                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
+                address = result["address"]
+                if address.find('://') >= 0:
+                    v.address = address
+                else:
+                    v.address = config.get("server", "video_video_domain") + address
+                horizontal = result["horizontal"]
+                if horizontal.find('://') >= 0:
+                    v.horizontal = horizontal
+                else:
+                    v.horizontal = config.get("server", "video_img_domain") + horizontal
+                vertical = result["vertical"]
+                if vertical.find('://') >= 0:
+                    v.vertical = vertical
+                else:
+                    v.vertical = config.get("server", "video_img_domain") + vertical
                 video_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -89,9 +113,21 @@ def query_video_search(connection, content, page, pagesize=20):
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = config.get("server", "video_video_domain") + result["address"]
-                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
-                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
+                address = result["address"]
+                if address.find('://') >= 0:
+                    v.address = address
+                else:
+                    v.address = config.get("server", "video_video_domain") + address
+                horizontal = result["horizontal"]
+                if horizontal.find('://') >= 0:
+                    v.horizontal = horizontal
+                else:
+                    v.horizontal = config.get("server", "video_img_domain") + horizontal
+                vertical = result["vertical"]
+                if vertical.find('://') >= 0:
+                    v.vertical = vertical
+                else:
+                    v.vertical = config.get("server", "video_img_domain") + vertical
                 video_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -113,9 +149,21 @@ def query_video_by_ids(connection, ids):
                 v.title = result["title"]
                 v.create_time = result["create_time"]
                 v.play_count = result["play_count"]
-                v.address = config.get("server", "video_video_domain") + result["address"]
-                v.horizontal = config.get("server", "video_img_domain") + result["horizontal"]
-                v.vertical = config.get("server", "video_img_domain") + result["vertical"]
+                address = result["address"]
+                if address.find('://') >= 0:
+                    v.address = address
+                else:
+                    v.address = config.get("server", "video_video_domain") + address
+                horizontal = result["horizontal"]
+                if horizontal.find('://') >= 0:
+                    v.horizontal = horizontal
+                else:
+                    v.horizontal = config.get("server", "video_img_domain") + horizontal
+                vertical = result["vertical"]
+                if vertical.find('://') >= 0:
+                    v.vertical = vertical
+                else:
+                    v.vertical = config.get("server", "video_img_domain") + vertical
                 video_list.append(v)
     except:
         logger.exception(traceback.format_exc())
