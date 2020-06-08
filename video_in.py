@@ -2,12 +2,11 @@
 import json
 import time
 
-from pycore.data.database import mysql_connection
 from pycore.data.entity import config, globalvar as gl
-from pycore.utils.logger_utils import LoggerUtils
 
 config.init("./conf/pyg.conf")
 gl.init()
+from pycore.data.database import mysql_connection
 from data.database import data_video
 from mode.video import Video
 
