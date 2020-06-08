@@ -38,7 +38,7 @@ app.logger.setLevel(gunicorn_logger.level)
 app.register_blueprint(api)
 
 threading.Thread(target=server.start, name='barrage_server').start()  # 线程对象.
-# app.run(host="0.0.0.0")
+app.run(host="0.0.0.0")
 
 
 class RequestFormatter(logging.Formatter):

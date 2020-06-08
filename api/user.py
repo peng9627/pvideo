@@ -6,13 +6,13 @@ import traceback
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import globalvar as gl, config
-from pycore.utils import http_utils
 from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_agent, data_vip, data_gold
 from mode.account import Account
+from utils import ip_utils
 
 logger = LoggerUtils('api.user').logger
 
@@ -42,8 +42,7 @@ def login():
         elif account.account_status != 0:
             result = '{"state":3}'
         else:
-            data_account.update_login(time.time(), connection, http_utils.getClientIP(request.headers.environ),
-                                      account.id)
+            data_account.update_login(time.time(), connection, ip_utils.get_ip(request.headers.environ), account.id)
             result = '{"state":0,"auth":"' + login_success(gl.get_v("redis"), account) + '"}'
     except:
         logger.exception(traceback.format_exc())
@@ -86,7 +85,7 @@ def register():
                 account.code = StringUtils.randomStr(4).upper()
                 while data_account.exist_code(connection, account.code):
                     account.code = StringUtils.randomStr(4).upper()
-                last_address = http_utils.getClientIP(request.headers.environ)
+                last_address = ip_utils.get_ip(request.headers.environ)
                 data_account.create_account(connection, account, last_address, share_code, share_ip)
                 result = '{"state":0}'
     except:
