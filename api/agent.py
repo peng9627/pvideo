@@ -4,13 +4,13 @@ import traceback
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import config, globalvar as gl
+from pycore.utils import http_utils
 from pycore.utils import time_utils
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_agent, data_account, data_gold, data_vip
 from mode.agent.agent import Agent
 from mode.vip import Vip
-from utils import ip_utils
 
 logger = LoggerUtils('api.agent').logger
 
@@ -18,7 +18,7 @@ logger = LoggerUtils('api.agent').logger
 def first():
     result = '{"state":1}'
     try:
-        ip = ip_utils.get_ip(request.headers.environ)
+        ip = http_utils.getClientIP(request.headers.environ)
         result = '{"state":0, "data":{"ip":"%s"}}' % ip
     except:
         logger.exception(traceback.format_exc())
@@ -111,7 +111,7 @@ def toip():
     redis = gl.get_v("redis")
     try:
         code = data['code']
-        ip = ip_utils.get_ip(request.headers.environ)
+        ip = http_utils.getClientIP(request.headers.environ)
         if ip is None or len(ip) < 1:
             ip = request.remote_addr
         if ip is not None and len(ip) > 1:

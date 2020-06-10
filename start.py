@@ -14,6 +14,7 @@ config.init("./conf/pyg.conf")
 gl.init()
 
 from api import api
+from app_thread import reset_count
 
 app = Flask(__name__)
 redis = RedisUtils()
@@ -37,6 +38,7 @@ app.logger.handlers = gunicorn_logger.handlers
 app.logger.setLevel(gunicorn_logger.level)
 app.register_blueprint(api)
 
+reset_count.reset_count()
 threading.Thread(target=server.start, name='barrage_server').start()  # 线程对象.
 # app.run(host="0.0.0.0")
 

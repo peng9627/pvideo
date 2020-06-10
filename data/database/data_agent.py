@@ -71,6 +71,17 @@ def use_min(connection, user_id, min):
         logger.exception(traceback.format_exc())
 
 
+def reset_min(connection):
+    try:
+        sql = config.get("sql", "sql_reset_min")
+        with connection.cursor() as cursor:
+            cursor.execute(sql)
+            connection.commit()
+    except:
+        connection.rollback()
+        logger.exception(traceback.format_exc())
+
+
 def query_min(connection, user_id):
     result = 0
     try:
