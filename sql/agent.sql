@@ -4,7 +4,7 @@ DROP TABLE IF EXISTS `agent`;
 CREATE TABLE `agent`
 (
     `id`          INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
-    `create_date` DATETIME(0)                  DEFAULT NULL,
+    `create_time` INT(10) UNSIGNED DEFAULT 0,
     `user_id`     INT(10)             NOT NULL UNIQUE,
     `parent_id`   INT(10),
     `parent_ids`  VARCHAR(255) COLLATE utf8mb4_unicode_ci,

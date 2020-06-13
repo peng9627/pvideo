@@ -53,6 +53,7 @@ def bind():
             pagent = data_agent.agent_by_id(connection, int(pid))
             if pagent is not None:
                 agent = Agent()
+                agent.create_time = int(time.time())
                 agent.user_id = user_id
                 agent.parent_id = pagent.user_id
                 if len(pagent.parent_ids) < 1:
@@ -276,8 +277,8 @@ def statistics():
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d') - 1
                 today_new = data_agent.agent_today_new(connection, account_id, time_stamp)
                 today_active = data_agent.agent_today_active(connection, account_id, time_stamp)
-                give_gold = data_gold.gold_sum(connection, account_id, 5, 0)
-                today_give_gold = data_gold.gold_sum(connection, account_id, 5, time_stamp)
+                give_gold = -data_gold.gold_sum(connection, account_id, 5, 0)
+                today_give_gold = -data_gold.gold_sum(connection, account_id, 5, time_stamp)
                 get_gold = data_gold.gold_sum(connection, account_id, 6, 0)
                 today_get_gold = data_gold.gold_sum(connection, account_id, 6, time_stamp)
                 result = '{"state":0, "data": {"user_count":%d, "directly_count":%d, "today_new":%d, ' \

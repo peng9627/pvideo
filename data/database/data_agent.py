@@ -39,7 +39,7 @@ def add_agent(connection, agent):
         sql = config.get("sql", "sql_add_agent")
         with connection.cursor() as cursor:
             cursor.execute(sql, (
-                agent.create_date, agent.user_id, agent.parent_id, agent.parent_ids, agent.top_id, agent.commission,
+                agent.create_time, agent.user_id, agent.parent_id, agent.parent_ids, agent.top_id, agent.commission,
                 agent.total_commission, agent.contact))
             connection.commit()
             result = True
