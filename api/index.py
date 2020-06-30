@@ -56,7 +56,7 @@ def index():
         vip_videos = data_vip_video.query(connection)
         if len(vip_videos) > 4:
             vip_videos = vip_videos[0:4]
-        short_videos = data_video.query_video_list(connection, 0, 1, 6)
+        short_videos = data_video.query_video_list(connection, -2, 1, 6)
         videos = data_video.query_video_list(connection, -1, 1, 6)
         need_lives = []
         for url in urls:
