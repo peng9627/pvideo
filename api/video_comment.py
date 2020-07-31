@@ -9,7 +9,7 @@ from pycore.utils.logger_utils import LoggerUtils
 from data.database import data_video_comment
 from mode.video_comment import VideoComment
 
-logger = LoggerUtils('api.video_praise').logger
+logger = LoggerUtils('api.video_comment').logger
 
 
 def comment():
