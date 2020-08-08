@@ -1,3 +1,4 @@
+import json
 import time
 import traceback
 
@@ -67,9 +68,18 @@ def bind():
                 agent.contact = pagent.contact
                 data_agent.add_agent(connection, agent)
 
-                add_min = int(config.get("server", "share_add_min"))
-                if 0 < add_min:
-                    data_agent.add_min(connection, pagent.user_id, add_min)
+                directly_count = data_agent.agent_directly_count(connection, pagent.user_id)
+                level_conf = json.loads(config.get("agent", "level_conf"))
+                add_min = 0
+                for lc in level_conf:
+                    if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
+                        add_min = lc["times"]
+                    else:
+                        break
+                if pagent.min < add_min:
+                    data_agent.add_min(connection, pagent.user_id, add_min - pagent.min)
+                elif add_min == -1:
+                    data_agent.add_min(connection, pagent.user_id, -1 - pagent.min)
                 add_gold = int(config.get("server", "share_add_gold"))
                 if 0 < add_gold:
                     data_account.update_gold(connection, add_gold, pagent.user_id)

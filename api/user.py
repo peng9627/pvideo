@@ -1,4 +1,6 @@
 # coding=utf-8
+import json
+import math
 import re
 import time
 import traceback
@@ -7,6 +9,7 @@ from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import globalvar as gl, config
 from pycore.utils import http_utils
+from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
@@ -170,21 +173,35 @@ def info():
                     agent = data_agent.agent_by_id(connection, account.id)
                     end_time = data_vip.vip_end_time(connection, account.id)
                     if 0 == end_time:
-                        vip = u"普通会员"
+                        vip = u"VIP会员"
                     elif end_time < time.time():
-                        vip = u"VIP会员已过期"
+                        vip = u"SVIP会员已过期"
                     else:
                         this_time = int(time.time())
                         if end_time - this_time > 86400:
-                            vip = u"VIP会员有效期:" + str((end_time - this_time) / 86400) + u"天"
+                            vip = u"SVIP会员有效期:%.0f天" % math.ceil((end_time - this_time) / 86400.0)
                         elif end_time - this_time > 3600:
-                            vip = u"VIP会员有效期:" + str((end_time - this_time) / 3600) + u"小时"
+                            vip = u"SVIP会员有效期:%.0f小时" % math.ceil((end_time - this_time) / 3600.0)
                         else:
-                            vip = u"VIP会员有效期:" + str((end_time - this_time) / 60) + u"分钟"
+                            vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
+                    directly_count = data_agent.agent_directly_count(connection, account.id)
+                    level_conf = json.loads(config.get("agent", "level_conf"))
+                    add_min = 0
+                    level = 1
+                    next = 0
+                    for lc in level_conf:
+                        if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
+                            add_min = lc["times"]
+                            level = lc["level"]
+                            next = lc["value"]
+                        else:
+                            next = lc["value"] - next
+                            break
                     result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
-                             '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "code":"%s"}}' % (
+                             '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
                                  account_id, "" if account.head is None else account.head, account.nickname,
-                                 account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, account.code)
+                                 account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, level, next,
+                                 account.code)
             except:
                 logger.exception(traceback.format_exc())
             finally:

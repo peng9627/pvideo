@@ -4,7 +4,8 @@ DROP TABLE IF EXISTS `video_history`;
 CREATE TABLE `video_history`
 (
     `id`          INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
-    `user_id`     INT(11)             NOT NULL,
+    `user_id`     INT(11)          DEFAULT 0,
+    `device`      VARCHAR(64)      DEFAULT NULL COLLATE utf8mb4_unicode_ci,
     `video_id`    INT(11)             NOT NULL,
     `video_type`  INT(11)             NOT NULL,/* 1.视频, 2.影视*/
     `update_time` INT(10) UNSIGNED DEFAULT 0,

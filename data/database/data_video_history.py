@@ -12,31 +12,32 @@ def add_video_history(connection, video_history):
     try:
         sql = config.get("sql", "sql_exist_video_history")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (video_history.user_id, video_history.video_id, video_history.video_type))
+            cursor.execute(sql, (
+                video_history.user_id, video_history.device, video_history.video_id, video_history.video_type))
             result = cursor.fetchone()
             if result["result"] != 0:
                 sql = config.get("sql", "sql_update_video_history")
                 cursor.execute(sql, (
-                    video_history.content, video_history.update_time, video_history.user_id, video_history.video_id,
-                    video_history.video_type))
+                    video_history.content, video_history.update_time, video_history.user_id, video_history.device,
+                    video_history.video_id, video_history.video_type))
                 connection.commit()
             else:
                 sql = config.get("sql", "sql_add_video_history")
                 cursor.execute(sql, (
-                    video_history.user_id, video_history.video_id, video_history.video_type, video_history.update_time,
-                    video_history.content))
+                    video_history.user_id, video_history.device, video_history.video_id, video_history.video_type,
+                    video_history.update_time, video_history.content))
                 connection.commit()
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
 
 
-def query_movie_history(connection, user_id, page, pagesize=12):
+def query_movie_history(connection, user_id, device, page, pagesize=12):
     movies = []
     try:
         sql = config.get("sql", "sql_query_movie_history")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (user_id, 2, (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, (user_id, device, 2, (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 movies.append(json.dumps(
