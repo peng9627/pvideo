@@ -9,7 +9,7 @@ from pycore.utils.logger_utils import LoggerUtils
 from data.database import data_gold
 from mode.account import Account
 
-logger = LoggerUtils("data_account").logger
+logger = LoggerUtils("data.account").logger
 
 
 def create_account(connection, account, last_address, share_code, share_ip):

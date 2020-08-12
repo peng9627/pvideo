@@ -9,7 +9,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.vip import Vip
 
-logger = LoggerUtils("data_vip").logger
+logger = LoggerUtils("data.vip").logger
 
 
 def is_vip(connection, account_id):
@@ -21,7 +21,6 @@ def is_vip(connection, account_id):
             result = cursor.fetchone()
             return result["result"] != 0
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
 
 
@@ -35,7 +34,6 @@ def vip_end_time(connection, account_id):
             if r is not None:
                 result = r["result"]
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
     return result
 

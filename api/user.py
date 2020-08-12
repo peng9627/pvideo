@@ -63,8 +63,7 @@ def register():
         connection = mysql_connection.get_conn()
         account_name = str(data['account'])
         pwd = str(data['pwd'])
-        username = re.compile(r"[0-9a-zA-Z_]{8,16}")
-        if username.match(account_name):
+        if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
             code = str(data['code'])
             if not gl.get_v("redis").exists(account_name + '_code'):
                 result = '{"state":1}'
@@ -107,8 +106,7 @@ def change_pwd():
         connection = mysql_connection.get_conn()
         account_name = str(data['account'])
         pwd = str(data['pwd'])
-        username = re.compile(r"[0-9a-zA-Z_]{8,16}")
-        if username.match(account_name):
+        if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
             code = str(data['code'])
             if not gl.get_v("redis").exists(account_name + '_code'):
                 result = '{"state":1}'

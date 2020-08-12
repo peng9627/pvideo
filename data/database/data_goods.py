@@ -26,7 +26,6 @@ def goods_by_id(connection, id):
                 goods.vip_days = result["vip_days"]
                 goods.status = result["status"]
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
     return goods
 
@@ -48,6 +47,5 @@ def goods_list(connection):
                 goods.status = result["status"]
                 goods_list.append(json.dumps(goods.__dict__))
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
     return goods_list

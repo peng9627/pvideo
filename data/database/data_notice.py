@@ -6,7 +6,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.notice import Notice
 
-logger = LoggerUtils("data_notice").logger
+logger = LoggerUtils("data.notice").logger
 
 
 def query(connection, type):

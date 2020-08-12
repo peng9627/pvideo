@@ -58,7 +58,6 @@ def order_by_order_no(connection, order_no):
                 order.goods_id = result["goods_id"]
                 order.status = result["status"]
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
     return order
 
@@ -78,6 +77,5 @@ def order_list(connection, user_id, page, page_size=20):
                 order.details = result["details"]
                 orders.append(json.dumps(order.__dict__))
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
     return orders

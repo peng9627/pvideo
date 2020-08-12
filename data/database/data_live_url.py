@@ -6,7 +6,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.live_url import LiveUrl
 
-logger = LoggerUtils("data_live_url").logger
+logger = LoggerUtils("data.live_url").logger
 
 
 def query(connection):

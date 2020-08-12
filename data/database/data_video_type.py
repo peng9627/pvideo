@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.video_type import VideoType
 
-logger = LoggerUtils("data_video_type").logger
+logger = LoggerUtils("data.video_type").logger
 
 
 def query_types(connection):

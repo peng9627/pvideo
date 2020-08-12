@@ -4,6 +4,7 @@ import threading
 
 import boto3
 from botocore.config import Config
+from botocore.exceptions import ClientError
 from pycore.data.entity import config
 
 
@@ -25,6 +26,13 @@ class S3Object(object):
     def delete(self, bucket, file_path):
         s = self.client.delete_object(Bucket=bucket, Key=file_path)
         print s
+
+    def exist(self, bucket, file_path):
+        try:
+            self.client.head_object(Bucket=bucket, Key=file_path)
+        except ClientError as e:
+            return int(e.response['Error']['Code']) != 404
+        return True
 
 
 class UploadProgressPercentage(object):

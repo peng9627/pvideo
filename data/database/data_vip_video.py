@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.vip_video import VipVideo
 
-logger = LoggerUtils("data_vip_video").logger
+logger = LoggerUtils("data.vip_video").logger
 
 
 def query(connection):

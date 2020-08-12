@@ -4,7 +4,7 @@ import traceback
 from pycore.data.entity import config
 from pycore.utils.logger_utils import LoggerUtils
 
-logger = LoggerUtils("data_praise").logger
+logger = LoggerUtils("data.praise").logger
 
 
 def create_video_praise(connection, user_video):

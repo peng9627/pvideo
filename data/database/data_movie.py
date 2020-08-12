@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.movie import Movie
 
-logger = LoggerUtils("data_movie").logger
+logger = LoggerUtils("data.movie").logger
 
 
 def create_movie(connection, movie):

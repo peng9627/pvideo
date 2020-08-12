@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.advertisement import Advertisement
 
-logger = LoggerUtils("data_advertisement").logger
+logger = LoggerUtils("data.advertisement").logger
 
 
 def query_advertisements(connection, where):
@@ -36,4 +36,5 @@ def add_count(connection, id):
             cursor.execute(sql)
             connection.commit()
     except:
+        connection.rollback()
         logger.exception(traceback.format_exc())

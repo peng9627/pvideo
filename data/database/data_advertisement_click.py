@@ -5,7 +5,7 @@ import traceback
 from pycore.data.entity import config
 from pycore.utils.logger_utils import LoggerUtils
 
-logger = LoggerUtils("data_advertisement").logger
+logger = LoggerUtils("data.advertisement").logger
 
 
 def create_click(connection, ad_id, userId):

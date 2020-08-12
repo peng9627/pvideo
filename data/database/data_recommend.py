@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.recommend import Recommend
 
-logger = LoggerUtils("data_recommend").logger
+logger = LoggerUtils("data.recommend").logger
 
 
 def query(connection):

@@ -6,7 +6,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.agent.agent import Agent
 
-logger = LoggerUtils("data_agent").logger
+logger = LoggerUtils("data.agent").logger
 
 
 def agent_by_id(connection, id):
@@ -92,7 +92,6 @@ def query_min(connection, user_id):
             if r is not None:
                 result = r["min"]
     except:
-        connection.rollback()
         logger.exception(traceback.format_exc())
     return result
 

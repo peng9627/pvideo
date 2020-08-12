@@ -5,7 +5,7 @@ import traceback
 from pycore.data.entity import config
 from pycore.utils.logger_utils import LoggerUtils
 
-logger = LoggerUtils("data_gold").logger
+logger = LoggerUtils("data.gold").logger
 
 
 def create_gold(connection, type, source, user_id, gold):

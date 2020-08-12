@@ -6,7 +6,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.recommend_movie import RecommendMovie
 
-logger = LoggerUtils("data_recommend").logger
+logger = LoggerUtils("data.recommend").logger
 
 
 def query(connection):

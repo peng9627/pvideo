@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.tv_url import TvUrl
 
-logger = LoggerUtils("data_tv_url").logger
+logger = LoggerUtils("data.tv_url").logger
 
 
 def query(connection):

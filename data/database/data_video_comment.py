@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 
 from mode.video_comment import VideoComment
 
-logger = LoggerUtils("data_video_comment").logger
+logger = LoggerUtils("data.video_comment").logger
 
 
 def create_video_comment(connection, comment):
