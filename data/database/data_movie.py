@@ -12,13 +12,14 @@ logger = LoggerUtils("data.movie").logger
 
 def create_movie(connection, movie):
     try:
-        sql = config.get("sql", "sql_add_movie")
-        with connection.cursor() as cursor:
-            cursor.execute(sql, (
-                movie.type, movie.title, movie.span, movie.create_time, movie.update_time, movie.address,
-                movie.horizontal, movie.vertical, movie.actor, movie.child_type, movie.director, movie.region,
-                movie.year, movie.total_part, movie.details, movie.source))
-            connection.commit()
+        if not exist(connection, movie):
+            sql = config.get("sql", "sql_add_movie")
+            with connection.cursor() as cursor:
+                cursor.execute(sql, (
+                    movie.type, movie.title, movie.span, movie.create_time, movie.update_time, movie.address,
+                    movie.horizontal, movie.vertical, movie.actor, movie.child_type, movie.director, movie.region,
+                    movie.year, movie.total_part, movie.details, movie.source))
+                connection.commit()
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
@@ -138,3 +139,15 @@ def info(connection, movie_id):
     except:
         logger.exception(traceback.format_exc())
     return movie
+
+
+def exist(connection, movie):
+    try:
+        sql = config.get("sql", "sql_movie_exist")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, (movie.title, movie.director, movie.year))
+            result = cursor.fetchone()
+            return result["result"] != 0
+    except:
+        logger.exception(traceback.format_exc())
+    return False
