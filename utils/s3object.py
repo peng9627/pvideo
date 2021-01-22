@@ -25,7 +25,7 @@ class S3Object(object):
 
     def delete(self, bucket, file_path):
         s = self.client.delete_object(Bucket=bucket, Key=file_path)
-        print s
+        print(s)
 
     def exist(self, bucket, file_path):
         try:

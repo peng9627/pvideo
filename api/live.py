@@ -2,7 +2,8 @@
 import json
 import random
 import traceback
-from urllib import unquote
+import functools
+from urllib.parse import unquote
 
 from flask import request
 from pycore.data.database import mysql_connection
@@ -57,7 +58,7 @@ def platform_list():
             platform_list_datas = json.loads(js)["pingtai"]
             for platform in platform_list_datas:
                 platform["xinimg"] = platform["address"].replace("json", '').replace(".txt", ".jpg")
-            platform_list_datas = sorted(platform_list_datas, cmp=platform_reversed_cmp)
+            platform_list_datas = sorted(platform_list_datas, key=functools.cmp_to_key(platform_reversed_cmp))
             result = '{"state":0, "data":%s}' % json.dumps(platform_list_datas)
             break
     except:
@@ -91,7 +92,7 @@ def lives():
                     else:
                         live["fire"] = random.randint(200, 500)
                     need_lives.append(live)
-            need_lives = sorted(need_lives, cmp=lives_reversed_cmp)
+            need_lives = sorted(need_lives, key=functools.cmp_to_key(lives_reversed_cmp))
             result = '{"state":0, "data":%s}' % (json.dumps(need_lives))
             break
     except:

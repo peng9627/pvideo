@@ -44,7 +44,7 @@ def login():
         elif account.account_status != 0:
             result = '{"state":3}'
         else:
-            data_account.update_login(time.time(), connection, http_utils.getClientIP(request.headers.environ),
+            data_account.update_login(time.time(), connection, http_utils.get_client_ip(request.headers.environ),
                                       account.id)
             result = '{"state":0,"auth":"' + login_success(gl.get_v("redis"), account) + '"}'
     except:
@@ -87,7 +87,7 @@ def register():
                 account.code = StringUtils.randomStr(4).upper()
                 while data_account.exist_code(connection, account.code):
                     account.code = StringUtils.randomStr(4).upper()
-                last_address = http_utils.getClientIP(request.headers.environ)
+                last_address = http_utils.get_client_ip(request.headers.environ)
                 data_account.create_account(connection, account, last_address, share_code, share_ip)
                 result = '{"state":0}'
     except:

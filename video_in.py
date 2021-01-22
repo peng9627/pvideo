@@ -30,7 +30,7 @@ if __name__ == '__main__':
                     video.vertical = v["allJCovers"]["vertical_large"]
                     data_video.create_video(conn, video)
         except:
-            print traceback.format_exc()
+            print(traceback.format_exc())
         finally:
             if conn is not None:
                 conn.close()

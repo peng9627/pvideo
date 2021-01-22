@@ -1,5 +1,5 @@
 # coding=utf-8
-import httplib
+import http.client
 import json
 import traceback
 
@@ -46,7 +46,7 @@ def lives():
         try:
             id = data["id"]
             page = data["page"]
-            conn = httplib.HTTPSConnection('m.douyu.com')
+            conn = http.client.HTTPSConnection('m.douyu.com')
             conn.request("GET", "/api/room/list?page=%s&type=%s" % (page, id), headers=reqheaders)
             res = conn.getresponse().read()
             for g in json.loads(res)["data"]["list"]:

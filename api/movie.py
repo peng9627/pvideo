@@ -94,7 +94,7 @@ def search():
         content = data["content"]
         page = int(data["page"])
         connection = mysql_connection.get_conn()
-        videos = data_movie.search(connection, pymysql.escape_string(content), page)
+        videos = data_movie.search(connection, pymysql.converters.escape_string(content), page)
         result = '{"state":0, "data":[%s]}' % ",".join(videos)
     except:
         logger.exception(traceback.format_exc())

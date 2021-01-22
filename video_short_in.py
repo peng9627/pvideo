@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 connection = mysql_connection.get_conn()
                 data_video.create_video(connection, video)
         except:
-            print "error"
+            print("error")
         finally:
             if conn is not None:
                 conn.close()

@@ -16,7 +16,7 @@ from data.database import data_movie
 from mode.movie import Movie
 
 if __name__ == '__main__':
-    channel_id = 4  # channel_id=1电影2电视剧6综艺4动漫
+    channel_id = 1  # channel_id=1电影2电视剧6综艺4动漫
     url = 'https://pub.m.iqiyi.com/h5/main/recVideos/lib/?page_id=%d&mode=24&channel_id=%d&smart_tag=&three_category_id=&content_type=&is_purchase=&ret_num=100&pos=1&type=list&market_release_date_level=-&post=list&from=mobile_videolib&is_unified_interface=1&version=1.0.0&device_id=7vu9385vytkuju1oxikxm2&play_platform=H5_QIYI&passport_id=&session='
     header = {
         'user-agent': 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36',
@@ -182,7 +182,7 @@ if __name__ == '__main__':
                     else:
                         name = ''
                         desc = ''
-                        print 'error'
+                        print('error')
 
                     tvid = videoDetailsJson['tvId']
                     date = time_utils.stamp_to_string(updateTime / 1000, '%Y%m%d')
@@ -192,7 +192,7 @@ if __name__ == '__main__':
                             "https://pcw-api.iqiyi.com/album/source/listByNumber/%d?date=%s&include=false&number=10&seq=true&tvId=%d" % (
                                 albumId, date, tvid), headers=header_pc).json()
                         if 'data' not in videoDetailsJson:
-                            print 'error'
+                            print('error')
                             break
                         for p in videoDetailsJson['data']:
                             date = time_utils.stamp_to_string(p['firstPublishTime'] / 1000, '%Y%m%d')
@@ -332,13 +332,13 @@ if __name__ == '__main__':
                 movie.details = desc
                 movie.source = 'iqiyi'
 
-                if connection is None:
-                    connection = mysql_connection.get_conn()
-                data_movie.create_movie(connection, movie)
+                # if connection is None:
+                #     connection = mysql_connection.get_conn()
+                # data_movie.create_movie(connection, movie)
             except:
-                print traceback.format_exc()
+                print(traceback.format_exc())
             finally:
                 if connection is not None:
                     connection.close()
-        print 'end page%d' % i
-    print 'end'
+        print('end page%d' % i)
+    print('end')

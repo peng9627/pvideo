@@ -3,7 +3,6 @@ import json
 import time
 import traceback
 
-from pycore.data.database import mysql_connection
 from pycore.data.entity import config
 from pycore.utils.logger_utils import LoggerUtils
 

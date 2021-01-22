@@ -19,7 +19,7 @@ logger = LoggerUtils('api.agent').logger
 def first():
     result = '{"state":1}'
     try:
-        ip = http_utils.getClientIP(request.headers.environ)
+        ip = http_utils.get_client_ip(request.headers.environ)
         result = '{"state":0, "data":{"ip":"%s"}}' % ip
     except:
         logger.exception(traceback.format_exc())
@@ -122,7 +122,7 @@ def toip():
     redis = gl.get_v("redis")
     try:
         code = data['code']
-        ip = http_utils.getClientIP(request.headers.environ)
+        ip = http_utils.get_client_ip(request.headers.environ)
         if ip is None or len(ip) < 1:
             ip = request.remote_addr
         if ip is not None and len(ip) > 1:

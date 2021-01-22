@@ -1,7 +1,8 @@
 import json
 import traceback
 import random
-from urllib import unquote
+import functools
+from urllib.parse import unquote
 
 from flask import request
 from pycore.data.database import mysql_connection
@@ -73,7 +74,7 @@ def index():
                     else:
                         live["fire"] = random.randint(200, 500)
                     need_lives.append(live)
-            need_lives = sorted(need_lives, cmp=lives_reversed_cmp)[0:6]
+            need_lives = sorted(need_lives, key=functools.cmp_to_key(lives_reversed_cmp))[0:6]
             break
         result = '{"state":0, "notice":"%s", "lives":%s, "ads1":[%s], "ads2":[%s], "vip_videos":[%s], "short_videos":[%s], ' \
                  '"videos":[%s]}' % (

@@ -18,7 +18,7 @@ from mode.movie import Movie
 
 if __name__ == '__main__':
     channel_id = 'movie'  # movie tv  variety cartoon
-    url = 'https://v.qq.com/x/bu/pagesheet/list?_all=1&append=1&channel=%s&feature=-1&listpage=%d&offset=%d&pagesize=100&sort=18'
+    url = 'https://v.qq.com/x/bu/pagesheet/list?_all=1&append=1&channel=%s&feature=-1&listpage=%d&offset=%d&pagesize=100&sort=19'
     header = {
         'user-agent': 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36',
         'accept-language': 'zh-CN,zh;q=0.9'
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                     if 'leading_actor' in videoDetailsJson and videoDetailsJson['leading_actor'] is not None:
                         mainActors = ','.join(videoDetailsJson['leading_actor'])
                     address = '%s$%s$%s' % (u'全集', '', pageUrl)
-                    span = u'%s分' % videoDetailsJson['score']['score']
+                    span = u'%s' % videoDetailsJson['score']['score']
                 elif 'variety' == channel_id:
                     column_id = videoDetailsJson['column_id']
                     offset = 0
@@ -105,9 +105,9 @@ if __name__ == '__main__':
                                         createTime = time_utils.string_to_stamp(p['fields']['publish_date'],
                                                                                 '%Y-%m-%d')
                                 except:
-                                    print 1
+                                    print(1)
                         else:
-                            print 1
+                            print(1)
                     if len(year) == 0:
                         year = int(time_utils.stamp_to_string(createTime, '%Y'))
                     directors = ''
@@ -137,7 +137,7 @@ if __name__ == '__main__':
                             for p in partjson['PlaylistItem']['videoPlayList']:
                                 address += ',%s$%s$%s' % (p['episode_number'], p['title'], p['playUrl'])
                         else:
-                            print 1
+                            print(1)
                     if len(address) > 0:
                         address = address[1:]
 
@@ -170,9 +170,9 @@ if __name__ == '__main__':
                 #     connection = mysql_connection.get_conn()
                 # data_movie.create_movie(connection, movie)
             except:
-                print traceback.format_exc()
+                print(traceback.format_exc())
             finally:
                 if connection is not None:
                     connection.close()
-        print 'end page%d' % i
-    print 'end'
+        print('end page%d' % i)
+    print('end')

@@ -1,5 +1,5 @@
 # coding=utf-8
-import Queue
+import queue
 import json
 import random
 import socket
@@ -148,7 +148,7 @@ class ClientReceive(object):
                     datalen = struct.pack(">i", len(data))
                     self.conns.sendall(datalen)
                     self.conns.sendall(data)
-            except Queue.Empty:
+            except queue.Empty:
                 logger.info("Received timeout")
             except:
                 logger.exception(traceback.format_exc())
