@@ -76,6 +76,7 @@ def play_urls(vid):
     fn_pre = video_json['vl']['vi'][0]['lnk']
     title = video_json['vl']['vi'][0]['ti']
     host = video_json['vl']['vi'][0]['ul']['ui'][0]['url']
+    vt = video_json['vl']['vi'][0]['ul']['ui'][0]['vt']
     seg_cnt = fc_cnt = video_json['vl']['vi'][0]['cl']['fc']
 
     filename = video_json['vl']['vi'][0]['fn']
@@ -83,43 +84,58 @@ def play_urls(vid):
         seg_cnt = 1
     else:
         fn_pre, magic_str, video_type = filename.split('.')
-
-    part_urls = []
-    total_size = 0
-    for part in range(1, seg_cnt + 1):
-        if fc_cnt == 0:
-            # fix json parsing error
-            part_format_id = video_json['vl']['vi'][0]['cl']['keyid'].split('.')[-1]
-        else:
-            part_format_id = video_json['vl']['vi'][0]['cl']['ci'][part - 1]['keyid'].split('.')[1]
-            filename = '.'.join([fn_pre, magic_str, str(part), video_type])
-
+    # url1 = video_json['vl']['vi'][0]['ul']['ui'][0]['url'] + video_json['vl']['vi'][0]['fn'] + "?vkey=" + \
+    #        video_json['vl']['vi'][0]['fvkey']
+    # filename = vid + '.mp4'
+    # key_api = 'http://vv.video.qq.com/getkey?format=2&otype=json&vt=150&vid=' + vid + '&ran=0\%2E9477521511726081\\&charge=0&filename=' + filename + '&platform=11'
+    # part_info = requests.get(key_api, headers).text
+    # key_json = json.loads(match1(part_info, r'QZOutputJson=(.*)')[:-1])
+    #
+    # url2 = video_json['vl']['vi'][0]['ul']['ui'][0]['url'] + filename + '?vkey=' + key_json['key']
+    for fi in video_json['fl']['fi']:
+        filename = '%s.p%d.1.mp4' % (vid, fi['id']%10000)
         key_api = "http://vv.video.qq.com/getkey?otype=json&platform=11&format={}&vid={}&filename={}&appver=3.2.19.333".format(
-            part_format_id, vid, filename)
+            fi['id'], vid, filename)
         part_info = requests.get(key_api, headers).text
         key_json = json.loads(match1(part_info, r'QZOutputJson=(.*)')[:-1])
-        if key_json.get('key') is None:
-            vkey = video_json['vl']['vi'][0]['fvkey']
-            url = '{}{}?vkey={}'.format(video_json['vl']['vi'][0]['ul']['ui'][0]['url'], fn_pre + '.mp4', vkey)
-        else:
-            vkey = key_json['key']
-            url = '{}{}?vkey={}'.format(host, filename, vkey)
-        if not vkey:
-            if part == 1:
-                print key_json['msg']
-            else:
-                print key_json['msg']
-            break
-        if key_json.get('filename') is None:
-            print key_json['msg']
-            break
-        part_urls.append(url)
+        url = '{}{}?vkey={}'.format(host, filename, key_json['key'])
+        print(1)
 
+    # part_urls = []
+    # total_size = 0
+    # for part in range(1, seg_cnt + 1):
+    #     if fc_cnt == 0:
+    #         # fix json parsing error
+    #         part_format_id = video_json['vl']['vi'][0]['cl']['keyid'].split('.')[-1]
+    #     else:
+    #         part_format_id = video_json['vl']['vi'][0]['cl']['ci'][part - 1]['keyid'].split('.')[1]
+    #         filename = '.'.join([fn_pre, magic_str, str(part), video_type])
+    #
+    #     key_api = "http://vv.video.qq.com/getkey?otype=json&platform=11&format={}&vid={}&filename={}&appver=3.2.19.333".format(
+    #         part_format_id, vid, filename)
+    #     part_info = requests.get(key_api, headers).text
+    #     key_json = json.loads(match1(part_info, r'QZOutputJson=(.*)')[:-1])
+    #     if key_json.get('key') is None:
+    #         vkey = video_json['vl']['vi'][0]['fvkey']
+    #         url = '{}{}?vkey={}'.format(video_json['vl']['vi'][0]['ul']['ui'][0]['url'], fn_pre + '.mp4', vkey)
+    #     else:
+    #         vkey = key_json['key']
+    #         url = '{}{}?vkey={}'.format(host, filename, vkey)
+    #     if not vkey:
+    #         if part == 1:
+    #             print(key_json['msg'])
+    #         else:
+    #             print(key_json['msg'])
+    #         break
+    #     if key_json.get('filename') is None:
+    #         print(key_json['msg'])
+    #         break
+    #     part_urls.append(url)
 
-    print 1
+    print('end')
 
 
 if __name__ == '__main__':
-    ss = get_details('https://v.qq.com/x/cover/mzc002005vjz76n/e0034ni0zdf.html')
-    play_urls('e0034ni0zdf')
-    print 1
+    # ss = get_details('https://v.qq.com/x/cover/mzc002002vcxot9/c0035cn9yyf.html')
+    play_urls('c0035cn9yyf')
+    print('1')

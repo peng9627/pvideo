@@ -294,7 +294,7 @@ def statistics():
                 result = '{"state":0, "data": {"user_count":%d, "directly_count":%d, "today_new":%d, ' \
                          '"today_active":%d, "give_gold":%d, "today_give_gold":%d, "get_gold":%d, ' \
                          '"today_get_gold":%d}} ' % (
-                             user_count, directly_count, today_new, today_active, -give_gold, -today_give_gold,
+                             user_count, directly_count, today_new, today_active, give_gold, today_give_gold,
                              get_gold, today_get_gold)
             except:
                 logger.exception(traceback.format_exc())

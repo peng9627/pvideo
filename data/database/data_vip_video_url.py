@@ -1,5 +1,4 @@
 # coding=utf-8
-import json
 import traceback
 
 from pycore.data.entity import config
@@ -22,7 +21,20 @@ def query(connection):
                 a.id = result["id"]
                 a.address = result["address"]
                 a.name = result["name"]
-                urls.append(json.dumps(a.__dict__))
+                urls.append(a)
     except:
+        logger.exception(traceback.format_exc())
+    return urls
+
+
+def update_ping(connection, vid, ping):
+    urls = []
+    try:
+        sql = config.get("sql", "sql_ping_vip_video_url")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, (ping, vid))
+            connection.commit()
+    except:
+        connection.rollback()
         logger.exception(traceback.format_exc())
     return urls

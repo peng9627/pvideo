@@ -67,7 +67,7 @@ def register():
             code = str(data['code'])
             if not gl.get_v("redis").exists(account_name + '_code'):
                 result = '{"state":1}'
-            elif code != gl.get_v("redis").get(account_name + '_code'):
+            elif code != str(gl.get_v("redis").get(account_name + '_code'), 'utf-8'):
                 result = '{"state":2}'
             elif data_account.exist(connection, account_name):
                 result = '{"state":3}'
@@ -139,12 +139,12 @@ def send_code():
             result = '{"state":2}'
         else:
             code = StringUtils.randomNum(6)
-            enc = StringUtils.md5(
-                config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
-            content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
-            msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
-                                                                                   "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
-                                              None)
+            # enc = StringUtils.md5(
+            #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
+            # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
+            # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
+            #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
+            #                                   None)
             gl.get_v("redis").setex(account_name + "_code", code, 120)
             logger.info(code)
             result = '{"state":0}'

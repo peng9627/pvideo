@@ -142,14 +142,14 @@ if __name__ == '__main__':
                         address = address[1:]
 
                 movie = Movie()
-                if channel_id == 'tv':
+                if channel_id == 'movie':
+                    movie.type = 1
+                elif channel_id == 'tv':
                     movie.type = 2
                 elif channel_id == 'cartoon':
                     movie.type = 3
                 elif channel_id == 'variety':
                     movie.type = 4
-                elif channel_id == 'movie':
-                    movie.type = 1
                 movie.title = name
                 movie.span = span
                 movie.create_time = createTime

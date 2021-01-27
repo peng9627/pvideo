@@ -4,7 +4,7 @@ import importlib
 from pycore.data.entity import config
 from flask import Blueprint, session, redirect, render_template
 
-from api import index
+from api import index, movie
 
 api = Blueprint('api', __name__, template_folder='../templates', static_folder='../resources')
 
@@ -12,8 +12,9 @@ api = Blueprint('api', __name__, template_folder='../templates', static_folder='
 @api.after_request
 def cors(environ):
     environ.headers['Access-Control-Allow-Origin'] = '*'
-    environ.headers['Access-Control-Allow-Method'] = '*'
+    environ.headers['Access-Control-Allow-Methods'] = '*'
     environ.headers['Access-Control-Allow-Headers'] = '*'
+    environ.headers['Server'] = 'dami_server'
     return environ
 
 
@@ -39,6 +40,6 @@ def download():
                            ios_url=config.get("server", "ios_url"))
 
 
-@api.route('/index', methods=['GET'])
-def funindex():
-    return index.index()
+@api.route('/play_movie')
+def play_movie():
+    return movie.play()

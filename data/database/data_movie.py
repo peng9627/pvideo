@@ -66,7 +66,7 @@ def search(connection, content, page, pagesize=20):
                 v.director = result["director"]
                 v.region = result["region"]
                 v.year = result["year"]
-                v.details = result["details"]
+                v.details = result["details"].decode()
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -93,7 +93,7 @@ def ranking(connection, movie_type, page, pagesize=20):
                 v.director = result["director"]
                 v.region = result["region"]
                 v.year = result["year"]
-                v.details = result["details"]
+                v.details = result["details"].decode()
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -133,8 +133,8 @@ def info(connection, movie_id):
                 movie.year = result["year"]
                 movie.total_part = result["total_part"]
                 movie.source = result["source"]
-                movie.address = result["address"]
-                movie.details = result["details"]
+                movie.address = result["address"].decode()
+                movie.details = result["details"].decode()
                 movie.play_count = result["play_count"]
     except:
         logger.exception(traceback.format_exc())
@@ -145,7 +145,7 @@ def exist(connection, movie):
     try:
         sql = config.get("sql", "sql_movie_exist")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (movie.title, movie.director, movie.year))
+            cursor.execute(sql, (movie.title, movie.director, movie.year, movie.type))
             result = cursor.fetchone()
             return result["result"] != 0
     except:

@@ -14,7 +14,7 @@ config.init("./conf/pyg.conf")
 gl.init()
 
 from api import api
-from app_thread import reset_count
+from app_thread import reset_count, video_url_ping
 
 app = Flask(__name__)
 redis = RedisUtils()
@@ -39,6 +39,7 @@ app.logger.setLevel(gunicorn_logger.level)
 app.register_blueprint(api)
 
 reset_count.reset_count()
+video_url_ping.video_url_ping()
 threading.Thread(target=server.start, name='barrage_server').start()  # 线程对象.
 # app.run(host="0.0.0.0")
 

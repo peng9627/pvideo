@@ -2,11 +2,14 @@ import json
 import traceback
 
 import pymysql
+import requests
 from flask import request
 from pycore.data.database import mysql_connection
+from pycore.data.entity import globalvar as gl
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_movie, data_recommend_movie
+from utils import movie_get_rel_addr
 
 logger = LoggerUtils('api.movie').logger
 
@@ -137,4 +140,46 @@ def query_info():
     finally:
         if connection is not None:
             connection.close()
+    return result
+
+
+def get_play_addr():
+    result = '{"state":-1}'
+    data = request.form
+    # redis = gl.get_v("redis")
+    # if "HTTP_AUTH" in request.headers.environ:
+    #     sessionid = request.headers.environ['HTTP_AUTH']
+    #     if not redis.exists(sessionid):
+    #         result = '{"state":2}'
+    #     else:
+    #         # sessions = redis.getobj(sessionid)
+    #         # account_id = sessions["id"]
+    url = movie_get_rel_addr.getadds(data['addr'])
+    if len(url) > 0:
+        return '{"state":0,"data":"%s"}' % url
+    # else:
+    #     result = '{"state":1}'
+    return result
+
+
+def play():
+    result = '{"state":-1}'
+    data = request.args
+    redis = gl.get_v("redis")
+    if "HTTP_AUTH" in request.headers.environ:
+        sessionid = request.headers.environ['HTTP_AUTH']
+        if not redis.exists(sessionid):
+            result = '{"state":2}'
+        else:
+            sessions = redis.getobj(sessionid)
+            account_id = sessions["id"]
+            url = movie_get_rel_addr.getadds(data['addr'])
+            if len(url) > 0:
+                header = {
+                    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
+                }
+                response = requests.get(url, headers=header)
+                return response.text, response.status_code, dict(response.headers)
+    else:
+        result = '{"state":1}'
     return result

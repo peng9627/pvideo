@@ -15,7 +15,7 @@ from data.database import data_movie
 from mode.movie import Movie
 
 if __name__ == '__main__':
-    channel_id = 96  # 1.96 2.97 3.85 4.100
+    channel_id = 96  # 1.96 2.97 3.100 4.85
     url = 'https://www.youku.com/category/page?c=%d&s=6&type=show&p=%d'
     header = {
         'user-agent': 'Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Mobile Safari/537.36',
@@ -97,9 +97,9 @@ if __name__ == '__main__':
                     movie.type = 1
                 elif channel_id == 97:
                     movie.type = 2
-                elif channel_id == 85:
-                    movie.type = 3
                 elif channel_id == 100:
+                    movie.type = 3
+                elif channel_id == 85:
                     movie.type = 4
                 movie.title = name
                 movie.span = span
