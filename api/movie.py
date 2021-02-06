@@ -5,11 +5,11 @@ import pymysql
 import requests
 from flask import request
 from pycore.data.database import mysql_connection
-from pycore.data.entity import globalvar as gl
+from pycore.data.entity import config, globalvar as gl
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_movie, data_recommend_movie
-from utils import movie_get_rel_addr
+from data.database import data_movie, data_recommend_movie, data_vip, data_agent
+from utils import movie_get_rel_addr, project_utils
 
 logger = LoggerUtils('api.movie').logger
 
@@ -146,40 +146,61 @@ def query_info():
 def get_play_addr():
     result = '{"state":-1}'
     data = request.form
-    # redis = gl.get_v("redis")
-    # if "HTTP_AUTH" in request.headers.environ:
-    #     sessionid = request.headers.environ['HTTP_AUTH']
-    #     if not redis.exists(sessionid):
-    #         result = '{"state":2}'
-    #     else:
-    #         # sessions = redis.getobj(sessionid)
-    #         # account_id = sessions["id"]
-    url = movie_get_rel_addr.getadds(data['addr'])
-    if len(url) > 0:
-        return '{"state":0,"data":"%s"}' % url
-    # else:
-    #     result = '{"state":1}'
+    check_time = 1
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            if not data_vip.is_vip(connection, account_id):
+                surplus_time = data_agent.query_min(connection, account_id)
+                if surplus_time > 0:
+                    data_agent.use_min(connection, account_id, 1)
+                    check_time = 0
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
+    elif 1 == code:
+        if "HTTP_DEVICE" in request.headers.environ:
+            device = request.headers.environ['HTTP_DEVICE']
+            redis = gl.get_v("redis")
+            if redis.exists("device_info_" + device):
+                device_info = redis.getobj("device_info_" + device)
+            else:
+                device_info = {}
+                device_info["surplus_time"] = int(config.get("server", "default_min"))
+            if device_info["surplus_time"] > 0:
+                device_info["surplus_time"] -= 1
+                check_time = 0
+                redis.setobj("device_info_" + device, device_info)
+        else:
+            check_time = 1
+    else:
+        check_time = 2
+    if 0 == check_time:
+        url = movie_get_rel_addr.getadds(data['addr'])
+        if len(url) > 0:
+            return '{"state":0,"data":"%s"}' % url
+    else:
+        return '{"state":%d}' % check_time
     return result
 
 
 def play():
     result = '{"state":-1}'
     data = request.args
-    redis = gl.get_v("redis")
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            url = movie_get_rel_addr.getadds(data['addr'])
-            if len(url) > 0:
-                header = {
-                    'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
-                }
-                response = requests.get(url, headers=header)
-                return response.text, response.status_code, dict(response.headers)
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        url = movie_get_rel_addr.getadds(data['addr'])
+        if len(url) > 0:
+            header = {
+                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
+            }
+            response = requests.get(url, headers=header)
+            return response.text, response.status_code, dict(response.headers)
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result

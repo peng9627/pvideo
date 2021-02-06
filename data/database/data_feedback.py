@@ -12,19 +12,20 @@ def add_feedback(connection, feedback):
     try:
         sql = config.get("sql", "sql_create_feedback")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (feedback.user_id, feedback.title, feedback.content, feedback.create_time))
+            cursor.execute(sql,
+                           (feedback.user_id, feedback.device, feedback.title, feedback.content, feedback.create_time))
             connection.commit()
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
 
 
-def query(connection, user_id, page, pagesize=20):
+def query(connection, user_id, device, page, pagesize=20):
     feedbacks = []
     try:
         sql = config.get("sql", "sql_feedback_list")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (user_id, (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, (user_id, device, (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 feedbacks.append(json.dumps(

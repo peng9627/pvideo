@@ -3,75 +3,64 @@ import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
-from pycore.data.entity import globalvar as gl
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_feedback
 from mode.feedback import Feedback
+from utils import project_utils
 
 logger = LoggerUtils('api.feedback').logger
 
 
 def add():
     result = '{"state":-1}'
-    data = request.form
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            title = data["title"]
-            content = data["content"]
-
-            feedback = Feedback()
-            feedback.user_id = account_id
-            feedback.create_time = int(time.time())
-            feedback.content = content
-            feedback.title = title
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                data_feedback.add_feedback(connection, feedback)
-                result = '{"state":0}'
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
-    else:
-        result = '{"state":1}'
-
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    connection = None
+    feedback = Feedback()
+    if 0 == code:
+        feedback.user_id = sessions["id"]
+    if "HTTP_DEVICE" in request.headers.environ:
+        feedback.device = request.headers.environ['HTTP_DEVICE']
+    try:
+        data = request.form
+        title = data["title"]
+        content = data["content"]
+        feedback.create_time = int(time.time())
+        feedback.content = content
+        feedback.title = title
+        connection = mysql_connection.get_conn()
+        data_feedback.add_feedback(connection, feedback)
+        result = '{"state":0}'
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
     return result
 
 
 def query():
     result = '{"state":-1}'
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    account_id = 0
+    device = ''
+    if 0 == code:
+        account_id = sessions["id"]
+    if "HTTP_DEVICE" in request.headers.environ:
+        device = request.headers.environ['HTTP_DEVICE']
     data = request.form
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            return '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                page = int(data["page"])
-                connection = mysql_connection.get_conn()
-                feedback = data_feedback.query(connection, account_id, page)
-                result = '{"state":0,"data":[%s]}' % (",".join(feedback))
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
-    else:
-        return '{"state":1}'
+    connection = None
+    try:
+        connection = mysql_connection.get_conn()
+        page = int(data["page"])
+        connection = mysql_connection.get_conn()
+        feedback = data_feedback.query(connection, account_id, device, page)
+        result = '{"state":0,"data":[%s]}' % (",".join(feedback))
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
     return result
 
 

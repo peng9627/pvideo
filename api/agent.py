@@ -12,6 +12,7 @@ from pycore.utils.logger_utils import LoggerUtils
 from data.database import data_agent, data_account, data_gold, data_vip
 from mode.agent.agent import Agent
 from mode.vip import Vip
+from utils import project_utils
 
 logger = LoggerUtils('api.agent').logger
 
@@ -136,171 +137,141 @@ def toip():
 
 def agent_contact():
     result = '{"state":-1}'
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                agent_id = data_agent.agent_get_parent_id(connection, account_id)
-                contact = data_agent.agent_contact(connection, agent_id)
-                result = '{"state":0, "data":{"contact":"%s"}}' % contact
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            agent_id = data_agent.agent_get_parent_id(connection, account_id)
+            contact = data_agent.agent_contact(connection, agent_id)
+            result = '{"state":0, "data":{"contact":"%s"}}' % contact
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result
 
 
 def my_contact():
     result = '{"state":-1}'
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                contact = data_agent.agent_contact(connection, account_id)
-                result = '{"state":0, "data":{"contact":"%s"}}' % contact
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            contact = data_agent.agent_contact(connection, account_id)
+            result = '{"state":0, "data":{"contact":"%s"}}' % contact
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result
 
 
 def users():
     result = '{"state":-1}'
-    data = request.form
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            connection = None
-            page = int(data["page"])
-            try:
-                connection = mysql_connection.get_conn()
-                users = data_account.by_parent(connection, account_id, page)
-                result = '{"state":0, "data":[%s]}' % ",".join(users)
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        data = request.form
+        connection = None
+        page = int(data["page"])
+        try:
+            connection = mysql_connection.get_conn()
+            users = data_account.by_parent(connection, account_id, page)
+            result = '{"state":0, "data":[%s]}' % ",".join(users)
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result
 
 
 def join_agent():
     result = '{"state":-1}'
-    data = request.form
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            user_id = int(data["user_id"])
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                data_agent.join(connection, user_id, account_id)
-                result = '{"state":0}'
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        data = request.form
+        user_id = int(data["user_id"])
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            data_agent.join(connection, user_id, account_id)
+            result = '{"state":0}'
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result
 
 
 def agent_set():
     result = '{"state":-1}'
-    data = request.form
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            contact = data["contact"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                old_contact = data_agent.agent_contact(connection, account_id)
-                data_agent.agent_set(connection, account_id, contact, old_contact)
-                result = '{"state":0}'
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        data = request.form
+        contact = data["contact"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            old_contact = data_agent.agent_contact(connection, account_id)
+            data_agent.agent_set(connection, account_id, contact, old_contact)
+            result = '{"state":0}'
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result
 
 
 def statistics():
     result = '{"state":-1}'
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                user_count = data_agent.agent_user_count(connection, account_id)
-                directly_count = data_agent.agent_directly_count(connection, account_id)
-                t = time.time()
-                time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
-                time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d') - 1
-                today_new = data_agent.agent_today_new(connection, account_id, time_stamp)
-                today_active = data_agent.agent_today_active(connection, account_id, time_stamp)
-                give_gold = -data_gold.gold_sum(connection, account_id, 5, 0)
-                today_give_gold = -data_gold.gold_sum(connection, account_id, 5, time_stamp)
-                get_gold = data_gold.gold_sum(connection, account_id, 6, 0)
-                today_get_gold = data_gold.gold_sum(connection, account_id, 6, time_stamp)
-                result = '{"state":0, "data": {"user_count":%d, "directly_count":%d, "today_new":%d, ' \
-                         '"today_active":%d, "give_gold":%d, "today_give_gold":%d, "get_gold":%d, ' \
-                         '"today_get_gold":%d}} ' % (
-                             user_count, directly_count, today_new, today_active, give_gold, today_give_gold,
-                             get_gold, today_get_gold)
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            user_count = data_agent.agent_user_count(connection, account_id)
+            directly_count = data_agent.agent_directly_count(connection, account_id)
+            t = time.time()
+            time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
+            time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d') - 1
+            today_new = data_agent.agent_today_new(connection, account_id, time_stamp)
+            today_active = data_agent.agent_today_active(connection, account_id, time_stamp)
+            give_gold = -data_gold.gold_sum(connection, account_id, 5, 0)
+            today_give_gold = -data_gold.gold_sum(connection, account_id, 5, time_stamp)
+            get_gold = data_gold.gold_sum(connection, account_id, 6, 0)
+            today_get_gold = data_gold.gold_sum(connection, account_id, 6, time_stamp)
+            result = '{"state":0, "data": {"user_count":%d, "directly_count":%d, "today_new":%d, ' \
+                     '"today_active":%d, "give_gold":%d, "today_give_gold":%d, "get_gold":%d, ' \
+                     '"today_get_gold":%d}} ' % (
+                         user_count, directly_count, today_new, today_active, give_gold, today_give_gold,
+                         get_gold, today_get_gold)
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result

@@ -5,6 +5,7 @@ CREATE TABLE `feedback`
 (
     `id`          INT(11) PRIMARY KEY                     NOT NULL AUTO_INCREMENT UNIQUE,
     `user_id`     INT(11)                                          DEFAULT 0,
+    `device`      VARCHAR(255)                                     DEFAULT NULL,
     `title`       VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `content`     VARCHAR(128) COLLATE utf8mb4_unicode_ci NOT NULL,
     `reply`       VARCHAR(128) COLLATE utf8mb4_unicode_ci,

@@ -6,6 +6,7 @@ from pycore.data.entity import globalvar as gl
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_advertisement, data_advertisement_click
+from utils import project_utils
 
 logger = LoggerUtils('api.advertisement').logger
 
@@ -36,14 +37,9 @@ def click():
     try:
         connection = mysql_connection.get_conn()
         data_advertisement.add_count(connection, id)
-        if "HTTP_AUTH" in request.headers.environ:
-            sessionid = request.headers.environ['HTTP_AUTH']
-            redis = gl.get_v("redis")
-            if not redis.exists(sessionid):
-                result = '{"state":2}'
-            else:
-                sessions = redis.getobj(sessionid)
-                account_id = sessions["id"]
+        code, sessions = project_utils.get_auth(request.headers.environ)
+        if 0 == code:
+            account_id = sessions["id"]
         data_advertisement_click.create_click(connection, id, account_id)
         result = '{"state":0}'
     except:

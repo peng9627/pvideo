@@ -9,12 +9,12 @@ from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import globalvar as gl, config
 from pycore.utils import http_utils
-from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_agent, data_vip, data_gold
 from mode.account import Account
+from utils import project_utils
 
 logger = LoggerUtils('api.user').logger
 
@@ -155,146 +155,125 @@ def send_code():
 
 def info():
     result = '{"state":-1}'
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                account = data_account.query_account_by_id(connection, account_id)
-                if account is not None:
-                    agent = data_agent.agent_by_id(connection, account.id)
-                    end_time = data_vip.vip_end_time(connection, account.id)
-                    if 0 == end_time:
-                        vip = u"VIP会员"
-                    elif end_time < time.time():
-                        vip = u"SVIP会员已过期"
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            account = data_account.query_account_by_id(connection, account_id)
+            if account is not None:
+                agent = data_agent.agent_by_id(connection, account.id)
+                end_time = data_vip.vip_end_time(connection, account.id)
+                if 0 == end_time:
+                    vip = u"VIP会员"
+                elif end_time < time.time():
+                    vip = u"SVIP会员已过期"
+                else:
+                    this_time = int(time.time())
+                    if end_time - this_time > 86400:
+                        vip = u"SVIP会员有效期:%.0f天" % math.ceil((end_time - this_time) / 86400.0)
+                    elif end_time - this_time > 3600:
+                        vip = u"SVIP会员有效期:%.0f小时" % math.ceil((end_time - this_time) / 3600.0)
                     else:
-                        this_time = int(time.time())
-                        if end_time - this_time > 86400:
-                            vip = u"SVIP会员有效期:%.0f天" % math.ceil((end_time - this_time) / 86400.0)
-                        elif end_time - this_time > 3600:
-                            vip = u"SVIP会员有效期:%.0f小时" % math.ceil((end_time - this_time) / 3600.0)
-                        else:
-                            vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
-                    directly_count = data_agent.agent_directly_count(connection, account.id)
-                    level_conf = json.loads(config.get("agent", "level_conf"))
-                    add_min = 0
-                    level = 1
-                    next = 0
-                    for lc in level_conf:
-                        if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
-                            add_min = lc["times"]
-                            level = lc["level"]
-                            next = lc["value"]
-                        else:
-                            next = lc["value"] - next
-                            break
-                    result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
-                             '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
-                                 account_id, "" if account.head is None else account.head, account.nickname,
-                                 account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, level, next,
-                                 account.code)
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
+                        vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
+                directly_count = data_agent.agent_directly_count(connection, account.id)
+                level_conf = json.loads(config.get("agent", "level_conf"))
+                add_min = 0
+                level = 1
+                next = 0
+                for lc in level_conf:
+                    if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
+                        add_min = lc["times"]
+                        level = lc["level"]
+                        next = lc["value"]
+                    else:
+                        next = lc["value"] - next
+                        break
+                result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
+                         '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
+                             account_id, "" if account.head is None else account.head, account.nickname,
+                             account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, level, next,
+                             account.code)
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
     return result
 
 
 def give_gold():
     result = '{"state":-1}'
-    data = request.form
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        redis = gl.get_v("redis")
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
-            user_id = int(data["user_id"])
-            give_gold = int(data["give_gold"])
-            if give_gold > 0:
-                connection = None
-                try:
-                    connection = mysql_connection.get_conn()
-                    parent_id = data_agent.agent_get_parent_id(connection, user_id)
-                    if parent_id != int(account_id):
-                        result = '{"state":3}'
-                    else:
-                        account = data_account.query_account_by_id(connection, account_id)
-                        if account.gold < give_gold:
-                            result = '{"state":4}'
-                        else:
-                            data_account.update_gold(connection, -give_gold, account_id)
-                            data_gold.create_gold(connection, 5, 0, account_id, -give_gold)
-
-                            data_account.update_gold(connection, give_gold, user_id)
-                            data_gold.create_gold(connection, 6, 0, user_id, give_gold)
-                            result = '{"state":0}'
-                except:
-                    logger.exception(traceback.format_exc())
-                finally:
-                    if connection is not None:
-                        connection.close()
-    else:
-        result = '{"state":1}'
-    return result
-
-
-def check_time():
-    result = '{"state":-1}'
-    data = request.form
-    use_time = int(data["time"])
-    redis = gl.get_v("redis")
-    if "HTTP_AUTH" in request.headers.environ:
-        sessionid = request.headers.environ['HTTP_AUTH']
-        if not redis.exists(sessionid):
-            result = '{"state":2}'
-        else:
-            sessions = redis.getobj(sessionid)
-            account_id = sessions["id"]
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        data = request.form
+        user_id = int(data["user_id"])
+        give_gold = int(data["give_gold"])
+        if give_gold > 0:
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                if data_vip.is_vip(connection, account_id):
-                    surplus_time = -1
+                parent_id = data_agent.agent_get_parent_id(connection, user_id)
+                if parent_id != int(account_id):
+                    result = '{"state":3}'
                 else:
-                    if use_time > 0:
-                        data_agent.use_min(connection, account_id, use_time)
-                    surplus_time = data_agent.query_min(connection, account_id)
-                    if surplus_time < 0:
-                        data_agent.use_min(connection, account_id, -surplus_time)
-                        surplus_time = 0
-                result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
+                    account = data_account.query_account_by_id(connection, account_id)
+                    if account.gold < give_gold:
+                        result = '{"state":4}'
+                    else:
+                        data_account.update_gold(connection, -give_gold, account_id)
+                        data_gold.create_gold(connection, 5, 0, account_id, -give_gold)
+
+                        data_account.update_gold(connection, give_gold, user_id)
+                        data_gold.create_gold(connection, 6, 0, user_id, give_gold)
+                        result = '{"state":0}'
             except:
                 logger.exception(traceback.format_exc())
             finally:
                 if connection is not None:
                     connection.close()
-    elif "HTTP_DEVICE" in request.headers.environ:
-        device = request.headers.environ['HTTP_DEVICE']
-        if redis.exists("device_info_" + device):
-            device_info = redis.getobj("device_info_" + device)
-        else:
-            device_info = {}
-            device_info["surplus_time"] = int(config.get("server", "default_min"))
-        if use_time > 0:
-            device_info["surplus_time"] -= use_time
-            if device_info["surplus_time"] < 0:
-                device_info["surplus_time"] = 0
-        redis.setobj("device_info_" + device, device_info)
-        result = '{"state":0,"data":{"surplus_time":%d, "total_time":%s}}' % (
-            device_info["surplus_time"], config.get("server", "default_min"))
     else:
-        result = '{"state":1}'
+        result = '{"state":%d}' % code
+    return result
+
+
+def check_time():
+    result = '{"state":-1}'
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    if 0 == code:
+        account_id = sessions["id"]
+        connection = None
+        try:
+            connection = mysql_connection.get_conn()
+            if data_vip.is_vip(connection, account_id):
+                surplus_time = -1
+            else:
+                surplus_time = data_agent.query_min(connection, account_id)
+                if surplus_time < 0:
+                    surplus_time = 0
+            result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
+    elif 1 == code:
+        if "HTTP_DEVICE" in request.headers.environ:
+            device = request.headers.environ['HTTP_DEVICE']
+            redis = gl.get_v("redis")
+            if redis.exists("device_info_" + device):
+                device_info = redis.getobj("device_info_" + device)
+                surplus_time = device_info['surplus_time']
+            else:
+                surplus_time = int(config.get("server", "default_min"))
+            result = '{"state":0,"data":{"surplus_time":%d, "total_time":%s}}' % (
+                surplus_time, config.get("server", "default_min"))
+        else:
+            result = '{"state":1}'
+    else:
+        result = '{"state":2}'
     return result

@@ -17,8 +17,8 @@ from data.database import data_movie
 from mode.movie import Movie
 
 if __name__ == '__main__':
-    channel_id = 2  # channel_id=1电影2电视剧4动漫6综艺
-    url = 'https://pub.m.iqiyi.com/h5/main/recVideos/lib/?page_id=%d&mode=24&channel_id=%d&smart_tag=&three_category_id=&content_type=&is_purchase=&ret_num=100&pos=1&type=list&market_release_date_level=-&post=list&from=mobile_videolib&is_unified_interface=1&version=1.0.0&device_id=53478e74a0f71f3b1022a7dee8f5e8c4&play_platform=H5_QIYI&passport_id=&session='
+    channel_id = 6  # channel_id=1电影28 2电视剧37 4动漫32 6综艺 25
+    url = 'https://pub.m.iqiyi.com/h5/main/recVideos/lib/?page_id=%d&mode=24&channel_id=%d&smart_tag=&three_category_id=&content_type=&is_purchase=&ret_num=100&pos=1&type=list&market_release_date_level=-&post=list&from=mobile_videolib&is_unified_interface=1&version=1.0.0&device_id=6b83e9b1d3523d459f198c2de986f890&play_platform=H5_QIYI&passport_id=&session=&_=%d'
     header = {
         'user-agent': 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.198 Mobile Safari/537.36',
         'referer': 'https://m.iqiyi.com/'
@@ -26,9 +26,9 @@ if __name__ == '__main__':
     header_pc = {
         'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
     }
-    for i in range(16, 25):
+    for i in range(1, 26):
         time.sleep(0.2)
-        url1 = url % (i, channel_id)
+        url1 = url % (i, channel_id, int(time.time() * 1000))
         response = requests.get(url1, headers=header)
         data = response.json()
         videos = data['data']['videos']
@@ -77,6 +77,7 @@ if __name__ == '__main__':
                         name = ''
                         desc = ''
                         print('error')
+                        continue
 
                     tvid = videoDetailsJson['tvId']
                     date = time_utils.stamp_to_string(updateTime / 1000, '%Y%m%d')
@@ -124,9 +125,17 @@ if __name__ == '__main__':
                             elif sitem('span').text() == u'地区：':
                                 region = sitem('a:first').text()
                         desst = videoDetails1.find('<div class="episodeIntro-brief" title="') + 39
+                        if desst < 39:
+                            desst = videoDetails1.find('<meta name="description" content="') + 34
+                        if desst < 34:
+                            print('error%s' % name)
+                            continue
                         desed = videoDetails1.find('"', desst)
                         desc = videoDetails1[desst:desed]
-
+                        if len(desc) < 1:
+                            desc = v['desc']
+                        if len(desc) < 1:
+                            desc = name
                         videoCount = 0
                         createTime = None
                         updateTime = None
@@ -146,7 +155,11 @@ if __name__ == '__main__':
                                 print('error%s' % name)
                                 break
                             videoDetailsJson = videoDetailsJson['data']
-                            videoCount = videoDetailsJson['videoCount']
+                            try:
+                                videoCount = videoDetailsJson['videoCount']
+                            except:
+                                print('error%s' % name)
+                                continue
                             totalPage = videoDetailsJson['page']
                             if videoDetailsJson['latestOrder'] == videoCount:
                                 span = '%d集全' % videoCount
@@ -182,7 +195,11 @@ if __name__ == '__main__':
                         vdjss = videoDetails1.find(':video-info=\'') + 13
                         vdjse = videoDetails1.find('\'>', vdjss)
                         vdjs = videoDetails1[vdjss:vdjse]
-                        videoDetailsJson = json.loads(vdjs)
+                        try:
+                            videoDetailsJson = json.loads(vdjs)
+                        except:
+                            print('error')
+                            continue
                         if 'areas' in videoDetailsJson and len(videoDetailsJson['areas']) > 0:
                             region = ','.join(videoDetailsJson['areas'])
                         else:
@@ -190,6 +207,10 @@ if __name__ == '__main__':
                         createTime = videoDetailsJson["firstPublishTime"]
                         updateTime = videoDetailsJson["lastPublishTime"]
                         desc = videoDetailsJson["description"]
+                        if len(desc) < 1 and 'desc' in v:
+                            desc = v['desc']
+                        if len(desc) < 1:
+                            desc = name
                         tags = ''
                         if 'categories' in videoDetailsJson:
                             for d in videoDetailsJson['categories']:
@@ -228,6 +249,10 @@ if __name__ == '__main__':
                         address = '%s$%s$%s' % ('', '', videoDetailsJson['url'])
                         span = videoDetailsJson['score']
 
+                if len(address) < 1:
+                    continue
+                if len(desc) < 1:
+                    continue
                 if createTime is None:
                     createTime = int(time.time() * 1000)
                     updateTime = int(time.time() * 1000)
@@ -251,7 +276,7 @@ if __name__ == '__main__':
                 movie.region = region
                 movie.year = year
                 movie.total_part = videoCount
-                movie.details = desc
+                movie.details = desc.replace(' ', '')
                 movie.source = 'iqiyi'
 
                 if connection is None:
