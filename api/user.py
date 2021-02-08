@@ -14,7 +14,7 @@ from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_agent, data_vip, data_gold
 from mode.account import Account
-from utils import project_utils
+from utils import project_utils, aes_utils
 
 logger = LoggerUtils('api.user').logger
 
@@ -30,250 +30,283 @@ def login_success(redis, account):
 
 def login():
     result = '{"state":-1}'
-    connection = None
-    data = request.form
-    try:
-        connection = mysql_connection.get_conn()
-        account_name = str(data['account'])
-        pwd = str(data['pwd'])
-        account = data_account.query_account_by_account_name(connection, account_name)
-        if account is None:
-            result = '{"state":1}'
-        elif StringUtils.md5(pwd + account.salt) != account.pwd:
-            result = '{"state":2}'
-        elif account.account_status != 0:
-            result = '{"state":3}'
-        else:
-            data_account.update_login(time.time(), connection, http_utils.get_client_ip(request.headers.environ),
-                                      account.id)
-            result = '{"state":0,"auth":"' + login_success(gl.get_v("redis"), account) + '"}'
-    except:
-        logger.exception(traceback.format_exc())
-    finally:
-        if connection is not None:
-            connection.close()
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        data = request.form["data"]
+        data = project_utils.get_data(key, data)
+        if data is not None:
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                account_name = str(data['account'])
+                pwd = str(data['pwd'])
+                account = data_account.query_account_by_account_name(connection, account_name)
+                if account is None:
+                    result = '{"state":1}'
+                elif StringUtils.md5(pwd + account.salt) != account.pwd:
+                    result = '{"state":2}'
+                elif account.account_status != 0:
+                    result = '{"state":3}'
+                else:
+                    data_account.update_login(time.time(), connection,
+                                              http_utils.get_client_ip(request.headers.environ),
+                                              account.id)
+                    result = '{"state":0,"auth":"' + login_success(gl.get_v("redis"), account) + '"}'
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+        return aes_utils.aes_encode(result, key)
     return result
 
 
 def register():
     result = '{"state":-1}'
-    connection = None
-    data = request.form
-    try:
-        connection = mysql_connection.get_conn()
-        account_name = str(data['account'])
-        pwd = str(data['pwd'])
-        if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
-            code = str(data['code'])
-            if not gl.get_v("redis").exists(account_name + '_code'):
-                result = '{"state":1}'
-            elif code != str(gl.get_v("redis").get(account_name + '_code'), 'utf-8'):
-                result = '{"state":2}'
-            elif data_account.exist(connection, account_name):
-                result = '{"state":3}'
-            else:
-                share_code = ''
-                if "share_code" in data:
-                    share_code = str(data['share_code'])
-                share_ip = ''
-                if "share_ip" in data:
-                    share_ip = str(data['share_ip'])
-                account = Account()
-                account.account_name = account_name
-                account.nickname = "zz" + account_name[-4:]
-                account.create_time = int(time.time())
-                account.salt = StringUtils.randomStr(32)
-                account.pwd = StringUtils.md5(pwd + account.salt)
-                account.code = StringUtils.randomStr(4).upper()
-                while data_account.exist_code(connection, account.code):
-                    account.code = StringUtils.randomStr(4).upper()
-                last_address = http_utils.get_client_ip(request.headers.environ)
-                data_account.create_account(connection, account, last_address, share_code, share_ip)
-                result = '{"state":0}'
-    except:
-        logger.exception(traceback.format_exc())
-    finally:
-        if connection is not None:
-            connection.close()
-    return result
-
-
-def change_pwd():
-    result = '{"state":-1}'
-    connection = None
-    data = request.form
-    try:
-        connection = mysql_connection.get_conn()
-        account_name = str(data['account'])
-        pwd = str(data['pwd'])
-        if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
-            code = str(data['code'])
-            if not gl.get_v("redis").exists(account_name + '_code'):
-                result = '{"state":1}'
-            elif code != gl.get_v("redis").get(account_name + '_code'):
-                result = '{"state":2}'
-            else:
-                account = data_account.query_account_by_account_name(connection, account_name)
-                if account is None:
-                    result = '{"state":3}'
-                else:
-                    pwd = StringUtils.md5(pwd + account.salt)
-                    data_account.update_pwd(connection, pwd, account.id)
-                    result = '{"state":0}'
-    except:
-        logger.exception(traceback.format_exc())
-    finally:
-        if connection is not None:
-            connection.close()
-    return result
-
-
-def send_code():
-    result = '{"state":-1}'
-    data = request.form
-    account_name = str(data['account'])
-    try:
-        if not re.match(r"^1[3456789]\d{9}$", account_name):
-            result = '{"state":1}'
-        elif gl.get_v("redis").exists(account_name + '_code'):
-            result = '{"state":2}'
-        else:
-            code = StringUtils.randomNum(6)
-            # enc = StringUtils.md5(
-            #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
-            # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
-            # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
-            #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
-            #                                   None)
-            gl.get_v("redis").setex(account_name + "_code", code, 120)
-            logger.info(code)
-            result = '{"state":0}'
-    except:
-        logger.exception(traceback.format_exc())
-    return result
-
-
-def info():
-    result = '{"state":-1}'
-    code, sessions = project_utils.get_auth(request.headers.environ)
-    if 0 == code:
-        account_id = sessions["id"]
-        connection = None
-        try:
-            connection = mysql_connection.get_conn()
-            account = data_account.query_account_by_id(connection, account_id)
-            if account is not None:
-                agent = data_agent.agent_by_id(connection, account.id)
-                end_time = data_vip.vip_end_time(connection, account.id)
-                if 0 == end_time:
-                    vip = u"VIP会员"
-                elif end_time < time.time():
-                    vip = u"SVIP会员已过期"
-                else:
-                    this_time = int(time.time())
-                    if end_time - this_time > 86400:
-                        vip = u"SVIP会员有效期:%.0f天" % math.ceil((end_time - this_time) / 86400.0)
-                    elif end_time - this_time > 3600:
-                        vip = u"SVIP会员有效期:%.0f小时" % math.ceil((end_time - this_time) / 3600.0)
-                    else:
-                        vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
-                directly_count = data_agent.agent_directly_count(connection, account.id)
-                level_conf = json.loads(config.get("agent", "level_conf"))
-                add_min = 0
-                level = 1
-                next = 0
-                for lc in level_conf:
-                    if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
-                        add_min = lc["times"]
-                        level = lc["level"]
-                        next = lc["value"]
-                    else:
-                        next = lc["value"] - next
-                        break
-                result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
-                         '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
-                             account_id, "" if account.head is None else account.head, account.nickname,
-                             account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, level, next,
-                             account.code)
-        except:
-            logger.exception(traceback.format_exc())
-        finally:
-            if connection is not None:
-                connection.close()
-    else:
-        result = '{"state":%d}' % code
-    return result
-
-
-def give_gold():
-    result = '{"state":-1}'
-    code, sessions = project_utils.get_auth(request.headers.environ)
-    if 0 == code:
-        account_id = sessions["id"]
-        data = request.form
-        user_id = int(data["user_id"])
-        give_gold = int(data["give_gold"])
-        if give_gold > 0:
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        data = request.form["data"]
+        data = project_utils.get_data(key, data)
+        if data is not None:
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                parent_id = data_agent.agent_get_parent_id(connection, user_id)
-                if parent_id != int(account_id):
-                    result = '{"state":3}'
-                else:
-                    account = data_account.query_account_by_id(connection, account_id)
-                    if account.gold < give_gold:
-                        result = '{"state":4}'
+                account_name = str(data['account'])
+                pwd = str(data['pwd'])
+                if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                    code = str(data['code'])
+                    if not gl.get_v("redis").exists(account_name + '_code'):
+                        result = '{"state":1}'
+                    elif code != str(gl.get_v("redis").get(account_name + '_code'), 'utf-8'):
+                        result = '{"state":2}'
+                    elif data_account.exist(connection, account_name):
+                        result = '{"state":3}'
                     else:
-                        data_account.update_gold(connection, -give_gold, account_id)
-                        data_gold.create_gold(connection, 5, 0, account_id, -give_gold)
-
-                        data_account.update_gold(connection, give_gold, user_id)
-                        data_gold.create_gold(connection, 6, 0, user_id, give_gold)
+                        share_code = ''
+                        if "share_code" in data:
+                            share_code = str(data['share_code'])
+                        share_ip = ''
+                        if "share_ip" in data:
+                            share_ip = str(data['share_ip'])
+                        account = Account()
+                        account.account_name = account_name
+                        account.nickname = "zz" + account_name[-4:]
+                        account.create_time = int(time.time())
+                        account.salt = StringUtils.randomStr(32)
+                        account.pwd = StringUtils.md5(pwd + account.salt)
+                        account.code = StringUtils.randomStr(4).upper()
+                        while data_account.exist_code(connection, account.code):
+                            account.code = StringUtils.randomStr(4).upper()
+                        last_address = http_utils.get_client_ip(request.headers.environ)
+                        data_account.create_account(connection, account, last_address, share_code, share_ip)
                         result = '{"state":0}'
             except:
                 logger.exception(traceback.format_exc())
             finally:
                 if connection is not None:
                     connection.close()
-    else:
-        result = '{"state":%d}' % code
+        return aes_utils.aes_encode(result, key)
+    return result
+
+
+def change_pwd():
+    result = '{"state":-1}'
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        data = request.form["data"]
+        data = project_utils.get_data(key, data)
+        if data is not None:
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                account_name = str(data['account'])
+                pwd = str(data['pwd'])
+                if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                    code = str(data['code'])
+                    if not gl.get_v("redis").exists(account_name + '_code'):
+                        result = '{"state":1}'
+                    elif code != gl.get_v("redis").get(account_name + '_code'):
+                        result = '{"state":2}'
+                    else:
+                        account = data_account.query_account_by_account_name(connection, account_name)
+                        if account is None:
+                            result = '{"state":3}'
+                        else:
+                            pwd = StringUtils.md5(pwd + account.salt)
+                            data_account.update_pwd(connection, pwd, account.id)
+                            result = '{"state":0}'
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+        return aes_utils.aes_encode(result, key)
+    return result
+
+
+def send_code():
+    result = '{"state":-1}'
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        data = request.form["data"]
+        data = project_utils.get_data(key, data)
+        if data is not None:
+            account_name = str(data['account'])
+            try:
+                if not re.match(r"^1[3456789]\d{9}$", account_name):
+                    result = '{"state":1}'
+                elif gl.get_v("redis").exists(account_name + '_code'):
+                    result = '{"state":2}'
+                else:
+                    code = StringUtils.randomNum(6)
+                    # enc = StringUtils.md5(
+                    #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
+                    # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
+                    # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
+                    #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
+                    #                                   None)
+                    gl.get_v("redis").setex(account_name + "_code", code, 120)
+                    logger.info(code)
+                    result = '{"state":0}'
+            except:
+                logger.exception(traceback.format_exc())
+        return aes_utils.aes_encode(result, key)
+    return result
+
+
+def info():
+    result = '{"state":-1}'
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        code, sessions = project_utils.get_auth(request.headers.environ)
+        if 0 == code:
+            account_id = sessions["id"]
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                account = data_account.query_account_by_id(connection, account_id)
+                if account is not None:
+                    agent = data_agent.agent_by_id(connection, account.id)
+                    end_time = data_vip.vip_end_time(connection, account.id)
+                    if 0 == end_time:
+                        vip = u"VIP会员"
+                    elif end_time < time.time():
+                        vip = u"SVIP会员已过期"
+                    else:
+                        this_time = int(time.time())
+                        if end_time - this_time > 86400:
+                            vip = u"SVIP会员有效期:%.0f天" % math.ceil((end_time - this_time) / 86400.0)
+                        elif end_time - this_time > 3600:
+                            vip = u"SVIP会员有效期:%.0f小时" % math.ceil((end_time - this_time) / 3600.0)
+                        else:
+                            vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
+                    directly_count = data_agent.agent_directly_count(connection, account.id)
+                    level_conf = json.loads(config.get("agent", "level_conf"))
+                    add_min = 0
+                    level = 1
+                    next = 0
+                    for lc in level_conf:
+                        if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
+                            add_min = lc["times"]
+                            level = lc["level"]
+                            next = lc["value"]
+                        else:
+                            next = lc["value"] - next
+                            break
+                    result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
+                             '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
+                                 account_id, "" if account.head is None else account.head, account.nickname,
+                                 account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, level, next,
+                                 account.code)
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+        else:
+            result = '{"state":%d}' % code
+        return aes_utils.aes_encode(result, key)
+    return result
+
+
+def give_gold():
+    result = '{"state":-1}'
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        data = request.form["data"]
+        data = project_utils.get_data(key, data)
+        if data is not None:
+            code, sessions = project_utils.get_auth(request.headers.environ)
+            if 0 == code:
+                account_id = sessions["id"]
+                data = request.form
+                user_id = int(data["user_id"])
+                give_gold = int(data["give_gold"])
+                if give_gold > 0:
+                    connection = None
+                    try:
+                        connection = mysql_connection.get_conn()
+                        parent_id = data_agent.agent_get_parent_id(connection, user_id)
+                        if parent_id != int(account_id):
+                            result = '{"state":3}'
+                        else:
+                            account = data_account.query_account_by_id(connection, account_id)
+                            if account.gold < give_gold:
+                                result = '{"state":4}'
+                            else:
+                                data_account.update_gold(connection, -give_gold, account_id)
+                                data_gold.create_gold(connection, 5, 0, account_id, -give_gold)
+
+                                data_account.update_gold(connection, give_gold, user_id)
+                                data_gold.create_gold(connection, 6, 0, user_id, give_gold)
+                                result = '{"state":0}'
+                    except:
+                        logger.exception(traceback.format_exc())
+                    finally:
+                        if connection is not None:
+                            connection.close()
+            else:
+                result = '{"state":%d}' % code
+        return aes_utils.aes_encode(result, key)
     return result
 
 
 def check_time():
     result = '{"state":-1}'
-    code, sessions = project_utils.get_auth(request.headers.environ)
-    if 0 == code:
-        account_id = sessions["id"]
-        connection = None
-        try:
-            connection = mysql_connection.get_conn()
-            if data_vip.is_vip(connection, account_id):
-                surplus_time = -1
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        code, sessions = project_utils.get_auth(request.headers.environ)
+        if 0 == code:
+            account_id = sessions["id"]
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                if data_vip.is_vip(connection, account_id):
+                    surplus_time = -1
+                else:
+                    surplus_time = data_agent.query_min(connection, account_id)
+                    if surplus_time < 0:
+                        surplus_time = 0
+                result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+        elif 1 == code:
+            if "HTTP_DEVICE" in request.headers.environ:
+                device = request.headers.environ['HTTP_DEVICE']
+                redis = gl.get_v("redis")
+                if redis.exists("device_info_" + device):
+                    device_info = redis.getobj("device_info_" + device)
+                    surplus_time = device_info['surplus_time']
+                else:
+                    surplus_time = int(config.get("server", "default_min"))
+                result = '{"state":0,"data":{"surplus_time":%d, "total_time":%s}}' % (
+                    surplus_time, config.get("server", "default_min"))
             else:
-                surplus_time = data_agent.query_min(connection, account_id)
-                if surplus_time < 0:
-                    surplus_time = 0
-            result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
-        except:
-            logger.exception(traceback.format_exc())
-        finally:
-            if connection is not None:
-                connection.close()
-    elif 1 == code:
-        if "HTTP_DEVICE" in request.headers.environ:
-            device = request.headers.environ['HTTP_DEVICE']
-            redis = gl.get_v("redis")
-            if redis.exists("device_info_" + device):
-                device_info = redis.getobj("device_info_" + device)
-                surplus_time = device_info['surplus_time']
-            else:
-                surplus_time = int(config.get("server", "default_min"))
-            result = '{"state":0,"data":{"surplus_time":%d, "total_time":%s}}' % (
-                surplus_time, config.get("server", "default_min"))
+                result = '{"state":1}'
         else:
-            result = '{"state":1}'
-    else:
-        result = '{"state":2}'
+            result = '{"state":2}'
+        return aes_utils.aes_encode(result, key)
     return result
