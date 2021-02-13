@@ -89,7 +89,7 @@ def more():
         connection = None
         try:
             connection = mysql_connection.get_conn()
-            videos = data_movie.query_movie_list(connection, '', "ORDER BY play_count DESC", 1, 6)
+            videos = data_movie.query_movie_list(connection, '', "ORDER BY play_count DESC", 1, 9)
             result = '{"state":0, "data":[%s]}' % ",".join(videos)
         except:
             logger.exception(traceback.format_exc())

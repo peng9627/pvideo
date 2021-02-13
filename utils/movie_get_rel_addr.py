@@ -15,20 +15,6 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
 }
 
-
-def getadd1(addr):
-    vdjs = ''
-    try:
-        result = requests.get('https://vip.laobandq.com/jiexi.php?url=' + addr, headers=headers, timeout=10).text
-        vdjss = result.find('"url":"') + 7
-        vdjse = result.find('"', vdjss)
-        vdjs = result[vdjss:vdjse]
-    except:
-        print(traceback.format_exc())
-    finally:
-        return vdjs
-
-
 def getadd2(addr):
     vdjs = ''
     try:
@@ -119,9 +105,7 @@ def getadds(addr):
         connection = mysql_connection.get_conn()
         parse_urls = data_vip_video_url.query(connection)
         for p in parse_urls:
-            if p.name == '1':
-                url = getadd1(addr)
-            elif p.name == '2':
+            if p.name == '2':
                 url = getadd2(addr)
             elif p.name == '3':
                 url = getadd3(addr)
@@ -154,7 +138,7 @@ def getadds(addr):
                                           options=chrome_options)
                 try:
                     driver.get('https://jx.youyitv.com/pp/?url=' + addr)
-                    t = 10
+                    t = 15
                     li = 0
                     find = False
                     while t > 0:
@@ -162,7 +146,7 @@ def getadds(addr):
                         log = driver.get_log('performance')
                         for i in range(li, len(log)):
                             s = log[i]['message']
-                            if s.find(".m3u8") != -1:
+                            if s.endswith(".m3u8") or s.endswith(".mp4") or '.m3u8?' in s or '.mp4?' in s:
                                 message_obj = json.loads(s)
                                 if 'request' in message_obj['message']['params']:
                                     url = message_obj['message']['params']['request']['url']
@@ -176,7 +160,7 @@ def getadds(addr):
                     print(traceback.format_exc())
                 finally:
                     driver.quit()
-            if len(url) > 0 and 'm3u8' in url:
+            if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 break
     except:
         print(traceback.format_exc())
@@ -194,9 +178,7 @@ def check_adds(addr):
         for p in parse_urls:
             url = ''
             times = time.time() * 1000
-            if p.name == '1':
-                url = getadd1(addr)
-            elif p.name == '2':
+            if p.name == '2':
                 url = getadd2(addr)
             elif p.name == '3':
                 url = getadd3(addr)
@@ -228,15 +210,13 @@ def check_adds(addr):
                 driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
                                           options=chrome_options)
                 try:
-                    print(int(time.time() * 1000 - times))
                     driver.get('https://jx.youyitv.com/pp/?url=' + addr)
                     t = 10
                     find = False
                     while t > 0:
                         time.sleep(0.2)
                         log = driver.get_log('performance')
-                        for li in (s for s in log if ".m3u8" in s['message']):
-                            print(int(time.time() * 1000 - times)*100)
+                        for li in (s for s in log if (s['message'].endswith(".m3u8") or s['message'].endswith(".mp4") or '.m3u8?' in s['message'] or '.mp4?' in s['message'])):
                             message_obj = json.loads(li['message'])
                             if 'request' in message_obj['message']['params']:
                                 url = message_obj['message']['params']['request']['url']
@@ -248,10 +228,8 @@ def check_adds(addr):
                 except:
                     print(traceback.format_exc())
                 finally:
-                    print(int(time.time() * 1000 - times))
                     driver.quit()
-                    print(int(time.time() * 1000 - times))
-            if len(url) > 0:
+            if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 data_vip_video_url.update_ping(connection, p.id, int(time.time() * 1000 - times))
             else:
                 data_vip_video_url.update_ping(connection, p.id, 200000)

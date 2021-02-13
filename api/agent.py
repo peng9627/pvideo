@@ -192,7 +192,6 @@ def users():
             code, sessions = project_utils.get_auth(request.headers.environ)
             if 0 == code:
                 account_id = sessions["id"]
-                data = request.form
                 connection = None
                 page = int(data["page"])
                 try:
