@@ -15,6 +15,7 @@ headers = {
     'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
 }
 
+
 def getadd2(addr):
     vdjs = ''
     try:
@@ -72,19 +73,6 @@ def getadd5(addr):
         return vdjs
 
 
-def getadd7(addr):
-    vdjs = ''
-    try:
-        result = requests.get('https://by.98a.ink/api.php?url=' + parse.quote(addr), headers=headers, timeout=10).text
-        vdjss = result.find('"url":"') + 7
-        vdjse = result.find('"', vdjss)
-        vdjs = result[vdjss:vdjse].replace("\\", '')
-    except:
-        print(traceback.format_exc())
-    finally:
-        return vdjs
-
-
 def getadd10(addr):
     vdjs = ''
     try:
@@ -113,8 +101,6 @@ def getadds(addr):
                 url = getadd4(addr)
             elif p.name == '5':
                 url = getadd5(addr)
-            elif p.name == '7':
-                url = getadd7(addr)
             elif p.name == '10':
                 url = getadd10(addr)
             else:
@@ -137,30 +123,28 @@ def getadds(addr):
                 driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
                                           options=chrome_options)
                 try:
-                    driver.get('https://jx.youyitv.com/pp/?url=' + addr)
-                    t = 15
-                    li = 0
+                    driver.get(p.address + addr)
+                    t = 20
                     find = False
                     while t > 0:
-                        time.sleep(0.5)
+                        time.sleep(0.2)
                         log = driver.get_log('performance')
-                        for i in range(li, len(log)):
-                            s = log[i]['message']
-                            if s.endswith(".m3u8") or s.endswith(".mp4") or '.m3u8?' in s or '.mp4?' in s:
-                                message_obj = json.loads(s)
-                                if 'request' in message_obj['message']['params']:
-                                    url = message_obj['message']['params']['request']['url']
-                                find = True
-                                break
+                        for li in (s for s in log if ('.m3u8' in s['message'] or '.mp4' in s['message'])):
+                            message_obj = json.loads(li['message'])
+                            if 'request' in message_obj['message']['params']:
+                                url = message_obj['message']['params']['request']['url']
+                                if url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url:
+                                    find = True
+                                    break
                         if find:
                             break
                         t -= 1
-                        li = len(log)
                 except:
                     print(traceback.format_exc())
                 finally:
                     driver.quit()
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
+                print(p.name)
                 break
     except:
         print(traceback.format_exc())
@@ -186,8 +170,6 @@ def check_adds(addr):
                 url = getadd4(addr)
             elif p.name == '5':
                 url = getadd5(addr)
-            elif p.name == '7':
-                url = getadd7(addr)
             elif p.name == '10':
                 url = getadd10(addr)
             else:
@@ -210,18 +192,20 @@ def check_adds(addr):
                 driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
                                           options=chrome_options)
                 try:
-                    driver.get('https://jx.youyitv.com/pp/?url=' + addr)
-                    t = 10
+                    driver.set_page_load_timeout(8)
+                    driver.get(p.address + addr)
+                    t = 20
                     find = False
                     while t > 0:
                         time.sleep(0.2)
                         log = driver.get_log('performance')
-                        for li in (s for s in log if (s['message'].endswith(".m3u8") or s['message'].endswith(".mp4") or '.m3u8?' in s['message'] or '.mp4?' in s['message'])):
+                        for li in (s for s in log if ('.m3u8' in s['message'] or '.mp4' in s['message'])):
                             message_obj = json.loads(li['message'])
                             if 'request' in message_obj['message']['params']:
                                 url = message_obj['message']['params']['request']['url']
-                                find = True
-                                break
+                                if url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url:
+                                    find = True
+                                    break
                         if find:
                             break
                         t -= 1
