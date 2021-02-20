@@ -1,5 +1,6 @@
 import base64
 import json
+import os
 import time
 import traceback
 from urllib import parse
@@ -120,9 +121,12 @@ def getadds(addr):
                 caps = DesiredCapabilities.CHROME
                 caps['loggingPrefs'] = {'performance': 'ALL'}
                 # 核心代码结束
-                driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
-                                          options=chrome_options)
+                # driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
+                #                           options=chrome_options)
+                driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
                 try:
+                    driver.set_page_load_timeout(8)
+                    driver.set_script_timeout(8)
                     driver.get(p.address + addr)
                     t = 20
                     find = False
@@ -143,6 +147,9 @@ def getadds(addr):
                     print(traceback.format_exc())
                 finally:
                     driver.quit()
+                    # os.system('kill -s 9 `pgrep chrome`')
+                    os.system('taskkill /im chromedriver.exe /F')
+                    os.system('taskkill /im chrome.exe /F')
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 print(p.name)
                 break
@@ -189,10 +196,12 @@ def check_adds(addr):
                 caps = DesiredCapabilities.CHROME
                 caps['loggingPrefs'] = {'performance': 'ALL'}
                 # 核心代码结束
-                driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
-                                          options=chrome_options)
+                # driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
+                #                           options=chrome_options)
+                driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
                 try:
                     driver.set_page_load_timeout(8)
+                    driver.set_script_timeout(8)
                     driver.get(p.address + addr)
                     t = 20
                     find = False
@@ -213,6 +222,9 @@ def check_adds(addr):
                     print(traceback.format_exc())
                 finally:
                     driver.quit()
+                    # os.system('kill -s 9 `pgrep chrome`')
+                    os.system('taskkill /im chromedriver.exe /F')
+                    os.system('taskkill /im chrome.exe /F')
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 data_vip_video_url.update_ping(connection, p.id, int(time.time() * 1000 - times))
             else:
