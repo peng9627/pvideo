@@ -41,7 +41,7 @@ app.register_blueprint(api)
 reset_count.reset_count()
 video_url_ping.video_url_ping()
 threading.Thread(target=server.start, name='barrage_server').start()  # 线程对象.
-app.run(host="0.0.0.0")
+# app.run(host="0.0.0.0")
 
 
 class RequestFormatter(logging.Formatter):
