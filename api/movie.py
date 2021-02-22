@@ -6,10 +6,11 @@ import requests
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import config, globalvar as gl
+from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_movie, data_recommend_movie, data_vip, data_agent
-from utils import movie_get_rel_addr, project_utils, aes_utils
+from utils import movie_get_rel_addr, project_utils
 
 logger = LoggerUtils('api.movie').logger
 

@@ -4,13 +4,14 @@ import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
+from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_goods, data_gold, data_order
 from mode import pay_type
 from mode.order import Order
-from utils import project_utils, aes_utils
+from utils import project_utils
 
 logger = LoggerUtils('api.order').logger
 

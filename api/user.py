@@ -8,13 +8,13 @@ import traceback
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import globalvar as gl, config
-from pycore.utils import http_utils
+from pycore.utils import http_utils, aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_agent, data_vip, data_gold
 from mode.account import Account
-from utils import project_utils, aes_utils
+from utils import project_utils
 
 logger = LoggerUtils('api.user').logger
 

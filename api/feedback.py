@@ -3,11 +3,12 @@ import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
+from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_feedback
 from mode.feedback import Feedback
-from utils import project_utils, aes_utils
+from utils import project_utils
 
 logger = LoggerUtils('api.feedback').logger
 

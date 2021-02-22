@@ -2,10 +2,11 @@ import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
+from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
 from data.database import data_advertisement, data_advertisement_click
-from utils import project_utils, aes_utils
+from utils import project_utils
 
 logger = LoggerUtils('api.advertisement').logger
 

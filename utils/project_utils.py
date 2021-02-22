@@ -2,7 +2,7 @@ import json
 
 from pycore.data.entity import globalvar as gl
 
-from utils import aes_utils
+from pycore.utils import aes_utils
 
 
 def get_auth(environ):

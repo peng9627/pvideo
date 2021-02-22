@@ -3,12 +3,13 @@ import traceback
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import config, globalvar as gl
+from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
 from data.database import data_advertisement, data_app_version, \
     data_notice
-from utils import project_utils, aes_utils
+from utils import project_utils
 
 logger = LoggerUtils('api.index').logger
 
