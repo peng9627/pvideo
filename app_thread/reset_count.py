@@ -21,7 +21,7 @@ def func():
         if keys is not None and len(keys) > 0:
             redis.delobj(*keys)
         connection = mysql_connection.get_conn()
-        data_agent.reset_min(connection)
+        data_agent.reset_times(connection)
     except:
         logger.exception(traceback.format_exc())
     finally:

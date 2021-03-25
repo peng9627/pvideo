@@ -25,9 +25,9 @@ def add():
                 account_id = sessions["id"]
                 video_history = VideoHistory()
                 video_history.user_id = account_id
-                # if video_history.user_id == 0 and "HTTP_DEVICE" in request.headers.environ:
-                #     device = request.headers.environ['HTTP_DEVICE']
-                #     video_history.device = device
+                if "HTTP_DEVICE" in request.headers.environ:
+                    device = request.headers.environ['HTTP_DEVICE']
+                    video_history.device = device
                 video_id = data["video_id"]
                 content = data["content"]
                 connection = None
@@ -60,14 +60,12 @@ def query():
             code, sessions = project_utils.get_auth(request.headers.environ)
             if 0 == code:
                 account_id = sessions["id"]
-                # elif "HTTP_DEVICE" in request.headers.environ:
-                #     device = request.headers.environ['HTTP_DEVICE']
                 connection = None
                 try:
                     connection = mysql_connection.get_conn()
                     page = int(data["page"])
                     connection = mysql_connection.get_conn()
-                    video_history = data_video_history.query_movie_history(connection, account_id, '', page)
+                    video_history = data_video_history.query_movie_history(connection, account_id, page)
                     result = '{"state":0,"data":[%s]}' % (",".join(video_history))
                 except:
                     logger.exception(traceback.format_exc())

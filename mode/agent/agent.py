@@ -6,7 +6,7 @@ class Agent(object):
         self.parent_id = 0
         self.parent_ids = ''
         self.top_id = 0
-        self.min = 0
-        self.total_min = 0
+        self.times = 0
+        self.total_times = 0
         self.status = 0
         self.contact = ''

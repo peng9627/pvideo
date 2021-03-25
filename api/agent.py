@@ -62,7 +62,7 @@ def bind():
                 else:
                     agent.parent_ids = pagent.parent_ids + ',' + str(pagent.user_id)
                 agent.top_id = pagent.top_id
-                init_count = int(config.get("server", "init_min"))
+                init_count = int(config.get("server", "init_times"))
                 agent.commission = init_count
                 agent.total_commission = init_count
                 agent.contact = pagent.contact
@@ -70,16 +70,16 @@ def bind():
 
                 directly_count = data_agent.agent_directly_count(connection, pagent.user_id)
                 level_conf = json.loads(config.get("agent", "level_conf"))
-                add_min = 0
+                add_times = 0
                 for lc in level_conf:
-                    if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
-                        add_min = lc["times"]
+                    if directly_count >= lc["value"] and (add_times < lc["times"] or lc["times"] == -1):
+                        add_times = lc["times"]
                     else:
                         break
-                if pagent.min < add_min:
-                    data_agent.add_min(connection, pagent.user_id, add_min - pagent.min)
-                elif add_min == -1:
-                    data_agent.add_min(connection, pagent.user_id, -1 - pagent.min)
+                if pagent.times < add_times:
+                    data_agent.add_times(connection, pagent.user_id, add_times - pagent.times)
+                elif add_times == -1:
+                    data_agent.add_times(connection, pagent.user_id, -1 - pagent.times)
                 add_gold = int(config.get("server", "share_add_gold"))
                 if 0 < add_gold:
                     data_account.update_gold(connection, add_gold, pagent.user_id)

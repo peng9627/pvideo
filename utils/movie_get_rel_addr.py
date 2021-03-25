@@ -17,6 +17,85 @@ headers = {
 }
 
 
+def getadd13(addr):
+    vdjs = ''
+    try:
+        result = requests.get('https://www.administratorm.com/WANG/index.php?url=' + parse.quote(addr), headers=headers,
+                              timeout=10).text
+        vdjss = result.find('vkey=\'') + 6
+        vdjse = result.find('\'', vdjss)
+        vkey = result[vdjss:vdjse]
+        datas = {'url': addr, 'wap': '0', 'ios': '0', 'vkey': vkey, 'type': ''}
+        result = requests.post('https://www.administratorm.com/WANG/Api.php', headers=headers, data=datas,
+                               timeout=10).text
+        vdjss = result.find('"url":"') + 7
+        vdjse = result.find('"', vdjss)
+        vdjs = result[vdjss:vdjse].replace("\\", '')
+    except:
+        print(traceback.format_exc())
+    finally:
+        return vdjs
+
+
+def getadd14(addr):
+    vdjs = ''
+    try:
+        datas = {'url': addr, 'referer': '', 'ref': '0', 'time': '1611645821', 'type': '',
+                 'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
+        result = requests.post('https://www.administratorm.com/api.php', headers=headers, data=datas, timeout=10).text
+        vdjss = result.find('"url":"') + 7
+        vdjse = result.find('"', vdjss)
+        vdjs = result[vdjss:vdjse].replace("\\", '')
+    except:
+        print(traceback.format_exc())
+    finally:
+        return vdjs
+
+
+def getadd15(addr):
+    vdjs = ''
+    try:
+        datas = {'url': addr, 'referer': '', 'ref': '0', 'time': '1611645821', 'type': '',
+                 'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
+        result = requests.post('http://m3u8.boquxinxi.com/jiexi/api.php', headers=headers, data=datas, timeout=10).text
+        vdjss = result.find('"url":"') + 7
+        vdjse = result.find('"', vdjss)
+        vdjs = result[vdjss:vdjse].replace("\\", '')
+    except:
+        print(traceback.format_exc())
+    finally:
+        return vdjs
+
+
+def getadd16(addr):
+    vdjs = ''
+    try:
+        datas = {'url': addr, 'referer': '', 'ref': '0', 'time': '1611645821', 'type': '',
+                 'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
+        result = requests.post('https://man.ledboke.com/147/apikey.php', headers=headers, data=datas, timeout=10).text
+        vdjss = result.find('"url":"') + 7
+        vdjse = result.find('"', vdjss)
+        vdjs = result[vdjss:vdjse].replace("\\", '')
+    except:
+        print(traceback.format_exc())
+    finally:
+        return vdjs
+
+
+def getadd17(addr):
+    vdjs = ''
+    try:
+        result = requests.get('https://vip.mpos.ren/rends/api.php?url=' + parse.quote(addr) + '&danmu=0',
+                              headers=headers, timeout=10).text
+        vdjss = result.find('"url":"') + 7
+        vdjse = result.find('"', vdjss)
+        vdjs = result[vdjss:vdjse].replace("\\", '')
+    except:
+        print(traceback.format_exc())
+    finally:
+        return vdjs
+
+
 def getadd2(addr):
     vdjs = ''
     try:
@@ -87,14 +166,17 @@ def getadd10(addr):
         return vdjs
 
 
-def getadds(addr):
+def getadds(addr, not_line):
     connection = None
     url = ''
+    name = ''
     try:
         connection = mysql_connection.get_conn()
         parse_urls = data_vip_video_url.query(connection)
         for p in parse_urls:
-            if p.name == '2':
+            if p.name in not_line:
+                continue
+            elif p.name == '2':
                 url = getadd2(addr)
             elif p.name == '3':
                 url = getadd3(addr)
@@ -104,6 +186,16 @@ def getadds(addr):
                 url = getadd5(addr)
             elif p.name == '10':
                 url = getadd10(addr)
+            elif p.name == '13':
+                url = getadd13(addr)
+            elif p.name == '14':
+                url = getadd14(addr)
+            elif p.name == '15':
+                url = getadd15(addr)
+            elif p.name == '16':
+                url = getadd16(addr)
+            elif p.name == '17':
+                url = getadd17(addr)
             else:
                 chrome_options = webdriver.ChromeOptions()
                 chrome_options.add_argument('--headless')  # 无界面
@@ -120,11 +212,12 @@ def getadds(addr):
                 chrome_options.add_experimental_option('w3c', False)
                 caps = DesiredCapabilities.CHROME
                 caps['loggingPrefs'] = {'performance': 'ALL'}
-                # 核心代码结束
-                # driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
-                #                           options=chrome_options)
-                driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
+                driver = None
                 try:
+                    # 核心代码结束
+                    # driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
+                    #                           options=chrome_options)
+                    driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
                     driver.set_page_load_timeout(8)
                     driver.set_script_timeout(8)
                     driver.get(p.address + addr)
@@ -146,19 +239,20 @@ def getadds(addr):
                 except:
                     print(traceback.format_exc())
                 finally:
-                    driver.quit()
+                    if driver is not None:
+                        driver.quit()
                     # os.system('kill -s 9 `pgrep chrome`')
-                    os.system('taskkill /im chromedriver.exe /F')
-                    os.system('taskkill /im chrome.exe /F')
+                    # os.system('taskkill /im chromedriver.exe /F')
+                    # os.system('taskkill /im chrome.exe /F')
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
-                print(p.name)
+                name = p.name
                 break
     except:
         print(traceback.format_exc())
     finally:
         if connection is not None:
             connection.close()
-    return url
+    return url, name
 
 
 def check_adds(addr):
@@ -179,6 +273,16 @@ def check_adds(addr):
                 url = getadd5(addr)
             elif p.name == '10':
                 url = getadd10(addr)
+            elif p.name == '13':
+                url = getadd13(addr)
+            elif p.name == '14':
+                url = getadd14(addr)
+            elif p.name == '15':
+                url = getadd15(addr)
+            elif p.name == '16':
+                url = getadd16(addr)
+            elif p.name == '17':
+                url = getadd17(addr)
             else:
                 chrome_options = webdriver.ChromeOptions()
                 chrome_options.add_argument('--headless')  # 无界面
@@ -223,8 +327,8 @@ def check_adds(addr):
                 finally:
                     driver.quit()
                     # os.system('kill -s 9 `pgrep chrome`')
-                    os.system('taskkill /im chromedriver.exe /F')
-                    os.system('taskkill /im chrome.exe /F')
+                    # os.system('taskkill /im chromedriver.exe /F')
+                    # os.system('taskkill /im chrome.exe /F')
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 data_vip_video_url.update_ping(connection, p.id, int(time.time() * 1000 - times))
             else:

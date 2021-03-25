@@ -145,7 +145,7 @@ def exist(connection, movie):
     try:
         sql = config.get("sql", "sql_movie_exist")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (movie.title, movie.director, movie.year, movie.type))
+            cursor.execute(sql, (movie.title, movie.year, movie.type))
             result = cursor.fetchone()
             return result["result"] != 0
     except:

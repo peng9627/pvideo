@@ -23,8 +23,8 @@ def agent_by_id(connection, id):
                     agent.parent_id = r["parent_id"]
                 agent.parent_ids = r["parent_ids"]
                 agent.top_id = r["top_id"]
-                agent.min = r["min"]
-                agent.total_min = r["total_min"]
+                agent.times = r["times"]
+                agent.total_times = r["total_times"]
                 agent.status = r["status"]
                 agent.contact = r["contact"]
                 result = agent
@@ -49,9 +49,9 @@ def add_agent(connection, agent):
     return result
 
 
-def add_min(connection, pid, add_min):
+def add_times(connection, pid, add_times):
     try:
-        sql = config.get("sql", "sql_add_min") % (add_min, add_min, pid)
+        sql = config.get("sql", "sql_add_times") % (add_times, add_times, pid)
         with connection.cursor() as cursor:
             cursor.execute(sql)
             connection.commit()
@@ -60,9 +60,9 @@ def add_min(connection, pid, add_min):
         logger.exception(traceback.format_exc())
 
 
-def use_min(connection, user_id, min):
+def use_times(connection, user_id, times):
     try:
-        sql = config.get("sql", "sql_use_min") % (min, user_id)
+        sql = config.get("sql", "sql_use_times") % (times, user_id)
         with connection.cursor() as cursor:
             cursor.execute(sql)
             connection.commit()
@@ -71,9 +71,9 @@ def use_min(connection, user_id, min):
         logger.exception(traceback.format_exc())
 
 
-def reset_min(connection):
+def reset_times(connection):
     try:
-        sql = config.get("sql", "sql_reset_min")
+        sql = config.get("sql", "sql_reset_times")
         with connection.cursor() as cursor:
             cursor.execute(sql)
             connection.commit()
@@ -82,15 +82,15 @@ def reset_min(connection):
         logger.exception(traceback.format_exc())
 
 
-def query_min(connection, user_id):
+def query_times(connection, user_id):
     result = 0
     try:
-        sql = config.get("sql", "sql_query_min")
+        sql = config.get("sql", "sql_query_times")
         with connection.cursor() as cursor:
             cursor.execute(sql, user_id)
             r = cursor.fetchone()
             if r is not None:
-                result = r["min"]
+                result = r["times"]
     except:
         logger.exception(traceback.format_exc())
     return result

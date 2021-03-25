@@ -8,7 +8,7 @@ CREATE TABLE `account`
     `pwd`            VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `salt`           VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `head`           VARCHAR(255) COLLATE utf8mb4_unicode_ci,
-    `nickname`       VARCHAR(6) COLLATE utf8mb4_unicode_ci   NOT NULL,
+    `nickname`       VARCHAR(12) COLLATE utf8mb4_unicode_ci   NOT NULL,
     `sex`            INT(1) UNSIGNED  DEFAULT 0,
     `create_time`    INT(10) UNSIGNED DEFAULT 0,
     `last_time`      INT(10) UNSIGNED DEFAULT 0,

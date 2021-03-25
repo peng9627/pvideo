@@ -2,8 +2,12 @@
 import json
 import math
 import re
+import smtplib
 import time
 import traceback
+from email.header import Header
+from email.mime.text import MIMEText
+from email.utils import formataddr
 
 from flask import request
 from pycore.data.database import mysql_connection
@@ -51,7 +55,8 @@ def login():
                     data_account.update_login(time.time(), connection,
                                               http_utils.get_client_ip(request.headers.environ),
                                               account.id)
-                    result = '{"state":0,"auth":"' + login_success(gl.get_v("redis"), account) + '"}'
+                    return aes_utils.aes_encode('{"state":0}', key), 200, {
+                        'auth': login_success(gl.get_v("redis"), account)}
             except:
                 logger.exception(traceback.format_exc())
             finally:
@@ -73,7 +78,9 @@ def register():
                 connection = mysql_connection.get_conn()
                 account_name = str(data['account'])
                 pwd = str(data['pwd'])
-                if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                # if re.match(r"^1[3456789]\d{9}$", account_name and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                if re.match(r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$",
+                            account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
                     code = str(data['code'])
                     if not gl.get_v("redis").exists(account_name + '_code'):
                         result = '{"state":1}'
@@ -90,7 +97,7 @@ def register():
                             share_ip = str(data['share_ip'])
                         account = Account()
                         account.account_name = account_name
-                        account.nickname = "zz" + account_name[-4:]
+                        account.nickname = "dm" + StringUtils.randomStr(6)
                         account.create_time = int(time.time())
                         account.salt = StringUtils.randomStr(32)
                         account.pwd = StringUtils.md5(pwd + account.salt)
@@ -121,7 +128,9 @@ def change_pwd():
                 connection = mysql_connection.get_conn()
                 account_name = str(data['account'])
                 pwd = str(data['pwd'])
-                if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                # if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                if re.match(r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$",
+                            account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
                     code = str(data['code'])
                     if not gl.get_v("redis").exists(account_name + '_code'):
                         result = '{"state":1}'
@@ -152,24 +161,41 @@ def send_code():
         data = project_utils.get_data(key, data)
         if data is not None:
             account_name = str(data['account'])
-            try:
-                if not re.match(r"^1[3456789]\d{9}$", account_name):
-                    result = '{"state":1}'
-                elif gl.get_v("redis").exists(account_name + '_code'):
-                    result = '{"state":2}'
-                else:
-                    code = StringUtils.randomNum(6)
-                    # enc = StringUtils.md5(
-                    #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
-                    # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
-                    # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
-                    #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
-                    #                                   None)
-                    gl.get_v("redis").setex(account_name + "_code", code, 120)
-                    logger.info(code)
-                    result = '{"state":0}'
-            except:
-                logger.exception(traceback.format_exc())
+            # if re.match(r"^1[3456789]\d{9}$", account_name):
+            if re.match(r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$", account_name):
+                try:
+                    if gl.get_v("redis").exists(account_name + '_code'):
+                        result = '{"state":2}'
+                    else:
+                        code = StringUtils.randomNum(6)
+                        # enc = StringUtils.md5(
+                        #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
+                        # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
+                        # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
+                        #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
+                        #                                   None)
+                        mail_sender = config.get("mail", "mail_sender")  # 发件人邮箱账号
+                        mail_pass = config.get("mail", "mail_pass")  # 发件人邮箱密码
+                        receivers = account_name  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+
+                        # 三个参数：第一个为文本内容，第二个 plain 设置文本格式，第三个 utf-8 设置编码
+                        message = MIMEText('dm...' + code, 'plain', 'utf-8')
+                        message['From'] = Header("dm", 'utf-8')
+
+                        subject = 'dm code'
+                        message['Subject'] = Header(subject, 'utf-8')
+
+                        server = smtplib.SMTP(config.get("mail", "mail_host"),
+                                                  int(config.get("mail", "mail_port")))  # 发件人邮箱中的SMTP服务器，端口是25
+                        server.ehlo()  # 向邮箱发送SMTP 'ehlo' 命令
+                        server.starttls()
+                        server.login(mail_sender, mail_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
+                        server.sendmail(mail_sender, [receivers], message.as_string())
+                        gl.get_v("redis").setex(account_name + "_code", code, 120)
+                        logger.info(code)
+                        result = '{"state":0}'
+                except:
+                    logger.exception(traceback.format_exc())
         return aes_utils.aes_encode(result, key)
     return result
 
@@ -202,21 +228,22 @@ def info():
                             vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
                     directly_count = data_agent.agent_directly_count(connection, account.id)
                     level_conf = json.loads(config.get("agent", "level_conf"))
-                    add_min = 0
+                    add_times = 0
                     level = 1
                     next = 0
                     for lc in level_conf:
-                        if directly_count >= lc["value"] and (add_min < lc["times"] or lc["times"] == -1):
-                            add_min = lc["times"]
+                        if directly_count >= lc["value"] and (add_times < lc["times"] or lc["times"] == -1):
+                            add_times = lc["times"]
                             level = lc["level"]
                             next = lc["value"]
                         else:
                             next = lc["value"] - next
                             break
                     result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
-                             '"min":%d, "total_min":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
+                             '"times":%d, "total_times":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
                                  account_id, "" if account.head is None else account.head, account.nickname,
-                                 account.sex, account.gold, agent.min, agent.total_min, agent.status, vip, level, next,
+                                 account.sex, account.gold, agent.times, agent.total_times, agent.status, vip, level,
+                                 next,
                                  account.code)
             except:
                 logger.exception(traceback.format_exc())
@@ -284,7 +311,7 @@ def check_time():
                 if data_vip.is_vip(connection, account_id):
                     surplus_time = -1
                 else:
-                    surplus_time = data_agent.query_min(connection, account_id)
+                    surplus_time = data_agent.query_times(connection, account_id)
                     if surplus_time < 0:
                         surplus_time = 0
                 result = '{"state":0,"data":{"surplus_time":%d}}' % surplus_time
@@ -301,9 +328,9 @@ def check_time():
                     device_info = redis.getobj("device_info_" + device)
                     surplus_time = device_info['surplus_time']
                 else:
-                    surplus_time = int(config.get("server", "default_min"))
+                    surplus_time = int(config.get("server", "default_times"))
                 result = '{"state":0,"data":{"surplus_time":%d, "total_time":%s}}' % (
-                    surplus_time, config.get("server", "default_min"))
+                    surplus_time, config.get("server", "default_times"))
             else:
                 result = '{"state":1}'
         else:

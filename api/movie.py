@@ -1,4 +1,5 @@
 import json
+import random
 import traceback
 
 import pymysql
@@ -9,7 +10,7 @@ from pycore.data.entity import config, globalvar as gl
 from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_movie, data_recommend_movie, data_vip, data_agent
+from data.database import data_movie, data_recommend_movie, data_vip, data_agent, data_video_history
 from utils import movie_get_rel_addr, project_utils
 
 logger = LoggerUtils('api.movie').logger
@@ -158,9 +159,17 @@ def query_info():
             try:
                 movie_id = data["movie_id"]
                 connection = mysql_connection.get_conn()
+                data_movie.movie_add_count(connection, movie_id)
                 movie = data_movie.info(connection, movie_id)
+                movie.play_count *= 30
+                movie.play_count += random.randint(1, 30)
                 if movie is not None:
-                    result = '{"state":0, "data":%s}' % json.dumps(movie.__dict__)
+                    code, sessions = project_utils.get_auth(request.headers.environ)
+                    content = ''
+                    if 0 == code:
+                        account_id = sessions["id"]
+                        content = data_video_history.continue_movie_history(connection, account_id, movie_id)
+                    result = '{"state":0, "data":%s,"content":"%s"}' % (json.dumps(movie.__dict__), content)
             except:
                 logger.exception(traceback.format_exc())
             finally:
@@ -176,44 +185,74 @@ def get_play_addr():
     if key is not None:
         data = request.form["data"]
         data = project_utils.get_data(key, data)
+        address = None
         if data is not None:
+            redis = gl.get_v("redis")
             check_time = 1
+            not_line = []
+            device_info = {}
             code, sessions = project_utils.get_auth(request.headers.environ)
             if 0 == code:
                 account_id = sessions["id"]
-                connection = None
-                try:
-                    connection = mysql_connection.get_conn()
-                    if not data_vip.is_vip(connection, account_id):
-                        surplus_time = data_agent.query_min(connection, account_id)
-                        if surplus_time > 0:
-                            data_agent.use_min(connection, account_id, 1)
-                            check_time = 0
-                except:
-                    logger.exception(traceback.format_exc())
-                finally:
-                    if connection is not None:
-                        connection.close()
+                if data['switch'] and 'current_line' in sessions:
+                    if 'not_line' in sessions:
+                        not_line = sessions['not_line']
+                    not_line.append(sessions['current_line'])
+                    address = sessions['current_address']
+                    check_time = 0
+                else:
+                    address = data['addr']
+                    connection = None
+                    try:
+                        connection = mysql_connection.get_conn()
+                        if not data_vip.is_vip(connection, account_id):
+                            surplus_time = data_agent.query_times(connection, account_id)
+                            if surplus_time > 0:
+                                data_agent.use_times(connection, account_id, 1)
+                                check_time = 0
+                    except:
+                        logger.exception(traceback.format_exc())
+                    finally:
+                        if connection is not None:
+                            connection.close()
             elif 1 == code:
                 if "HTTP_DEVICE" in request.headers.environ:
                     device = request.headers.environ['HTTP_DEVICE']
-                    redis = gl.get_v("redis")
                     if redis.exists("device_info_" + device):
                         device_info = redis.getobj("device_info_" + device)
                     else:
                         device_info = {}
-                        device_info["surplus_time"] = int(config.get("server", "default_min"))
-                    if device_info["surplus_time"] > 0:
+                        device_info["surplus_time"] = int(config.get("server", "default_times"))
+                    if data['switch'] and 'current_line' in device_info:
+                        if 'not_line' in device_info:
+                            not_line = device_info['not_line']
+                        not_line.append(device_info['current_line'])
+                        address = device_info['current_address']
+                        check_time = 0
+                    elif device_info["surplus_time"] > 0:
                         device_info["surplus_time"] -= 1
                         check_time = 0
-                        redis.setobj("device_info_" + device, device_info)
+                        address = data['addr']
                 else:
                     check_time = 1
             else:
                 check_time = 2
             if 0 == check_time:
-                url = movie_get_rel_addr.getadds(data['addr'])
+                url, name = movie_get_rel_addr.getadds(address, not_line)
+                if len(url) == 0:
+                    not_line.clear()
+                    url, name = movie_get_rel_addr.getadds(address, [])
                 if len(url) > 0:
+                    if 0 == code:
+                        sessions['current_line'] = name
+                        sessions['not_line'] = not_line
+                        sessions['current_address'] = address
+                        redis.setexo(request.headers.environ['HTTP_AUTH'], sessions, 604800)
+                    else:
+                        device_info['current_line'] = name
+                        device_info['not_line'] = not_line
+                        device_info['current_address'] = address
+                        redis.setobj("device_info_" + request.headers.environ['HTTP_DEVICE'], device_info)
                     result = '{"state":0,"data":"%s"}' % url
             else:
                 result = '{"state":%d}' % check_time
@@ -226,7 +265,7 @@ def play():
     data = request.args
     code, sessions = project_utils.get_auth(request.headers.environ)
     if 0 == code:
-        url = movie_get_rel_addr.getadds(data['addr'])
+        url = movie_get_rel_addr.getadds(data['addr'], [])
         if len(url) > 0:
             header = {
                 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',

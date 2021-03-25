@@ -22,8 +22,8 @@ def create_account(connection, account, last_address, share_code, share_ip):
             connection.commit()
             account = query_account_by_account_name(connection, account.account_name)
             if account is not None:
-                update_gold(connection, int(config.get("server", "login_gold")), account.id)
-                data_gold.create_gold(connection, 1, 0, account.id, int(config.get("server", "login_gold")))
+                update_gold(connection, int(config.get("server", "register_gold")), account.id)
+                data_gold.create_gold(connection, 1, 0, account.id, int(config.get("server", "register_gold")))
                 try:
                     s = HttpUtils(config.get("api", "api_host")).post(config.get("api", "bind"),
                                                                       json.loads(config.get("api", "bind_param") % (
