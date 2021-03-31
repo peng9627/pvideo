@@ -7,7 +7,6 @@ import time
 import traceback
 from email.header import Header
 from email.mime.text import MIMEText
-from email.utils import formataddr
 
 from flask import request
 from pycore.data.database import mysql_connection
@@ -18,6 +17,8 @@ from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_agent, data_vip, data_gold
 from mode.account import Account
+from mode.agent.agent import Agent
+from mode.vip import Vip
 from utils import project_utils
 
 logger = LoggerUtils('api.user').logger
@@ -89,12 +90,6 @@ def register():
                     elif data_account.exist(connection, account_name):
                         result = '{"state":3}'
                     else:
-                        share_code = ''
-                        if "share_code" in data:
-                            share_code = str(data['share_code'])
-                        share_ip = ''
-                        if "share_ip" in data:
-                            share_ip = str(data['share_ip'])
                         account = Account()
                         account.account_name = account_name
                         account.nickname = "dm" + StringUtils.randomStr(6)
@@ -105,7 +100,110 @@ def register():
                         while data_account.exist_code(connection, account.code):
                             account.code = StringUtils.randomStr(4).upper()
                         last_address = http_utils.get_client_ip(request.headers.environ)
-                        data_account.create_account(connection, account, last_address, share_code, share_ip)
+                        data_account.create_account(connection, account, last_address)
+                        account = data_account.query_account_by_account_name(connection, account.account_name)
+                        if account is not None:
+                            data_account.update_gold(connection, int(config.get("server", "register_gold")), account.id)
+                            data_gold.create_gold(connection, 1, 0, account.id,
+                                                  int(config.get("server", "register_gold")))
+
+                            agent = data_agent.agent_by_id(connection, account.id)
+                            pid = None
+                            if agent is None:
+                                share_code = ''
+                                if "share_code" in data:
+                                    share_code = str(data['share_code'])
+                                share_ip = ''
+                                if "share_ip" in data:
+                                    share_ip = str(data['share_ip'])
+                                redis = gl.get_v("redis")
+                                # 通过推广码找代理
+                                if share_code is not None and 1 < len(share_code):
+                                    parent = data_account.query_account_by_code(connection, share_code)
+                                    if parent is not None:
+                                        pid = parent.id
+                                # 通过ip找代理
+                                if pid is None:
+                                    if redis.exists("ipinfo_" + share_ip):
+                                        share_code = redis.get("ipinfo_" + share_ip)
+                                        parent = data_account.query_account_by_code(connection, share_code)
+                                        if parent is not None:
+                                            pid = parent.id
+                                # 没代理自动绑定平台
+                                if pid is None:
+                                    pid = 10000
+                                pagent = data_agent.agent_by_id(connection, int(pid))
+                                if pagent is not None:
+                                    agent = Agent()
+                                    agent.create_time = int(time.time())
+                                    agent.user_id = account.id
+                                    agent.parent_id = pagent.user_id
+                                    if len(pagent.parent_ids) < 1:
+                                        agent.parent_ids = str(pagent.user_id)
+                                    else:
+                                        agent.parent_ids = pagent.parent_ids + ',' + str(pagent.user_id)
+                                    agent.top_id = pagent.top_id
+                                    init_count = int(config.get("server", "init_times"))
+                                    agent.commission = init_count
+                                    agent.total_commission = init_count
+                                    agent.contact = pagent.contact
+                                    data_agent.add_agent(connection, agent)
+                                    directly_count = data_agent.agent_directly_count(connection, pagent.user_id)
+                                    # vip等级
+                                    level_conf = json.loads(config.get("agent", "level_conf"))
+                                    add_times = 0
+                                    for lc in level_conf:
+                                        if directly_count >= lc["value"] and (
+                                                add_times < lc["times"] or lc["times"] == -1):
+                                            add_times = lc["times"]
+                                        else:
+                                            break
+                                    if pagent.times < add_times:
+                                        data_agent.add_times(connection, pagent.user_id, add_times - pagent.total_times,
+                                                             add_times - pagent.total_times)
+                                    elif add_times == -1:
+                                        data_agent.add_times(connection, pagent.user_id, -1 - pagent.times,
+                                                             -1 - pagent.total_times)
+                                    add_gold = int(config.get("server", "share_add_gold"))
+                                    if 0 < add_gold:
+                                        data_account.update_gold(connection, add_gold, pagent.user_id)
+                                        data_gold.create_gold(connection, 2, 0, pagent.user_id, add_gold)
+                                    create_time = int(time.time())
+                                    # 推广送vip天数
+                                    share_add_vip_day = int(config.get("server", "share_add_vip_day"))
+                                    if 0 < share_add_vip_day:
+                                        last_end_time = data_vip.vip_end_time(connection, pagent.user_id)
+                                        if last_end_time > create_time:
+                                            start_time = last_end_time
+                                        else:
+                                            start_time = create_time
+                                        end_time = share_add_vip_day * 86400 + start_time
+                                        vip = Vip()
+                                        vip.account_id = pagent.user_id
+                                        vip.create_time = create_time
+                                        vip.start_time = start_time
+                                        vip.end_time = end_time
+                                        vip.order_no = ''
+                                        vip.operation_account = agent.user_id
+                                        data_vip.create_vip(connection, vip)
+                                    # 注册送vip天数
+                                    register_vip_day = int(config.get("server", "register_vip_day"))
+                                    if 0 < register_vip_day:
+                                        last_end_time = data_vip.vip_end_time(connection, account.id)
+                                        if last_end_time > create_time:
+                                            start_time = last_end_time
+                                        else:
+                                            start_time = create_time
+                                        end_time = register_vip_day * 86400 + start_time
+                                        vip = Vip()
+                                        vip.account_id = account.id
+                                        vip.create_time = create_time
+                                        vip.start_time = start_time
+                                        vip.end_time = end_time
+                                        vip.order_no = ''
+                                        vip.operation_account = account.id
+                                        data_vip.create_vip(connection, vip)
+
                         result = '{"state":0}'
             except:
                 logger.exception(traceback.format_exc())
@@ -186,7 +284,7 @@ def send_code():
                         message['Subject'] = Header(subject, 'utf-8')
 
                         server = smtplib.SMTP(config.get("mail", "mail_host"),
-                                                  int(config.get("mail", "mail_port")))  # 发件人邮箱中的SMTP服务器，端口是25
+                                              int(config.get("mail", "mail_port")))  # 发件人邮箱中的SMTP服务器，端口是25
                         server.ehlo()  # 向邮箱发送SMTP 'ehlo' 命令
                         server.starttls()
                         server.login(mail_sender, mail_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
@@ -243,8 +341,7 @@ def info():
                              '"times":%d, "total_times":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
                                  account_id, "" if account.head is None else account.head, account.nickname,
                                  account.sex, account.gold, agent.times, agent.total_times, agent.status, vip, level,
-                                 next,
-                                 account.code)
+                                 next, account.code)
             except:
                 logger.exception(traceback.format_exc())
             finally:

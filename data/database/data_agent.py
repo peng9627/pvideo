@@ -49,9 +49,9 @@ def add_agent(connection, agent):
     return result
 
 
-def add_times(connection, pid, add_times):
+def add_times(connection, pid, add_times, add_total_times):
     try:
-        sql = config.get("sql", "sql_add_times") % (add_times, add_times, pid)
+        sql = config.get("sql", "sql_add_times") % (add_times, add_total_times, pid)
         with connection.cursor() as cursor:
             cursor.execute(sql)
             connection.commit()

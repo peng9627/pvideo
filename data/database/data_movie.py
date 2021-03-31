@@ -73,12 +73,12 @@ def search(connection, content, page, pagesize=20):
     return movie_list
 
 
-def ranking(connection, movie_type, page, pagesize=20):
+def ranking(connection, create_time, movie_type, page, pagesize=20):
     movie_list = []
     try:
         with connection.cursor() as cursor:
             sql = config.get("sql", "sql_movie_ranking")
-            cursor.execute(sql, (movie_type, (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, (create_time, movie_type, (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()

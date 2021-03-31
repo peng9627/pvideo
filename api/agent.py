@@ -1,16 +1,14 @@
-import json
+import time
 import time
 import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
-from pycore.data.entity import config, globalvar as gl
+from pycore.data.entity import globalvar as gl
 from pycore.utils import http_utils, time_utils, aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_agent, data_account, data_gold, data_vip
-from mode.agent.agent import Agent
-from mode.vip import Vip
+from data.database import data_agent, data_account, data_gold
 from utils import project_utils
 
 logger = LoggerUtils('api.agent').logger
@@ -23,96 +21,6 @@ def first():
         result = '{"state":0, "data":{"ip":"%s"}}' % ip
     except:
         logger.exception(traceback.format_exc())
-    return result
-
-
-def bind():
-    result = '{"state":1}'
-    connection = None
-    data = request.form
-    try:
-        user_id = int(data['userid'])
-        code = str(data['code'])
-        ip = str(data['ip'])
-        redis = gl.get_v("redis")
-        connection = mysql_connection.get_conn()
-        agent = data_agent.agent_by_id(connection, user_id)
-        pid = None
-        if agent is None:
-            if code is not None and 1 < len(code):
-                parent = data_account.query_account_by_code(connection, code)
-                if parent is not None:
-                    pid = parent.id
-            if pid is None:
-                if redis.exists("ipinfo_" + ip):
-                    code = redis.get("ipinfo_" + ip)
-                    parent = data_account.query_account_by_code(connection, code)
-                    if parent is not None:
-                        pid = parent.id
-            if pid is None:
-                pid = 10000
-            pagent = data_agent.agent_by_id(connection, int(pid))
-            if pagent is not None:
-                agent = Agent()
-                agent.create_time = int(time.time())
-                agent.user_id = user_id
-                agent.parent_id = pagent.user_id
-                if len(pagent.parent_ids) < 1:
-                    agent.parent_ids = str(pagent.user_id)
-                else:
-                    agent.parent_ids = pagent.parent_ids + ',' + str(pagent.user_id)
-                agent.top_id = pagent.top_id
-                init_count = int(config.get("server", "init_times"))
-                agent.commission = init_count
-                agent.total_commission = init_count
-                agent.contact = pagent.contact
-                data_agent.add_agent(connection, agent)
-
-                directly_count = data_agent.agent_directly_count(connection, pagent.user_id)
-                level_conf = json.loads(config.get("agent", "level_conf"))
-                add_times = 0
-                for lc in level_conf:
-                    if directly_count >= lc["value"] and (add_times < lc["times"] or lc["times"] == -1):
-                        add_times = lc["times"]
-                    else:
-                        break
-                if pagent.times < add_times:
-                    data_agent.add_times(connection, pagent.user_id, add_times - pagent.times)
-                elif add_times == -1:
-                    data_agent.add_times(connection, pagent.user_id, -1 - pagent.times)
-                add_gold = int(config.get("server", "share_add_gold"))
-                if 0 < add_gold:
-                    data_account.update_gold(connection, add_gold, pagent.user_id)
-                    data_gold.create_gold(connection, 2, 0, pagent.user_id, add_gold)
-                share_add_vip_day = int(config.get("server", "share_add_vip_day"))
-                if 0 < share_add_vip_day:
-                    xj = data_agent.agent_directly_count(connection, pagent.user_id)
-                    if 2 == xj:
-                        share_add_vip_day = 5
-                    elif xj > 2:
-                        share_add_vip_day = 10
-                    create_time = int(time.time())
-                    last_end_time = data_vip.vip_end_time(connection, pagent.user_id)
-                    if last_end_time > create_time:
-                        start_time = last_end_time
-                    else:
-                        start_time = create_time
-                    end_time = share_add_vip_day * 86400 + start_time
-                    vip = Vip()
-                    vip.account_id = pagent.user_id
-                    vip.create_time = create_time
-                    vip.start_time = start_time
-                    vip.end_time = end_time
-                    vip.order_no = ''
-                    vip.operation_account = agent.user_id
-                    data_vip.create_vip(connection, vip)
-                result = '{"state":0}'
-
-    except:
-        logger.exception(traceback.format_exc())
-    finally:
-        if connection is not None:
-            connection.close()
     return result
 
 
@@ -134,7 +42,7 @@ def toip():
     return result
 
 
-def agent_contact():
+def my_agent_id():
     result = '{"state":-1}'
     key = project_utils.get_key(request.headers.environ)
     if key is not None:
@@ -145,8 +53,8 @@ def agent_contact():
             try:
                 connection = mysql_connection.get_conn()
                 agent_id = data_agent.agent_get_parent_id(connection, account_id)
-                contact = data_agent.agent_contact(connection, agent_id)
-                result = '{"state":0, "data":{"contact":"%s"}}' % contact
+                # contact = data_agent.agent_contact(connection, agent_id)
+                result = '{"state":0, "data":{"agent_id":"%s"}}' % agent_id
             except:
                 logger.exception(traceback.format_exc())
             finally:
@@ -158,27 +66,27 @@ def agent_contact():
     return result
 
 
-def my_contact():
-    result = '{"state":-1}'
-    key = project_utils.get_key(request.headers.environ)
-    if key is not None:
-        code, sessions = project_utils.get_auth(request.headers.environ)
-        if 0 == code:
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                contact = data_agent.agent_contact(connection, account_id)
-                result = '{"state":0, "data":{"contact":"%s"}}' % contact
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
-        else:
-            result = '{"state":%d}' % code
-        return aes_utils.aes_encode(result, key)
-    return result
+# def my_contact():
+#     result = '{"state":-1}'
+#     key = project_utils.get_key(request.headers.environ)
+#     if key is not None:
+#         code, sessions = project_utils.get_auth(request.headers.environ)
+#         if 0 == code:
+#             account_id = sessions["id"]
+#             connection = None
+#             try:
+#                 connection = mysql_connection.get_conn()
+#                 contact = data_agent.agent_contact(connection, account_id)
+#                 result = '{"state":0, "data":{"contact":"%s"}}' % contact
+#             except:
+#                 logger.exception(traceback.format_exc())
+#             finally:
+#                 if connection is not None:
+#                     connection.close()
+#         else:
+#             result = '{"state":%d}' % code
+#         return aes_utils.aes_encode(result, key)
+#     return result
 
 
 def users():

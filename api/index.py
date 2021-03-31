@@ -59,6 +59,7 @@ def init_key():
             code, sessions = project_utils.get_auth(request.headers.environ)
             if 0 == code:
                 account_id = sessions["id"]
+                result = '{"state":0,"key":"%s","uid":%d}' % (device_info['aes_key'], account_id)
                 t = time.time()
                 time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d')
@@ -75,7 +76,7 @@ def init_key():
                     data_sign.sign(connection, account_id, time_stamp, gold)
                     data_account.update_gold(connection, gold, account_id)
                     data_gold.create_gold(connection, 3, 0, account_id, gold)
-                    result = '{"state":0,"key":"%s","sign":%d}' % (device_info['aes_key'], gold)
+                    result = '{"state":0,"key":"%s","uid":%d,"sign":%d}' % (device_info['aes_key'], account_id, gold)
             else:
                 account_id = 0
             ip = http_utils.get_client_ip(request.headers.environ)

@@ -1,18 +1,15 @@
 # coding=utf-8
-import json
 import traceback
 
 from pycore.data.entity import config
-from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_gold
 from mode.account import Account
 
 logger = LoggerUtils("data.account").logger
 
 
-def create_account(connection, account, last_address, share_code, share_ip):
+def create_account(connection, account, last_address):
     try:
         sql = config.get("sql", "sql_create_account")
         with connection.cursor() as cursor:
@@ -20,17 +17,6 @@ def create_account(connection, account, last_address, share_code, share_ip):
                            (account.account_name, account.pwd, account.salt, account.nickname, account.create_time,
                             account.code, account.create_time, last_address))
             connection.commit()
-            account = query_account_by_account_name(connection, account.account_name)
-            if account is not None:
-                update_gold(connection, int(config.get("server", "register_gold")), account.id)
-                data_gold.create_gold(connection, 1, 0, account.id, int(config.get("server", "register_gold")))
-                try:
-                    s = HttpUtils(config.get("api", "api_host")).post(config.get("api", "bind"),
-                                                                      json.loads(config.get("api", "bind_param") % (
-                                                                          account.id, share_code, share_ip)))
-                    res = s
-                except:
-                    logger.exception(traceback.format_exc())
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())

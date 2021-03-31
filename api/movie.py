@@ -1,5 +1,6 @@
 import json
 import random
+import time
 import traceback
 
 import pymysql
@@ -7,10 +8,10 @@ import requests
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import config, globalvar as gl
-from pycore.utils import aes_utils
+from pycore.utils import aes_utils, time_utils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_movie, data_recommend_movie, data_vip, data_agent, data_video_history
+from data.database import data_movie, data_recommend_movie, data_vip, data_agent, data_video_history, data_play_details
 from utils import movie_get_rel_addr, project_utils
 
 logger = LoggerUtils('api.movie').logger
@@ -38,7 +39,7 @@ def query_movie():
                 if "region" in data:
                     region = data["region"]
                     if len(region) < 4:
-                        wheres.append("region LIKE '%s'" % region)
+                        wheres.append("region LIKE '%" + region + "%'")
                 if "year" in data:
                     year = data["year"]
                     if len(year) < 5:
@@ -47,7 +48,7 @@ def query_movie():
                     where = "WHERE " + " AND ".join(wheres)
                 page = int(data["page"])
                 connection = mysql_connection.get_conn()
-                videos = data_movie.query_movie_list(connection, where, "ORDER BY update_time DESC", page)
+                videos = data_movie.query_movie_list(connection, where, "ORDER BY year DESC, update_time DESC", page)
                 result = '{"state":0, "data":[%s]}' % ",".join(videos)
             except:
                 logger.exception(traceback.format_exc())
@@ -136,8 +137,12 @@ def ranking():
             try:
                 movie_type = int(data["type"])
                 page = int(data["page"])
+                days = int(data["days"])
+                t = time.time()
+                time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
+                time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d') - 1 - days * 86400
                 connection = mysql_connection.get_conn()
-                videos = data_movie.ranking(connection, movie_type, page)
+                videos = data_movie.ranking(connection, time_stamp, movie_type, page)
                 result = '{"state":0, "data":[%s]}' % ",".join(videos)
             except:
                 logger.exception(traceback.format_exc())
@@ -160,6 +165,10 @@ def query_info():
                 movie_id = data["movie_id"]
                 connection = mysql_connection.get_conn()
                 data_movie.movie_add_count(connection, movie_id)
+                t = time.time()
+                time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
+                time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d')
+                data_play_details.add_play_details(connection, movie_id, time_stamp)
                 movie = data_movie.info(connection, movie_id)
                 movie.play_count *= 30
                 movie.play_count += random.randint(1, 30)
@@ -210,6 +219,8 @@ def get_play_addr():
                             if surplus_time > 0:
                                 data_agent.use_times(connection, account_id, 1)
                                 check_time = 0
+                        else:
+                            check_time = 0
                     except:
                         logger.exception(traceback.format_exc())
                     finally:
