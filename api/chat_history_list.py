@@ -5,7 +5,7 @@ from pycore.data.database import mysql_connection
 from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
-from data.database import data_chat_history_list
+from data.database import data_chat_history_list, data_chat_history
 from utils import project_utils
 
 logger = LoggerUtils('api.chat_history_list').logger
@@ -25,8 +25,9 @@ def query_list():
                 connection = None
                 try:
                     connection = mysql_connection.get_conn()
-                    chat_history_list = data_chat_history_list.query_chat_history_list(connection, account_id, page)
-                    result = '{"state":0, "data":[%s]}' % ",".join(chat_history_list)
+                    chat_history_list = data_chat_history_list.query(connection, account_id, page)
+                    message_count = data_chat_history.unread_count(connection, account_id)
+                    result = '{"state":0, "data":[%s], "count":%d}' % (",".join(chat_history_list), message_count)
                 except:
                     logger.exception(traceback.format_exc())
                 finally:
@@ -52,7 +53,7 @@ def delete_list():
                 connection = None
                 try:
                     connection = mysql_connection.get_conn()
-                    data_chat_history_list.delete_chat_history_list(connection, account_id, to_id)
+                    data_chat_history_list.delete(connection, account_id, to_id)
                     result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())

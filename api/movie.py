@@ -17,7 +17,7 @@ from utils import movie_get_rel_addr, project_utils
 logger = LoggerUtils('api.movie').logger
 
 
-def query_movie():
+def query():
     result = '{"state":-1}'
     key = project_utils.get_key(request.headers.environ)
     if key is not None:
@@ -48,7 +48,7 @@ def query_movie():
                     where = "WHERE " + " AND ".join(wheres)
                 page = int(data["page"])
                 connection = mysql_connection.get_conn()
-                videos = data_movie.query_movie_list(connection, where, "ORDER BY year DESC, update_time DESC", page)
+                videos = data_movie.query(connection, where, "ORDER BY year DESC, update_time DESC", page)
                 result = '{"state":0, "data":[%s]}' % ",".join(videos)
             except:
                 logger.exception(traceback.format_exc())
@@ -72,7 +72,7 @@ def recommend():
                 ids = r.ids.split(",")
                 where = "WHERE id in (%s)" % ', '.join(ids)
                 # where = where % ids
-                videos = data_movie.query_movie_list(connection, where, "ORDER BY play_count DESC", 1)
+                videos = data_movie.query(connection, where, "ORDER BY play_count DESC", 1)
                 index_recommend = '{"desc": "%s", "data": [%s]}' % (r.desc, ",".join(videos))
                 index_recommends.append(index_recommend)
             result = '{"state":0, "data":[%s]}' % ",".join(index_recommends)
@@ -92,7 +92,7 @@ def more():
         connection = None
         try:
             connection = mysql_connection.get_conn()
-            videos = data_movie.query_movie_list(connection, '', "ORDER BY play_count DESC", 1, 9)
+            videos = data_movie.query(connection, '', "ORDER BY play_count DESC", 1, 9)
             result = '{"state":0, "data":[%s]}' % ",".join(videos)
         except:
             logger.exception(traceback.format_exc())
@@ -164,11 +164,11 @@ def query_info():
             try:
                 movie_id = data["movie_id"]
                 connection = mysql_connection.get_conn()
-                data_movie.movie_add_count(connection, movie_id)
+                data_movie.add_count(connection, movie_id)
                 t = time.time()
                 time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d')
-                data_play_details.add_play_details(connection, movie_id, time_stamp)
+                data_play_details.create(connection, movie_id, time_stamp)
                 movie = data_movie.info(connection, movie_id)
                 movie.play_count *= 30
                 movie.play_count += random.randint(1, 30)
@@ -177,7 +177,7 @@ def query_info():
                     content = ''
                     if 0 == code:
                         account_id = sessions["id"]
-                        content = data_video_history.continue_movie_history(connection, account_id, movie_id)
+                        content = data_video_history.content(connection, account_id, movie_id)
                     result = '{"state":0, "data":%s,"content":"%s"}' % (json.dumps(movie.__dict__), content)
             except:
                 logger.exception(traceback.format_exc())

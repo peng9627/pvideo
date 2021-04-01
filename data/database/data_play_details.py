@@ -7,10 +7,10 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.play_details").logger
 
 
-def add_play_details(connection, video_id, create_time):
+def create(connection, video_id, create_time):
     try:
         if not exist(connection, video_id, create_time):
-            sql = config.get("sql", "sql_add_play_details")
+            sql = config.get("sql", "sql_create_play_details")
             with connection.cursor() as cursor:
                 cursor.execute(sql, (video_id, create_time))
                 connection.commit()

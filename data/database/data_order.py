@@ -11,7 +11,7 @@ from mode.order import Order
 logger = LoggerUtils('data.order').logger
 
 
-def create_order(connection, order):
+def create(connection, order):
     try:
         sql = config.get("sql", "sql_create_order")
         with connection.cursor() as cursor:
@@ -24,7 +24,7 @@ def create_order(connection, order):
         logger.exception(traceback.format_exc())
 
 
-def pay_order(connection, order_no):
+def pay(connection, order_no):
     try:
         sql = config.get("sql", "sql_pay_order")
         with connection.cursor() as cursor:
@@ -35,7 +35,7 @@ def pay_order(connection, order_no):
         logger.exception(traceback.format_exc())
 
 
-def use_order(connection, order_no):
+def use(connection, order_no):
     try:
         sql = config.get("sql", "sql_pay_order")
         with connection.cursor() as cursor:
@@ -46,7 +46,7 @@ def use_order(connection, order_no):
         logger.exception(traceback.format_exc())
 
 
-def order_by_order_no(connection, order_no):
+def by_order_no(connection, order_no):
     order = None
     try:
         sql = config.get("sql", "sql_order_by_no")
@@ -62,7 +62,7 @@ def order_by_order_no(connection, order_no):
     return order
 
 
-def order_list(connection, user_id, page, page_size=20):
+def list(connection, user_id, page, page_size=20):
     orders = []
     try:
         sql = config.get("sql", "sql_order_list")

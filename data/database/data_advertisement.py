@@ -10,7 +10,7 @@ from mode.advertisement import Advertisement
 logger = LoggerUtils("data.advertisement").logger
 
 
-def query_advertisements(connection, where):
+def query(connection, where):
     advertisements = []
     try:
         sql = config.get("sql", "sql_advertisement")

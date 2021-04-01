@@ -17,7 +17,7 @@ from pycore.utils.stringutils import StringUtils
 
 from data.database import data_account, data_agent, data_vip, data_gold
 from mode.account import Account
-from mode.agent.agent import Agent
+from mode.agent import Agent
 from mode.vip import Vip
 from utils import project_utils
 
@@ -45,7 +45,7 @@ def login():
                 connection = mysql_connection.get_conn()
                 account_name = str(data['account'])
                 pwd = str(data['pwd'])
-                account = data_account.query_account_by_account_name(connection, account_name)
+                account = data_account.query_by_account_name(connection, account_name)
                 if account is None:
                     result = '{"state":1}'
                 elif StringUtils.md5(pwd + account.salt) != account.pwd:
@@ -100,14 +100,14 @@ def register():
                         while data_account.exist_code(connection, account.code):
                             account.code = StringUtils.randomStr(4).upper()
                         last_address = http_utils.get_client_ip(request.headers.environ)
-                        data_account.create_account(connection, account, last_address)
-                        account = data_account.query_account_by_account_name(connection, account.account_name)
+                        data_account.create(connection, account, last_address)
+                        account = data_account.query_by_account_name(connection, account.account_name)
                         if account is not None:
                             data_account.update_gold(connection, int(config.get("server", "register_gold")), account.id)
-                            data_gold.create_gold(connection, 1, 0, account.id,
+                            data_gold.create(connection, 1, 0, account.id,
                                                   int(config.get("server", "register_gold")))
 
-                            agent = data_agent.agent_by_id(connection, account.id)
+                            agent = data_agent.by_id(connection, account.id)
                             pid = None
                             if agent is None:
                                 share_code = ''
@@ -119,20 +119,20 @@ def register():
                                 redis = gl.get_v("redis")
                                 # 通过推广码找代理
                                 if share_code is not None and 1 < len(share_code):
-                                    parent = data_account.query_account_by_code(connection, share_code)
+                                    parent = data_account.query_by_code(connection, share_code)
                                     if parent is not None:
                                         pid = parent.id
                                 # 通过ip找代理
                                 if pid is None:
                                     if redis.exists("ipinfo_" + share_ip):
                                         share_code = redis.get("ipinfo_" + share_ip)
-                                        parent = data_account.query_account_by_code(connection, share_code)
+                                        parent = data_account.query_by_code(connection, share_code)
                                         if parent is not None:
                                             pid = parent.id
                                 # 没代理自动绑定平台
                                 if pid is None:
                                     pid = 10000
-                                pagent = data_agent.agent_by_id(connection, int(pid))
+                                pagent = data_agent.by_id(connection, int(pid))
                                 if pagent is not None:
                                     agent = Agent()
                                     agent.create_time = int(time.time())
@@ -147,8 +147,8 @@ def register():
                                     agent.commission = init_count
                                     agent.total_commission = init_count
                                     agent.contact = pagent.contact
-                                    data_agent.add_agent(connection, agent)
-                                    directly_count = data_agent.agent_directly_count(connection, pagent.user_id)
+                                    data_agent.create(connection, agent)
+                                    directly_count = data_agent.directly_count(connection, pagent.user_id)
                                     # vip等级
                                     level_conf = json.loads(config.get("agent", "level_conf"))
                                     add_times = 0
@@ -167,12 +167,12 @@ def register():
                                     add_gold = int(config.get("server", "share_add_gold"))
                                     if 0 < add_gold:
                                         data_account.update_gold(connection, add_gold, pagent.user_id)
-                                        data_gold.create_gold(connection, 2, 0, pagent.user_id, add_gold)
+                                        data_gold.create(connection, 2, 0, pagent.user_id, add_gold)
                                     create_time = int(time.time())
                                     # 推广送vip天数
                                     share_add_vip_day = int(config.get("server", "share_add_vip_day"))
                                     if 0 < share_add_vip_day:
-                                        last_end_time = data_vip.vip_end_time(connection, pagent.user_id)
+                                        last_end_time = data_vip.end_time(connection, pagent.user_id)
                                         if last_end_time > create_time:
                                             start_time = last_end_time
                                         else:
@@ -185,11 +185,11 @@ def register():
                                         vip.end_time = end_time
                                         vip.order_no = ''
                                         vip.operation_account = agent.user_id
-                                        data_vip.create_vip(connection, vip)
+                                        data_vip.create(connection, vip)
                                     # 注册送vip天数
                                     register_vip_day = int(config.get("server", "register_vip_day"))
                                     if 0 < register_vip_day:
-                                        last_end_time = data_vip.vip_end_time(connection, account.id)
+                                        last_end_time = data_vip.end_time(connection, account.id)
                                         if last_end_time > create_time:
                                             start_time = last_end_time
                                         else:
@@ -202,7 +202,7 @@ def register():
                                         vip.end_time = end_time
                                         vip.order_no = ''
                                         vip.operation_account = account.id
-                                        data_vip.create_vip(connection, vip)
+                                        data_vip.create(connection, vip)
 
                         result = '{"state":0}'
             except:
@@ -235,7 +235,7 @@ def change_pwd():
                     elif code != gl.get_v("redis").get(account_name + '_code'):
                         result = '{"state":2}'
                     else:
-                        account = data_account.query_account_by_account_name(connection, account_name)
+                        account = data_account.query_by_account_name(connection, account_name)
                         if account is None:
                             result = '{"state":3}'
                         else:
@@ -308,10 +308,10 @@ def info():
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                account = data_account.query_account_by_id(connection, account_id)
+                account = data_account.query_by_id(connection, account_id)
                 if account is not None:
-                    agent = data_agent.agent_by_id(connection, account.id)
-                    end_time = data_vip.vip_end_time(connection, account.id)
+                    agent = data_agent.by_id(connection, account.id)
+                    end_time = data_vip.end_time(connection, account.id)
                     if 0 == end_time:
                         vip = u"VIP会员"
                     elif end_time < time.time():
@@ -324,7 +324,7 @@ def info():
                             vip = u"SVIP会员有效期:%.0f小时" % math.ceil((end_time - this_time) / 3600.0)
                         else:
                             vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
-                    directly_count = data_agent.agent_directly_count(connection, account.id)
+                    directly_count = data_agent.directly_count(connection, account.id)
                     level_conf = json.loads(config.get("agent", "level_conf"))
                     add_times = 0
                     level = 1
@@ -370,19 +370,19 @@ def give_gold():
                     connection = None
                     try:
                         connection = mysql_connection.get_conn()
-                        parent_id = data_agent.agent_get_parent_id(connection, user_id)
+                        parent_id = data_agent.get_parent_id(connection, user_id)
                         if parent_id != int(account_id):
                             result = '{"state":3}'
                         else:
-                            account = data_account.query_account_by_id(connection, account_id)
+                            account = data_account.query_by_id(connection, account_id)
                             if account.gold < give_gold:
                                 result = '{"state":4}'
                             else:
                                 data_account.update_gold(connection, -give_gold, account_id)
-                                data_gold.create_gold(connection, 5, 0, account_id, -give_gold)
+                                data_gold.create(connection, 5, 0, account_id, -give_gold)
 
                                 data_account.update_gold(connection, give_gold, user_id)
-                                data_gold.create_gold(connection, 6, 0, user_id, give_gold)
+                                data_gold.create(connection, 6, 0, user_id, give_gold)
                                 result = '{"state":0}'
                     except:
                         logger.exception(traceback.format_exc())

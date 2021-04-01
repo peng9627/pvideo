@@ -9,7 +9,7 @@ from mode.account import Account
 logger = LoggerUtils("data.account").logger
 
 
-def create_account(connection, account, last_address):
+def create(connection, account, last_address):
     try:
         sql = config.get("sql", "sql_create_account")
         with connection.cursor() as cursor:
@@ -22,7 +22,7 @@ def create_account(connection, account, last_address):
         logger.exception(traceback.format_exc())
 
 
-def query_account_by_account_name(connection, account_name):
+def query_by_account_name(connection, account_name):
     account = None
     try:
         sql = config.get("sql", "sql_query_account_by_account_name")
@@ -51,7 +51,7 @@ def query_account_by_account_name(connection, account_name):
     return account
 
 
-def query_account_by_code(connection, code):
+def query_by_code(connection, code):
     account = None
     try:
         sql = config.get("sql", "sql_query_account_by_code")
@@ -80,7 +80,7 @@ def query_account_by_code(connection, code):
     return account
 
 
-def query_account_by_id(connection, id):
+def query_by_id(connection, id):
     account = None
     try:
         sql = config.get("sql", "sql_query_account_by_id")

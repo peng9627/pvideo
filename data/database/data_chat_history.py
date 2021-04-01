@@ -8,7 +8,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.chat_history").logger
 
 
-def create_chat_history(connection, chat_history):
+def create(connection, chat_history):
     try:
         sql = config.get("sql", "sql_create_chat_history")
         with connection.cursor() as cursor:
@@ -20,7 +20,7 @@ def create_chat_history(connection, chat_history):
         logger.exception(traceback.format_exc())
 
 
-def receive_chat_history(connection, receive_time, create_time, user_id, to_id):
+def receive(connection, receive_time, create_time, user_id, to_id):
     try:
         sql = config.get("sql", "sql_receive_chat_history")
         with connection.cursor() as cursor:
@@ -31,7 +31,7 @@ def receive_chat_history(connection, receive_time, create_time, user_id, to_id):
         logger.exception(traceback.format_exc())
 
 
-def clean_chat_history(connection, user_id, to_id):
+def clean(connection, user_id, to_id):
     try:
         sql = config.get("sql", "sql_clean_chat_history")
         with connection.cursor() as cursor:
@@ -42,7 +42,7 @@ def clean_chat_history(connection, user_id, to_id):
         logger.exception(traceback.format_exc())
 
 
-def query_chat_history(connection, user_id, to_id, create_time, page=1, pagesize=12):
+def query(connection, user_id, to_id, create_time, page=1, pagesize=12):
     chat_history_list = []
     try:
         with connection.cursor() as cursor:

@@ -8,7 +8,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.advertisement").logger
 
 
-def create_click(connection, ad_id, userId):
+def click(connection, ad_id, userId):
     try:
         sql = config.get("sql", "sql_advertisement_clicked_add") % (ad_id, userId, int(time.time()))
         with connection.cursor() as cursor:

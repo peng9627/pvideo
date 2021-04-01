@@ -31,15 +31,15 @@ def create():
                 connection = None
                 try:
                     connection = mysql_connection.get_conn()
-                    account = data_account.query_account_by_id(connection, account_id)
+                    account = data_account.query_by_id(connection, account_id)
                     if account is not None:
                         goods_id = data["goods_id"]
-                        goods = data_goods.goods_by_id(connection, goods_id)
+                        goods = data_goods.by_id(connection, goods_id)
                         if account.gold >= goods.amount:
                             data_account.update_gold(connection, -goods.amount, account.id)
-                            data_gold.create_gold(connection, 4, 0, account.id, -goods.amount)
+                            data_gold.create(connection, 4, 0, account.id, -goods.amount)
                             order_no = StringUtils.randomStr(32)
-                            while data_order.order_by_order_no(connection, order_no) is not None:
+                            while data_order.by_order_no(connection, order_no) is not None:
                                 order_no = StringUtils.randomStr(32)
                             order = Order()
                             order.order_no = order_no
@@ -49,14 +49,14 @@ def create():
                             order.goods_id = goods.id
                             order.pay_type = pay_type.OFFLINE
                             order.details = goods.name
-                            data_order.create_order(connection, order)
-                            data_order.pay_order(connection, order.order_no)
+                            data_order.create(connection, order)
+                            data_order.pay(connection, order.order_no)
                             result = '{"state":0}'
-                            if bool(config.get("server", "use_order")):
+                            if config.get("server", "use_order") == "True":
                                 # 直接使用卡密
                                 create_time = int(time.time())
-                                goods = data_goods.goods_by_id(connection, order.goods_id)
-                                last_end_time = data_vip.vip_end_time(connection, account_id)
+                                goods = data_goods.by_id(connection, order.goods_id)
+                                last_end_time = data_vip.end_time(connection, account_id)
                                 if last_end_time > create_time:
                                     start_time = last_end_time
                                 else:
@@ -69,8 +69,8 @@ def create():
                                 vip.end_time = end_time
                                 vip.order_no = order_no
                                 vip.operation_account = account_id
-                                data_vip.create_vip(connection, vip)
-                                data_order.use_order(connection, order_no)
+                                data_vip.create(connection, vip)
+                                data_order.use(connection, order_no)
                         else:
                             result = '{"state":3}'
                 except:
@@ -98,7 +98,7 @@ def list():
                 page = int(data["page"])
                 try:
                     connection = mysql_connection.get_conn()
-                    orders = data_order.order_list(connection, account_id, page)
+                    orders = data_order.list(connection, account_id, page)
                     result = '{"state":0, "data":[%s]}' % ",".join(orders)
                 except:
                     logger.exception(traceback.format_exc())

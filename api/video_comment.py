@@ -33,7 +33,7 @@ def comment():
                     video_comment.video_id = video_id
                     video_comment.create_time = int(time.time())
                     video_comment.content = content
-                    data_video_comment.create_video_comment(connection, video_comment)
+                    data_video_comment.create(connection, video_comment)
                     result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())
@@ -58,8 +58,8 @@ def query():
                 video_id = data["video_id"]
                 page = int(data["page"])
                 connection = mysql_connection.get_conn()
-                comments = data_video_comment.query_comment(connection, video_id, page)
-                comment_count = data_video_comment.video_comment_count(connection, video_id)
+                comments = data_video_comment.query(connection, video_id, page)
+                comment_count = data_video_comment.count(connection, video_id)
                 result = '{"state":0,"data":[%s],"count":%d}' % (",".join(comments), comment_count)
             except:
                 logger.exception(traceback.format_exc())

@@ -10,7 +10,7 @@ from mode.movie import Movie
 logger = LoggerUtils("data.movie").logger
 
 
-def create_movie(connection, movie):
+def create(connection, movie):
     try:
         if not exist(connection, movie):
             sql = config.get("sql", "sql_add_movie")
@@ -25,7 +25,7 @@ def create_movie(connection, movie):
         logger.exception(traceback.format_exc())
 
 
-def query_movie_list(connection, where, order, page, pagesize=12):
+def query(connection, where, order, page, pagesize=12):
     movie_list = []
     try:
         with connection.cursor() as cursor:
@@ -100,7 +100,7 @@ def ranking(connection, create_time, movie_type, page, pagesize=20):
     return movie_list
 
 
-def movie_add_count(connection, id):
+def add_count(connection, id):
     try:
         sql = config.get("sql", "sql_movie_add_count")
         with connection.cursor() as cursor:

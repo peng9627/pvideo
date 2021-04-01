@@ -10,7 +10,7 @@ from mode.app_version import AppVersion
 logger = LoggerUtils("data.app_version").logger
 
 
-def query_app_version(connection, type, platform):
+def query(connection, type, platform):
     version_result = ''
     try:
         sql = config.get("sql", "sql_query_app_version")

@@ -7,6 +7,7 @@ CREATE TABLE `chat_history_list`
     `user_id`   INT(11)          DEFAULT 0,
     `to_id`     INT(11)          DEFAULT 0,
     `last_time` INT(10) UNSIGNED DEFAULT 0,
+    `unread` INT(10) UNSIGNED DEFAULT 0,
     `content`   VARCHAR(255)        NOT NULL COLLATE utf8mb4_unicode_ci
 ) ENGINE = InnoDB
   DEFAULT CHARSET = utf8mb4

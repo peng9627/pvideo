@@ -31,7 +31,7 @@ def exist(connection, user_id, create_time):
     return False
 
 
-def sign_by_time(connection, user_id, create_time):
+def by_time(connection, user_id, create_time):
     gold = 0
     try:
         sql = config.get("sql", "sql_sign_by_time")

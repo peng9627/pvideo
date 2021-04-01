@@ -10,7 +10,7 @@ from mode.video import Video
 logger = LoggerUtils("data.video").logger
 
 
-def create_video(connection, video):
+def create(connection, video):
     try:
         sql = config.get("sql", "sql_add_video")
         with connection.cursor() as cursor:
@@ -22,7 +22,7 @@ def create_video(connection, video):
         logger.exception(traceback.format_exc())
 
 
-def query_video_list(connection, type, page, pagesize=20):
+def list(connection, type, page, pagesize=20):
     video_list = []
     try:
         with connection.cursor() as cursor:
@@ -75,7 +75,7 @@ def recommend(connection):
     return video_list
 
 
-def query_video_search(connection, content, page, pagesize=20):
+def search(connection, content, page, pagesize=20):
     video_list = []
     try:
         sql = config.get("sql", "sql_video_search")
@@ -98,7 +98,7 @@ def query_video_search(connection, content, page, pagesize=20):
     return video_list
 
 
-def query_video_by_ids(connection, ids):
+def by_ids(connection, ids):
     video_list = []
     try:
         in_p = ', '.join((map(lambda x: '%s', ids)))
@@ -122,7 +122,7 @@ def query_video_by_ids(connection, ids):
     return video_list
 
 
-def video_add_count(connection, id):
+def add_count(connection, id):
     try:
         sql = config.get("sql", "sql_video_add_count")
         with connection.cursor() as cursor:

@@ -10,7 +10,7 @@ from mode.video_type import VideoType
 logger = LoggerUtils("data.video_type").logger
 
 
-def query_types(connection):
+def query(connection):
     video_types = []
     try:
         sql = config.get("sql", "sql_video_types")

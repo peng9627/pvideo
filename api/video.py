@@ -16,7 +16,7 @@ def query_type():
     connection = None
     try:
         connection = mysql_connection.get_conn()
-        types = data_video_type.query_types(connection)
+        types = data_video_type.query(connection)
         result = '{"state":0, "data":[%s]}' % ",".join(types)
     except:
         logger.exception(traceback.format_exc())
@@ -34,7 +34,7 @@ def query_video():
         type = int(data["type"])
         page = int(data["page"])
         connection = mysql_connection.get_conn()
-        videos = data_video.query_video_list(connection, type, page)
+        videos = data_video.list(connection, type, page)
         result = '{"state":0, "data":[%s]}' % ",".join(videos)
     except:
         logger.exception(traceback.format_exc())
@@ -67,7 +67,7 @@ def search():
         content = data["content"]
         page = int(data["page"])
         connection = mysql_connection.get_conn()
-        videos = data_video.query_video_search(connection, content, page)
+        videos = data_video.search(connection, content, page)
         result = '{"state":0, "data":[%s]}' % ",".join(videos)
     except:
         logger.exception(traceback.format_exc())
@@ -84,8 +84,8 @@ def query_details():
     try:
         video_id = data["video_id"]
         connection = mysql_connection.get_conn()
-        praises = data_video_praise.video_praise_count(connection, '%,' + str(video_id))
-        comments = data_video_comment.video_comment_count(connection, video_id)
+        praises = data_video_praise.count(connection, '%,' + str(video_id))
+        comments = data_video_comment.count(connection, video_id)
         praised = False
         code, sessions = project_utils.get_auth(request.headers.environ)
         if 0 == code:
@@ -109,7 +109,7 @@ def query_info():
         video_id = data["video_id"]
         connection = mysql_connection.get_conn()
         video_data = data_video.info(connection, video_id)
-        video_data["praises"] = data_video_praise.video_praise_count(connection, '%,' + str(video_id))
+        video_data["praises"] = data_video_praise.count(connection, '%,' + str(video_id))
         praised = False
         code, sessions = project_utils.get_auth(request.headers.environ)
         if 0 == code:

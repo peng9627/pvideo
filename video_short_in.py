@@ -39,7 +39,7 @@ if __name__ == '__main__':
                 video.horizontal = ""
                 video.vertical = ""
                 connection = mysql_connection.get_conn()
-                data_video.create_video(connection, video)
+                data_video.create(connection, video)
         except:
             print("error")
         finally:

@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.app_init").logger
 
 
-def app_init(connection, create_time, user_id, device, ip):
+def init(connection, create_time, user_id, device, ip):
     try:
         sql = config.get("sql", "sql_create_app_init")
         with connection.cursor() as cursor:

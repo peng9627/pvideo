@@ -37,7 +37,7 @@ def add():
                     video_history.video_type = 2
                     video_history.update_time = int(time.time())
                     video_history.content = content
-                    data_video_history.add_video_history(connection, video_history)
+                    data_video_history.create(connection, video_history)
                     result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())
@@ -65,7 +65,7 @@ def query():
                     connection = mysql_connection.get_conn()
                     page = int(data["page"])
                     connection = mysql_connection.get_conn()
-                    video_history = data_video_history.query_movie_history(connection, account_id, page)
+                    video_history = data_video_history.query(connection, account_id, page)
                     result = '{"state":0,"data":[%s]}' % (",".join(video_history))
                 except:
                     logger.exception(traceback.format_exc())

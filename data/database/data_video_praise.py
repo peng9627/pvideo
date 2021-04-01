@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.praise").logger
 
 
-def create_video_praise(connection, user_video):
+def create(connection, user_video):
     result = 0
     try:
         sql = config.get("sql", "sql_add_video_praise")
@@ -20,7 +20,7 @@ def create_video_praise(connection, user_video):
     return result
 
 
-def cancel_video_praise(connection, user_video):
+def cancel(connection, user_video):
     result = 0
     try:
         sql = config.get("sql", "sql_cancel_video_praise")
@@ -45,7 +45,7 @@ def exist(connection, user_video):
     return False
 
 
-def video_praise_count(connection, user_video):
+def count(connection, user_video):
     result = 0
     try:
         sql = config.get("sql", "sql_video_praise_count")

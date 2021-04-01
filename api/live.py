@@ -81,7 +81,7 @@ def lives():
             s1 = url.address.split("://")
             s2 = s1[1].index("/")
             js = HttpUtils(s1[1][0:s2]).get("/" + s1[1][s2 + 1:].replace("json.txt", address), None)
-            delete_rooms = data_delete_room.delete_room_list(connection)
+            delete_rooms = data_delete_room.delete(connection)
             live_datas = json.loads(js)["zhubo"]
             need_lives = []
             for live in live_datas:

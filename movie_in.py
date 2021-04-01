@@ -41,7 +41,7 @@ if __name__ == '__main__':
                 movie.total_part = 1
                 movie.details = v["details"]
                 movie.source = v["source"]
-                data_movie.create_movie(connection, movie)
+                data_movie.create(connection, movie)
             page += 1
     except:
         traceback.format_exc()

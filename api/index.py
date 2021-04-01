@@ -32,7 +32,7 @@ def version():
         connection = mysql_connection.get_conn()
         platform = data["platform"]
         version_type = data["type"]
-        app_version = data_app_version.query_app_version(connection, version_type, platform)
+        app_version = data_app_version.query(connection, version_type, platform)
         result = '{"state":0,"data":%s}' % app_version
     except:
         logger.exception(traceback.format_exc())
@@ -66,7 +66,7 @@ def init_key():
                 # 今日没有签到
                 if not data_sign.exist(connection, account_id, time_stamp):
                     # 昨天签到金币
-                    last_gold = data_sign.sign_by_time(connection, account_id, time_stamp - 86400)
+                    last_gold = data_sign.by_time(connection, account_id, time_stamp - 86400)
                     sign_golds = json.loads(config.get("server", "sign_golds"))
                     gold = 0
                     for g in sign_golds:
@@ -75,12 +75,12 @@ def init_key():
                             break
                     data_sign.sign(connection, account_id, time_stamp, gold)
                     data_account.update_gold(connection, gold, account_id)
-                    data_gold.create_gold(connection, 3, 0, account_id, gold)
+                    data_gold.create(connection, 3, 0, account_id, gold)
                     result = '{"state":0,"key":"%s","uid":%d,"sign":%d}' % (device_info['aes_key'], account_id, gold)
             else:
                 account_id = 0
             ip = http_utils.get_client_ip(request.headers.environ)
-            data_app_init.app_init(connection, int(time.time()), account_id, device, ip)
+            data_app_init.init(connection, int(time.time()), account_id, device, ip)
         else:
             result = '{"state":1}'
     except:
@@ -95,8 +95,8 @@ def index():
         connection = None
         try:
             connection = mysql_connection.get_conn()
-            advertisement1 = data_advertisement.query_advertisements(connection, 1)
-            advertisement2 = data_advertisement.query_advertisements(connection, 2)
+            advertisement1 = data_advertisement.query(connection, 1)
+            advertisement2 = data_advertisement.query(connection, 2)
             notice_s = ''
             notice = data_notice.query(connection, 1)
             if notice is not None:

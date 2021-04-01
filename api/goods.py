@@ -19,7 +19,7 @@ def list():
         connection = None
         try:
             connection = mysql_connection.get_conn()
-            goods = data_goods.goods_list(connection)
+            goods = data_goods.list(connection)
             result = '{"state":0, "data":[%s]}' % ",".join(goods)
         except:
             logger.exception(traceback.format_exc())

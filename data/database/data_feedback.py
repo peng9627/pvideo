@@ -8,7 +8,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.feedback").logger
 
 
-def add_feedback(connection, feedback):
+def create(connection, feedback):
     try:
         sql = config.get("sql", "sql_create_feedback")
         with connection.cursor() as cursor:

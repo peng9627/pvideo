@@ -28,7 +28,7 @@ if __name__ == '__main__':
                     video.address = v["address"]["480P"]
                     video.horizontal = v["allJCovers"]["horizontal_large"]
                     video.vertical = v["allJCovers"]["vertical_large"]
-                    data_video.create_video(conn, video)
+                    data_video.create(conn, video)
         except:
             print(traceback.format_exc())
         finally:

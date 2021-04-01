@@ -4,12 +4,12 @@ import traceback
 from pycore.data.entity import config
 from pycore.utils.logger_utils import LoggerUtils
 
-from mode.agent.agent import Agent
+from mode.agent import Agent
 
 logger = LoggerUtils("data.agent").logger
 
 
-def agent_by_id(connection, id):
+def by_id(connection, id):
     result = None
     try:
         sql = config.get("sql", "sql_agent_by_id")
@@ -33,10 +33,10 @@ def agent_by_id(connection, id):
     return result
 
 
-def add_agent(connection, agent):
+def create(connection, agent):
     result = False
     try:
-        sql = config.get("sql", "sql_add_agent")
+        sql = config.get("sql", "sql_create_agent")
         with connection.cursor() as cursor:
             cursor.execute(sql, (
                 agent.create_time, agent.user_id, agent.parent_id, agent.parent_ids, agent.top_id, agent.commission,
@@ -110,7 +110,7 @@ def agent_contact(connection, id):
     return result
 
 
-def agent_get_parent_id(connection, id):
+def get_parent_id(connection, id):
     result = None
     try:
         sql = config.get("sql", "sql_agent_get_parent_id")
@@ -146,7 +146,7 @@ def agent_set(connection, user_id, contact, old_contact):
         logger.exception(traceback.format_exc())
 
 
-def agent_user_count(connection, id):
+def user_count(connection, id):
     result = 0
     try:
         sql = config.get("sql", "sql_agent_user_count")
@@ -160,7 +160,7 @@ def agent_user_count(connection, id):
     return result
 
 
-def agent_directly_count(connection, id):
+def directly_count(connection, id):
     result = 0
     try:
         sql = config.get("sql", "sql_agent_directly_count")
@@ -174,7 +174,7 @@ def agent_directly_count(connection, id):
     return result
 
 
-def agent_today_new(connection, id, time_stamp):
+def today_new(connection, id, time_stamp):
     result = 0
     try:
         sql = config.get("sql", "sql_agent_today_new")
@@ -188,7 +188,7 @@ def agent_today_new(connection, id, time_stamp):
     return result
 
 
-def agent_today_active(connection, id, time_stamp):
+def today_active(connection, id, time_stamp):
     result = 0
     try:
         sql = config.get("sql", "sql_agent_today_active")

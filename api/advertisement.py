@@ -22,7 +22,7 @@ def query():
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                advertisement = data_advertisement.query_advertisements(connection, where)
+                advertisement = data_advertisement.query(connection, where)
                 result = '{"state":0, "data":[%s]}' % ",".join(advertisement)
             except:
                 logger.exception(traceback.format_exc())
@@ -49,7 +49,7 @@ def click():
                 code, sessions = project_utils.get_auth(request.headers.environ)
                 if 0 == code:
                     account_id = sessions["id"]
-                data_advertisement_click.create_click(connection, id, account_id)
+                data_advertisement_click.click(connection, id, account_id)
                 result = '{"state":0}'
             except:
                 logger.exception(traceback.format_exc())

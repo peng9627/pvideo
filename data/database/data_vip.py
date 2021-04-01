@@ -23,7 +23,7 @@ def is_vip(connection, account_id):
         logger.exception(traceback.format_exc())
 
 
-def vip_end_time(connection, account_id):
+def end_time(connection, account_id):
     result = 0
     try:
         sql = config.get("sql", "sql_vip_end_time") % account_id
@@ -37,7 +37,7 @@ def vip_end_time(connection, account_id):
     return result
 
 
-def create_vip(connection, vip):
+def create(connection, vip):
     try:
         sql = config.get("sql", "sql_create_vip")
         with connection.cursor() as cursor:

@@ -28,15 +28,15 @@ def use_code():
                 try:
                     connection = mysql_connection.get_conn()
                     order_no = data["code"]
-                    order = data_order.order_by_order_no(connection, order_no)
+                    order = data_order.by_order_no(connection, order_no)
                     if order is None:
                         result = '{"state":3}'
                     elif order.status == 2:
                         result = '{"state":4}'
                     else:
                         create_time = int(time.time())
-                        goods = data_goods.goods_by_id(connection, order.goods_id)
-                        last_end_time = data_vip.vip_end_time(connection, account_id)
+                        goods = data_goods.by_id(connection, order.goods_id)
+                        last_end_time = data_vip.end_time(connection, account_id)
                         if last_end_time > create_time:
                             start_time = last_end_time
                         else:
@@ -49,8 +49,8 @@ def use_code():
                         vip.end_time = end_time
                         vip.order_no = order_no
                         vip.operation_account = account_id
-                        data_vip.create_vip(connection, vip)
-                        data_order.use_order(connection, order_no)
+                        data_vip.create(connection, vip)
+                        data_order.use(connection, order_no)
                         result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())

@@ -52,7 +52,7 @@ def my_agent_id():
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                agent_id = data_agent.agent_get_parent_id(connection, account_id)
+                agent_id = data_agent.get_parent_id(connection, account_id)
                 # contact = data_agent.agent_contact(connection, agent_id)
                 result = '{"state":0, "data":{"agent_id":"%s"}}' % agent_id
             except:
@@ -181,17 +181,17 @@ def statistics():
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                user_count = data_agent.agent_user_count(connection, account_id)
-                directly_count = data_agent.agent_directly_count(connection, account_id)
+                user_count = data_agent.user_count(connection, account_id)
+                directly_count = data_agent.directly_count(connection, account_id)
                 t = time.time()
                 time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d') - 1
-                today_new = data_agent.agent_today_new(connection, account_id, time_stamp)
-                today_active = data_agent.agent_today_active(connection, account_id, time_stamp)
-                give_gold = -data_gold.gold_sum(connection, account_id, 5, 0)
-                today_give_gold = -data_gold.gold_sum(connection, account_id, 5, time_stamp)
-                get_gold = data_gold.gold_sum(connection, account_id, 6, 0)
-                today_get_gold = data_gold.gold_sum(connection, account_id, 6, time_stamp)
+                today_new = data_agent.today_new(connection, account_id, time_stamp)
+                today_active = data_agent.today_active(connection, account_id, time_stamp)
+                give_gold = -data_gold.sum(connection, account_id, 5, 0)
+                today_give_gold = -data_gold.sum(connection, account_id, 5, time_stamp)
+                get_gold = data_gold.sum(connection, account_id, 6, 0)
+                today_get_gold = data_gold.sum(connection, account_id, 6, time_stamp)
                 result = '{"state":0, "data": {"user_count":%d, "directly_count":%d, "today_new":%d, ' \
                          '"today_active":%d, "give_gold":%d, "today_give_gold":%d, "get_gold":%d, ' \
                          '"today_get_gold":%d}} ' % (

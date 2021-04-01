@@ -8,7 +8,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.video_history").logger
 
 
-def add_video_history(connection, video_history):
+def create(connection, video_history):
     try:
         sql = config.get("sql", "sql_exist_video_history")
         with connection.cursor() as cursor:
@@ -22,7 +22,7 @@ def add_video_history(connection, video_history):
                     video_history.video_type))
                 connection.commit()
             else:
-                sql = config.get("sql", "sql_add_video_history")
+                sql = config.get("sql", "sql_create_video_history")
                 cursor.execute(sql, (
                     video_history.user_id, video_history.device, video_history.video_id, video_history.video_type,
                     video_history.update_time, video_history.content))
@@ -32,7 +32,7 @@ def add_video_history(connection, video_history):
         logger.exception(traceback.format_exc())
 
 
-def query_movie_history(connection, user_id, page, pagesize=12):
+def query(connection, user_id, page, pagesize=12):
     movies = []
     try:
         sql = config.get("sql", "sql_query_movie_history")
@@ -49,10 +49,10 @@ def query_movie_history(connection, user_id, page, pagesize=12):
     return movies
 
 
-def continue_movie_history(connection, user_id, video_id):
+def content(connection, user_id, video_id):
     content = ''
     try:
-        sql = config.get("sql", "sql_continue_movie_history")
+        sql = config.get("sql", "sql_movie_history_content")
         with connection.cursor() as cursor:
             cursor.execute(sql, (user_id, video_id, 2))
             result = cursor.fetchone()

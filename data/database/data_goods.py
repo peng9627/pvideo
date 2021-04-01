@@ -10,7 +10,7 @@ from mode.goods import Goods
 logger = LoggerUtils('data.goods').logger
 
 
-def goods_by_id(connection, id):
+def by_id(connection, id):
     goods = None
     try:
         sql = config.get("sql", "sql_goods_by_id")
@@ -30,7 +30,7 @@ def goods_by_id(connection, id):
     return goods
 
 
-def goods_list(connection):
+def list(connection):
     goods_list = []
     try:
         sql = config.get("sql", "sql_goods_list")

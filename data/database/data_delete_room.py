@@ -7,7 +7,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils('data.delete_room').logger
 
 
-def delete_room_list(connection):
+def delete(connection):
     delete_rooms = []
     try:
         sql = config.get("sql", "sql_delete_room_list")

@@ -8,7 +8,7 @@ from pycore.utils.logger_utils import LoggerUtils
 logger = LoggerUtils("data.video_comment").logger
 
 
-def create_video_comment(connection, comment):
+def create(connection, comment):
     try:
         sql = config.get("sql", "sql_add_video_comment")
         with connection.cursor() as cursor:
@@ -19,7 +19,7 @@ def create_video_comment(connection, comment):
         logger.exception(traceback.format_exc())
 
 
-def query_comment(connection, video_id, page, pagesize=20):
+def query(connection, video_id, page, pagesize=20):
     video_comments = []
     try:
         sql = config.get("sql", "sql_query_comment")
@@ -35,7 +35,7 @@ def query_comment(connection, video_id, page, pagesize=20):
     return video_comments
 
 
-def video_comment_count(connection, video_id):
+def count(connection, video_id):
     result = 0
     try:
         sql = config.get("sql", "sql_video_comment_count")

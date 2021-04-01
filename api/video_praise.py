@@ -25,7 +25,7 @@ def praise():
                 connection = None
                 try:
                     connection = mysql_connection.get_conn()
-                    data_video_praise.create_video_praise(connection, str(account_id) + ',' + video_id)
+                    data_video_praise.create(connection, str(account_id) + ',' + video_id)
                     result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())
@@ -52,7 +52,7 @@ def cancel_praise():
                 connection = None
                 try:
                     connection = mysql_connection.get_conn()
-                    data_video_praise.cancel_video_praise(connection, str(account_id) + ',' + video_id)
+                    data_video_praise.cancel(connection, str(account_id) + ',' + video_id)
                     result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())

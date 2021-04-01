@@ -34,7 +34,7 @@ def add():
                 feedback.content = content
                 feedback.title = title
                 connection = mysql_connection.get_conn()
-                data_feedback.add_feedback(connection, feedback)
+                data_feedback.create(connection, feedback)
                 result = '{"state":0}'
             except:
                 logger.exception(traceback.format_exc())
