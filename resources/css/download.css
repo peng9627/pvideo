@@ -1,0 +1,115 @@
+* {
+    margin: 0;
+    padding: 0;
+    max-width: 600px;
+}
+
+img {
+    display: block;
+}
+
+.download-background {
+    width: 100%;
+}
+
+.top-back {
+    width: 100%;
+    position: fixed;
+    top: 0;
+    background: #00000099;
+    z-index: 2;
+}
+
+.top {
+    width: 94%;
+    padding: 2% 3%;
+    display: -webkit-box;
+    display: box;
+    -webkit-box-align: center;
+    box-align: center;
+    background: #00000099;
+}
+
+.download-icon {
+    width: 50px;
+    height: 50px;
+}
+
+.download-icon img {
+    width: 100%;
+}
+
+.download-top-text {
+    -webkit-box-flex: 1;
+    box-flex: 1;
+    margin-left: 2.5%;
+}
+
+.download-top-download {
+    width: 120px;
+    padding: 5px;
+    color: white;
+    font-size: 16px;
+    text-align: center;
+    background: #ff1e64;
+    border-radius: 30px;
+    font-weight: bold;
+}
+
+.download-content {
+    padding-top: 35%;
+    width: 100%;
+    background: url("/resources/images/background.jpg");
+}
+
+#qrcode img {
+    width: 60%;
+    padding: 0 20%;
+}
+
+#imgLogo {
+    display: none;
+}
+
+.download-domain {
+    padding: 5px;
+    color: white;
+    margin: 5% 10% 0 10%;
+    width: 80%;
+    font-size: 25px;
+    text-align: center;
+    background: #00000099;
+    border-radius: 30px;
+}
+
+.download-download {
+    padding: 5px;
+    color: white;
+    margin: 5% 10% 5% 10%;
+    width: 80%;
+    font-size: 25px;
+    text-align: center;
+    background: #ff1e64;
+    border-radius: 30px;
+    font-weight: bold;
+}
+
+.weixinTip img {
+    max-width: 100%;
+    height: auto;
+}
+
+.download-title {
+    color: transparent;
+    background: linear-gradient(to right, #FF6F6F, #FF1C61);
+    -webkit-background-clip: text;
+    font-weight: bold;
+}
+
+.download-title1 {
+    color: transparent;
+    background: linear-gradient(to right, #FF6F6F, #FF1C61);
+    -webkit-background-clip: text;
+    font-size: 13px;
+    font-weight: bold;
+}
