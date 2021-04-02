@@ -215,9 +215,9 @@ def getadds(addr, not_line):
                 driver = None
                 try:
                     # 核心代码结束
-                    driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
-                                              options=chrome_options)
-                    # driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
+                    # driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
+                    #                           options=chrome_options)
+                    driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
                     driver.set_page_load_timeout(8)
                     driver.set_script_timeout(8)
                     driver.get(p.address + addr)
@@ -300,9 +300,9 @@ def check_adds(addr):
                 caps = DesiredCapabilities.CHROME
                 caps['loggingPrefs'] = {'performance': 'ALL'}
                 # 核心代码结束
-                driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
-                                          options=chrome_options)
-                # driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
+                # driver = webdriver.Chrome('D:/software/phantomjs/bin/chromedriver.exe', desired_capabilities=caps,
+                #                           options=chrome_options)
+                driver = webdriver.Chrome(desired_capabilities=caps, options=chrome_options)
                 try:
                     driver.set_page_load_timeout(8)
                     driver.set_script_timeout(8)
