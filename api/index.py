@@ -44,6 +44,7 @@ def version():
 
 def init_key():
     result = '{"state":-1}'
+    headers = {}
     try:
         if "HTTP_DEVICE" in request.headers.environ:
             device = request.headers.environ['HTTP_DEVICE']
@@ -54,12 +55,14 @@ def init_key():
                 device_info = {'surplus_time': int(config.get("server", "default_times"))}
             device_info['aes_key'] = StringUtils.randomStr(16)
             redis.setexo("device_info_" + device, device_info, 18000)
-            result = '{"state":0,"key":"%s"}' % device_info['aes_key']
+            headers['auth_key'] = device_info['aes_key']
+            result = '{"state":0}'
             connection = mysql_connection.get_conn()
             code, sessions = project_utils.get_auth(request.headers.environ)
             if 0 == code:
                 account_id = sessions["id"]
-                result = '{"state":0,"key":"%s","uid":%d}' % (device_info['aes_key'], account_id)
+                headers['auth'] = project_utils.flush_auth(request.headers.environ, sessions)
+                result = '{"state":0,"uid":%d}' % account_id
                 t = time.time()
                 time_string = time_utils.stamp_to_string(t, '%Y/%m/%d')
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d')
@@ -76,7 +79,7 @@ def init_key():
                     data_sign.sign(connection, account_id, time_stamp, gold)
                     data_account.update_gold(connection, gold, account_id)
                     data_gold.create(connection, 3, 0, account_id, gold)
-                    result = '{"state":0,"key":"%s","uid":%d,"sign":%d}' % (device_info['aes_key'], account_id, gold)
+                    result = '{"state":0,"uid":%d,"sign":%d}' % (account_id, gold)
             else:
                 account_id = 0
             ip = http_utils.get_client_ip(request.headers.environ)
@@ -85,7 +88,7 @@ def init_key():
             result = '{"state":1}'
     except:
         logger.exception(traceback.format_exc())
-    return result
+    return result, 200, headers
 
 
 def index():

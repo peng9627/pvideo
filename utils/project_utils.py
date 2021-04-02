@@ -3,6 +3,7 @@ import json
 from pycore.data.entity import globalvar as gl
 
 from pycore.utils import aes_utils
+from pycore.utils.stringutils import StringUtils
 
 
 def get_auth(environ):
@@ -16,6 +17,18 @@ def get_auth(environ):
             return 0, sessions
     else:
         return 1, ''
+
+
+def flush_auth(environ, sessions):
+    if "HTTP_AUTH" in environ:
+        sessionid = environ['HTTP_AUTH']
+        redis = gl.get_v("redis")
+        redis.delobj(sessionid)
+        sessionid = 'session' + StringUtils.randomStr(32)
+        while redis.exists(sessionid):
+            sessionid = 'session' + StringUtils.randomStr(32)
+        redis.setexo(sessionid, sessions, 604800)
+        return sessionid
 
 
 def get_key(environ):

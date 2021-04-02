@@ -104,8 +104,7 @@ def register():
                         account = data_account.query_by_account_name(connection, account.account_name)
                         if account is not None:
                             data_account.update_gold(connection, int(config.get("server", "register_gold")), account.id)
-                            data_gold.create(connection, 1, 0, account.id,
-                                                  int(config.get("server", "register_gold")))
+                            data_gold.create(connection, 1, 0, account.id, int(config.get("server", "register_gold")))
 
                             agent = data_agent.by_id(connection, account.id)
                             pid = None

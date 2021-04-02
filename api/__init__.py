@@ -14,8 +14,13 @@ def cors(environ):
     environ.headers['Access-Control-Allow-Origin'] = '*'
     environ.headers['Access-Control-Allow-Methods'] = '*'
     environ.headers['Access-Control-Allow-Headers'] = '*'
+    headers = []
     if 'auth' in environ.headers:
-        environ.headers['Access-Control-Expose-Headers'] = '*'
+        headers.append('auth')
+    if 'auth_key' in environ.headers:
+        headers.append('auth_key')
+    if len(headers) > 0:
+        environ.headers['Access-Control-Expose-Headers'] = ','.join(headers)
     environ.headers['Server'] = 'dami_server'
     return environ
 
