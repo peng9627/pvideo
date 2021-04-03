@@ -241,9 +241,9 @@ def getadds(addr, not_line):
                 finally:
                     if driver is not None:
                         driver.quit()
-                    os.system('kill -s 9 `pgrep chrome`')
-                    os.system('taskkill /im chromedriver.exe /F')
-                    os.system('taskkill /im chrome.exe /F')
+                    # os.system('kill -s 9 `pgrep chrome`')
+                    # os.system('taskkill /im chromedriver.exe /F')
+                    # os.system('taskkill /im chrome.exe /F')
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 name = p.name
                 break
@@ -326,9 +326,9 @@ def check_adds(addr):
                     print(traceback.format_exc())
                 finally:
                     driver.quit()
-                    os.system('kill -s 9 `pgrep chrome`')
-                    os.system('taskkill /im chromedriver.exe /F')
-                    os.system('taskkill /im chrome.exe /F')
+                    # os.system('kill -s 9 `pgrep chrome`')
+                    # os.system('taskkill /im chromedriver.exe /F')
+                    # os.system('taskkill /im chrome.exe /F')
             if len(url) > 0 and (url.endswith(".m3u8") or url.endswith(".mp4") or '.m3u8?' in url or '.mp4?' in url):
                 data_vip_video_url.update_ping(connection, p.id, int(time.time() * 1000 - times))
             else:
