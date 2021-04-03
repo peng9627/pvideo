@@ -17,13 +17,13 @@ def getadd13(addr):
     vdjs = ''
     try:
         result = requests.get('https://www.administratorm.com/WANG/index.php?url=' + parse.quote(addr), headers=headers,
-                              timeout=10).text
+                              timeout=5).text
         vdjss = result.find('vkey=\'') + 6
         vdjse = result.find('\'', vdjss)
         vkey = result[vdjss:vdjse]
         datas = {'url': addr, 'wap': '0', 'ios': '0', 'vkey': vkey, 'type': ''}
         result = requests.post('https://www.administratorm.com/WANG/Api.php', headers=headers, data=datas,
-                               timeout=10).text
+                               timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -38,7 +38,7 @@ def getadd14(addr):
     try:
         datas = {'url': addr, 'referer': '', 'ref': '0', 'time': '1611645821', 'type': '',
                  'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
-        result = requests.post('https://www.administratorm.com/api.php', headers=headers, data=datas, timeout=10).text
+        result = requests.post('https://www.administratorm.com/api.php', headers=headers, data=datas, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -53,7 +53,7 @@ def getadd15(addr):
     try:
         datas = {'url': addr, 'referer': '', 'ref': '0', 'time': '1611645821', 'type': '',
                  'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
-        result = requests.post('http://m3u8.boquxinxi.com/jiexi/api.php', headers=headers, data=datas, timeout=10).text
+        result = requests.post('http://m3u8.boquxinxi.com/jiexi/api.php', headers=headers, data=datas, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -68,7 +68,7 @@ def getadd16(addr):
     try:
         datas = {'url': addr, 'referer': '', 'ref': '0', 'time': '1611645821', 'type': '',
                  'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
-        result = requests.post('https://man.ledboke.com/147/apikey.php', headers=headers, data=datas, timeout=10).text
+        result = requests.post('https://man.ledboke.com/147/apikey.php', headers=headers, data=datas, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -82,7 +82,7 @@ def getadd17(addr):
     vdjs = ''
     try:
         result = requests.get('https://vip.mpos.ren/rends/api.php?url=' + parse.quote(addr) + '&danmu=0',
-                              headers=headers, timeout=10).text
+                              headers=headers, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -95,7 +95,7 @@ def getadd17(addr):
 def getadd2(addr):
     vdjs = ''
     try:
-        result = requests.get('https://api.v6.chat/api.php?url=' + parse.quote(addr), headers=headers, timeout=10).text
+        result = requests.get('https://api.v6.chat/api.php?url=' + parse.quote(addr), headers=headers, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -108,7 +108,7 @@ def getadd2(addr):
 def getadd3(addr):
     vdjs = ''
     try:
-        result = requests.get('https://jx.ap2p.cn/jh/jiexi/?url=' + addr, headers=headers, timeout=10).text
+        result = requests.get('https://jx.ap2p.cn/jh/jiexi/?url=' + addr, headers=headers, timeout=5).text
         vdjss = result.find('"url": "') + 8
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse]
@@ -124,7 +124,7 @@ def getadd4(addr):
         datas = {'url': addr, 'referer': '', 'ref': 'false', 'time': '1611645821', 'type': '',
                  'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
         result = requests.post('https://ckplayer.gdkaman.com/jiexi/api.php', headers=headers, data=datas,
-                               timeout=10).text
+                               timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -139,7 +139,7 @@ def getadd5(addr):
     try:
         datas = {'url': addr, 'referer': '', 'ref': 'false', 'time': '1611645821', 'type': '',
                  'other': str(base64.b64encode(addr.encode("utf-8"))), 'ios': ''}
-        result = requests.post('http://5.nmgbq.com/2/api.php', headers=headers, data=datas, timeout=10).text
+        result = requests.post('http://5.nmgbq.com/2/api.php', headers=headers, data=datas, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
@@ -152,7 +152,7 @@ def getadd5(addr):
 def getadd10(addr):
     vdjs = ''
     try:
-        result = requests.get('https://jx.rdhk.net/api.php?url=' + parse.quote(addr), headers=headers, timeout=10).text
+        result = requests.get('https://jx.rdhk.net/api.php?url=' + parse.quote(addr), headers=headers, timeout=5).text
         vdjss = result.find('"url":"') + 7
         vdjse = result.find('"', vdjss)
         vdjs = result[vdjss:vdjse].replace("\\", '')
