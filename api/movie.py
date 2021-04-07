@@ -249,18 +249,18 @@ def get_play_addr():
             else:
                 check_time = 2
             if 0 == check_time:
-                url, name = movie_get_rel_addr.getadds(address, not_line)
+                url, url_id = movie_get_rel_addr.get_addr(address, not_line)
                 if len(url) == 0:
                     not_line.clear()
-                    url, name = movie_get_rel_addr.getadds(address, [])
+                    url, url_id = movie_get_rel_addr.get_addr(address, [])
                 if len(url) > 0:
                     if 0 == code:
-                        sessions['current_line'] = name
+                        sessions['current_line'] = url_id
                         sessions['not_line'] = not_line
                         sessions['current_address'] = address
                         redis.setexo(request.headers.environ['HTTP_AUTH'], sessions, 604800)
                     else:
-                        device_info['current_line'] = name
+                        device_info['current_line'] = url_id
                         device_info['not_line'] = not_line
                         device_info['current_address'] = address
                         redis.setobj("device_info_" + request.headers.environ['HTTP_DEVICE'], device_info)
@@ -276,7 +276,7 @@ def play():
     data = request.args
     code, sessions = project_utils.get_auth(request.headers.environ)
     if 0 == code:
-        url = movie_get_rel_addr.getadds(data['addr'], [])
+        url = movie_get_rel_addr.get_addr(data['addr'], [])
         if len(url) > 0:
             header = {
                 'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
