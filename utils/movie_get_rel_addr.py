@@ -3,6 +3,7 @@ import traceback
 
 import requests
 from pycore.data.database import mysql_connection
+from pycore.data.entity import config
 
 from data.database import data_vip_video_url, data_video_real_addr
 
@@ -27,7 +28,7 @@ def get_addr(addr, not_line):
         # 所有线路都没有缓存 调用解析 不要的线路优先去掉 除非没找到
         data = {'addr': addr, 'not_line': ','.join('%s' % url_id for url_id in not_line)}
         # data = {'addr': addr, 'not_line': not_line}
-        result = requests.post('http://127.0.0.1:8888/movie/get_play_addr', data, timeout=45).json()
+        result = requests.post(config.get("server", "vip_parse_url"), data, timeout=45).json()
         url = result['url']
         url_id = result['url_id']
         if len(url) > 0:
