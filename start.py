@@ -12,7 +12,7 @@ config.init("./conf/pyg.conf")
 gl.init()
 
 from api import api, message
-from app_thread import reset_count, video_url_ping
+from app_thread import reset_count
 
 app = Flask(__name__)
 redis = RedisUtils()
@@ -38,7 +38,6 @@ app.logger.setLevel(gunicorn_logger.level)
 app.register_blueprint(api)
 
 reset_count.reset_count()
-video_url_ping.video_url_ping()
 # 弹幕
 # threading.Thread(target=server.start, name='barrage_server').start()  # 线程对象.
 
@@ -46,7 +45,6 @@ socketio = SocketIO(app, cors_allowed_origins="*")
 socketio.on_event('message', message.on_message)
 socketio.on_event('connect', message.on_connect)
 socketio.on_event('disconnect', message.on_disconnect)
-
 
 socketio.run(app, host="0.0.0.0", port=5555)
 
