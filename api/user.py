@@ -12,6 +12,7 @@ from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import globalvar as gl, config
 from pycore.utils import http_utils, aes_utils
+from pycore.utils.http_utils import HttpUtils
 from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
@@ -80,8 +81,9 @@ def register():
                 account_name = str(data['account'])
                 pwd = str(data['pwd'])
                 # if re.match(r"^1[3456789]\d{9}$", account_name and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
-                if re.match(r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$",
-                            account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                if (re.match(r"^1[3456789]\d{9}$", account_name) or re.match(
+                        r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$",
+                        account_name)) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
                     code = str(data['code'])
                     if not gl.get_v("redis").exists(account_name + '_code'):
                         result = '{"state":1}'
@@ -226,8 +228,9 @@ def change_pwd():
                 account_name = str(data['account'])
                 pwd = str(data['pwd'])
                 # if re.match(r"^1[3456789]\d{9}$", account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
-                if re.match(r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$",
-                            account_name) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
+                if (re.match(r"^1[3456789]\d{9}$", account_name) or re.match(
+                        r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$",
+                        account_name)) and re.match(r"[0-9a-zA-Z_]{8,16}", pwd):
                     code = str(data['code'])
                     if not gl.get_v("redis").exists(account_name + '_code'):
                         result = '{"state":1}'
@@ -259,35 +262,38 @@ def send_code():
         if data is not None:
             account_name = str(data['account'])
             # if re.match(r"^1[3456789]\d{9}$", account_name):
-            if re.match(r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$", account_name):
+            if re.match(r"^1[3456789]\d{9}$", account_name) or re.match(
+                    r"^[A-Za-z0-9]+([_.][A-Za-z0-9]+)*@([A-Za-z0-9-]+.)+[A-Za-z]{2,6}$", account_name):
                 try:
                     if gl.get_v("redis").exists(account_name + '_code'):
                         result = '{"state":2}'
                     else:
                         code = StringUtils.randomNum(6)
-                        # enc = StringUtils.md5(
-                        #     config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
-                        # content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
-                        # msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
-                        #                                                                        "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
-                        #                                   None)
-                        mail_sender = config.get("mail", "mail_sender")  # 发件人邮箱账号
-                        mail_pass = config.get("mail", "mail_pass")  # 发件人邮箱密码
-                        receivers = account_name  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
+                        if re.match(r"^1[3456789]\d{9}$", account_name):
+                            enc = StringUtils.md5(
+                                config.get("sms", "sms_user") + StringUtils.md5(config.get("sms", "sms_key")))
+                            content = "【至尊娱乐】验证码：" + code + "，请在3分钟内正确输入。"
+                            msg = HttpUtils("sms-cly.cn").get("/smsSend.do?username=" + config.get("sms",
+                                                                                                   "sms_user") + "&password=" + enc + "&mobile=" + account_name + "&content=" + content,
+                                                              None)
+                        else:
+                            mail_sender = config.get("mail", "mail_sender")  # 发件人邮箱账号
+                            mail_pass = config.get("mail", "mail_pass")  # 发件人邮箱密码
+                            receivers = account_name  # 接收邮件，可设置为你的QQ邮箱或者其他邮箱
 
-                        # 三个参数：第一个为文本内容，第二个 plain 设置文本格式，第三个 utf-8 设置编码
-                        message = MIMEText('dm...' + code, 'plain', 'utf-8')
-                        message['From'] = Header("dm", 'utf-8')
+                            # 三个参数：第一个为文本内容，第二个 plain 设置文本格式，第三个 utf-8 设置编码
+                            message = MIMEText('【大米】验证码：' + code, 'plain', 'utf-8')
+                            message['From'] = Header("dm", 'utf-8')
 
-                        subject = 'dm code'
-                        message['Subject'] = Header(subject, 'utf-8')
+                            subject = 'dm code'
+                            message['Subject'] = Header(subject, 'utf-8')
 
-                        server = smtplib.SMTP(config.get("mail", "mail_host"),
-                                              int(config.get("mail", "mail_port")))  # 发件人邮箱中的SMTP服务器，端口是25
-                        server.ehlo()  # 向邮箱发送SMTP 'ehlo' 命令
-                        server.starttls()
-                        server.login(mail_sender, mail_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
-                        server.sendmail(mail_sender, [receivers], message.as_string())
+                            server = smtplib.SMTP(config.get("mail", "mail_host"),
+                                                  int(config.get("mail", "mail_port")))  # 发件人邮箱中的SMTP服务器，端口是25
+                            server.ehlo()  # 向邮箱发送SMTP 'ehlo' 命令
+                            server.starttls()
+                            server.login(mail_sender, mail_pass)  # 括号中对应的是发件人邮箱账号、邮箱密码
+                            server.sendmail(mail_sender, [receivers], message.as_string())
                         gl.get_v("redis").setex(account_name + "_code", code, 120)
                         logger.info(code)
                         result = '{"state":0}'
