@@ -51,33 +51,18 @@ def query_by_account_name(connection, account_name):
     return account
 
 
-def query_by_code(connection, code):
-    account = None
+def query_id_by_code(connection, code):
+    account_id = None
     try:
-        sql = config.get("sql", "sql_query_account_by_code")
+        sql = config.get("sql", "sql_query_account_id_by_code")
         with connection.cursor() as cursor:
             cursor.execute(sql, code)
             result = cursor.fetchone()
             if result is not None:
-                account = Account()
-                account.id = int(result["id"])
-                account.account_name = result["account_name"]
-                account.pwd = result["pwd"]
-                account.salt = result["salt"]
-                if result["head"] is not None:
-                    account.head = result["head"]
-                account.nickname = result["nickname"]
-                account.sex = result["sex"]
-                account.create_time = result["create_time"]
-                account.last_time = result["last_time"]
-                account.last_address = result["last_address"]
-                account.account_status = result["account_status"]
-                account.device = result["device"]
-                account.code = result["code"]
-                account.gold = result["gold"]
+                account_id = result["result"]
     except:
         logger.exception(traceback.format_exc())
-    return account
+    return account_id
 
 
 def query_by_id(connection, id):

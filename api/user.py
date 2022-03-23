@@ -120,16 +120,16 @@ def register():
                                 redis = gl.get_v("redis")
                                 # 通过推广码找代理
                                 if share_code is not None and 1 < len(share_code):
-                                    parent = data_account.query_by_code(connection, share_code)
+                                    parent = data_account.query_id_by_code(connection, share_code)
                                     if parent is not None:
-                                        pid = parent.id
+                                        pid = parent
                                 # 通过ip找代理
                                 if pid is None:
                                     if redis.exists("ipinfo_" + share_ip):
                                         share_code = redis.get("ipinfo_" + share_ip)
-                                        parent = data_account.query_by_code(connection, share_code)
+                                        parent = data_account.query_id_by_code(connection, share_code)
                                         if parent is not None:
-                                            pid = parent.id
+                                            pid = parent
                                 # 没代理自动绑定平台
                                 if pid is None:
                                     pid = 10000
