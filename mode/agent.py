@@ -3,7 +3,7 @@ class Agent(object):
         self.id = 0
         self.create_time = 0
         self.user_id = 0
-        self.parent_id = 0
+        self.parent_id = None
         self.parent_ids = ''
         self.top_id = 0
         self.times = 0

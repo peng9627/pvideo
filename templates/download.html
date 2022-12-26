@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>豆奶视频</title>
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, viewport-fit=cover,user-scalable=0">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
+    <meta property="og:url" content="/">
+    <meta property="og:image" content="/logo.jpg?1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#fa6400">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="">
+    <meta name="renderer" content="webkit">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="x5-page-mode" content="app">
+    <meta name="browsermode" content="application">
+    <meta name="screen-orientation" content="portrait">
+    <meta name="x5-orientation" content="portrait">
+    <meta name="imagemode" content="force">
+    <meta name="nightmode" content="disable">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Cache-Control" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="stylesheet" href="/resources/style.css">
+</head>
+
+<body>
+<div id="__nuxt">
+    <div id="__layout">
+        <div class="app">
+            <div class="container pcm root">
+                <div class="pc-video">
+                    <!--pc端背景视频-->
+                    <video id="pcVideo" muted="muted" autoplay="autoplay" data-autoplay="" loop="loop" playsinline="">
+                        <source src="/resources/bili10.js" type="video/mp4">
+                    </video>
+                </div>
+                <div class="header">
+                    <div class="logo"><img src="/resources/logo.png" alt="">
+                    </div>
+                </div>
+                <div class="main">
+                    <div class="left mobile">
+                        <img src="/resources/banner1.png" alt="">
+                    </div>
+                    <div class="right desc-warp">
+                        <div class="desc-top">
+                            <div class="desc-top-tit"><img width="100%" height="80%" src="/resources/av.bb44693.png"
+                                                           alt="" class="pcimg">
+                                <img src="/resources/av.bb44693.png" alt="" class="mobileimg"></div>
+                        </div>
+                        <div class="desc-warp-mid">
+                            <div class="qr-code" id="qr"></div>
+                            <div class="desc-warp-mid-img"><img src="/resources/desc-right.43e5b7d.png" alt=""></div>
+                        </div>
+                        <div class="desc-warp-open" onclick="openH5()"><span>直接访问</span></div>
+                        <div class="desc-warp-footer">
+                            <div class="btn-android">
+                                <div>
+                                    <p onclick="openAppDownloadSign(1)">安卓下载</p>
+                                </div>
+                                {#                                <div>#}
+                                {#                                    <p onclick="openAppIOSDownloadSign(1)">苹果下载</p>#}
+                                {#                                </div>#}
+                            </div>
+                            <div class="btn-ios">
+                                {#                                <div>#}
+                                {#                                    <p onclick="openAppIOSDownloadSign(1)">苹果下载</p>#}
+                                {#                                </div>#}
+                            </div>
+                            <div class="btn-h5">
+                                <div>
+                                    <p onclick="openH5()">直接访问</p>
+                                </div>
+                            </div>
+                            <div class="desc-warp-footer-img pc-footer-img"><img
+                                    src="/resources/desc-bottom.5c31265.png" alt=""></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pc-mark">
+                    <div class="pc-mark-c pc-mark-c-1"></div>
+                </div>
+                <div class="pcimg pc-hezuo flex">
+                    <div class="tit"><img src="/resources/501b497.png">
+                    </div>
+                    <div><img src="/resources/1.jpg" alt=""></div>
+                    <div><img src="/resources/2.jpg" alt=""></div>
+                    <div><img src="/resources/3.jpg" alt=""></div>
+                    <div><img src="/resources/4.jpg" alt=""></div>
+                    <div><img src="/resources/5.jpg" alt=""></div>
+                    <div><img src="/resources/6.jpg" alt=""></div>
+                    <div><img src="/resources/7.jpg" alt=""></div>
+                    <div><img src="/resources/8.jpg" alt=""></div>
+                </div>
+                <!--安卓-->
+                <div class="mobile-mark" id="androidInstallBox">
+
+                    <div class="mobile-hezuo">
+                        <div class="installPopupBox">
+                            <ul class="installSignList">
+                                <li>
+                                    <div class="installSignStyle ">
+                                        <div class="title">安卓安装教程</div>
+                                        <div class="desc">1.下载前请先至“设定”→“安全性”→开启“未知来源”<br>2.点击“下载按钮”并同意安装即可<br>3.华为鸿蒙系统请先至“设定”→“系统更新”→关闭“纯净模式”，华为纯净模式无法安装非商店应用，关闭即可安装APP。
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <!--ios-->
+                <div class="mobile-mark" id="iosInstallBox">
+
+                    <div class="mobile-hezuo">
+                        <div class="installPopupBox">
+                            <ul class="installSignList">
+                                <li>
+                                    <div class="installSignStyle iosInstallBox">
+                                        {#                                        <div class="title">苹果安装教程</div>#}
+                                        {#                                        <div class="icon">#}
+                                        {#                                        </div>#}
+                                        {#                                        <div class="desc">1.请用Safari下载并点击允许 <br>2.点击允许后会弹窗，点击“允许” <br>3.自动跳转到“VPN与设备界面” <br>4.点击下载的描述文件进去后点击安装<br>5.安装后返回桌面就能看到轻量版。#}
+                                        {#                                        </div>#}
+                                        <div class="desc">
+                                            因苹果政策问题，请暂时使用网页版本进行体验。我们将尽快为您提供苹果版的APP
+                                        </div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--下载前提示弹窗(安卓)-->
+<div class="beforeDownloadPopupBg" id="beforeDownloadPopupBgApp">
+    <div class="beforeDownloadPopup">
+        <!--提示字段-->
+        <p class="sign">
+            若手机有安装杀毒软件被判定提示为恶意软件，主因app包含成人视频内容原因，我们不会放恶意程序破坏狼友们的手机，请大家放心使用！</p>
+        <!--按钮-->
+        <div class="buttonLine">
+            <div id="confirmDownload" onclick="downloadApp()">确认下载</div>
+        </div>
+    </div>
+    <!--关闭按钮-->
+    <p class="closeLine" onclick="openAppDownloadSign(0)">关闭</p>
+</div>
+<!--下载前提示弹窗(ios)-->
+<div class="beforeDownloadPopupBg" id="beforeDownloadPopupBgAppIOS">
+    <div class="beforeDownloadPopup">
+        <!--提示字段-->
+        <p class="sign">
+            若手机有安装杀毒软件被判定提示为恶意软件，主因app包含成人视频内容原因，我们不会放恶意程序破坏狼友们的手机，请大家放心使用！</p>
+        <!--按钮-->
+        <div class="buttonLine">
+            <div id="confirmDownloadIOS" onclick="downloadAppIos()">确认下载</div>
+        </div>
+    </div>
+    <!--关闭按钮-->
+    <p class="closeLine" onclick="openAppIOSDownloadSign(0)">关闭</p>
+</div>
+<script src="/resources/jquery.min.js"></script>
+<script src="/resources/qrcode.min.js"></script>
+<script>
+    var share_url = "{{ share_url }}";
+    var apkDownloadUrl = "{{ android_url }}";
+    var ipaDownloadUrl = "{{ ios_url }}";
+    var h5Url = "{{ h5_url }}"
+
+    /*打开ios提示弹窗*/
+    function openAppIOSDownloadSign(type) {
+        /*
+        * type:1是打开,0是关闭
+        * */
+        type === 1 ? $('#beforeDownloadPopupBgAppIOS').addClass('active') : $('#beforeDownloadPopupBgAppIOS').removeClass('active');
+    }
+
+    /*打开安卓提示弹窗*/
+    function openAppDownloadSign(type) {
+        /*
+        * type:1是打开,0是关闭
+        * */
+        type === 1 ? $('#beforeDownloadPopupBgApp').addClass('active') : $('#beforeDownloadPopupBgApp').removeClass('active');
+
+    }
+
+    /*打开安卓提示弹窗*/
+    function openH5() {
+        copy();
+        window.location.href = h5Url;
+    }
+
+    function openPopup() {
+        console.log('打开');
+        $("#installPopupBox").addClass('active');
+    }
+
+    function closePopup() {
+        $('#installPopupBox').removeClass('active');
+    }
+
+    var u = navigator.userAgent;
+    var isAndroid = u.indexOf("Android") > -1 || u.indexOf("Adr") > -1; //android终端
+    var copyContent = "tt_#";
+
+    var isiOS = !!u.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+    if (isAndroid) {
+        $(".btn-ios").hide();
+        $("#androidInstallBox").show();
+    }
+    if (isiOS) {
+        $(".btn-android").hide();
+        $(".btn-ios").hide();
+        $("#iosInstallBox").show();
+    }
+    creatQr("qr", share_url, 152);
+
+    function downloadAppIos() {
+        copy();
+        window.location.href = ipaDownloadUrl;
+    }
+
+    function downloadApp() {
+        copy();
+        window.location.href = apkDownloadUrl;
+    }
+
+    function copy() {
+        // 数字没有 .length 不能执行selectText 需要转化成字符串
+        var input = document.createElement('input');
+        input.id = "copy-input";
+        input.readOnly = "readOnly";        // 防止ios聚焦触发键盘事件
+        input.style.position = "absolute";
+        input.style.left = "-1000px";
+        input.style.zIndex = "-1000";
+        document.body.appendChild(input)
+        input.value = "{{ code }}";
+        // ios必须先选中文字且不支持 input.select();
+        selectText(input, 0, input.value.length);
+        console.log(document.execCommand('copy'), 'execCommand');
+        if (document.execCommand('copy')) {
+            document.execCommand('copy');
+        }
+        input.blur();
+
+        // input自带的select()方法在苹果端无法进行选择，所以需要自己去写一个类似的方法
+        // 选择文本。createTextRange(setSelectionRange)是input方法
+        function selectText(textbox, startIndex, stopIndex) {
+            if (textbox.createTextRange) {//ie
+                const range = textbox.createTextRange();
+                range.collapse(true);
+                range.moveStart('character', startIndex);//起始光标
+                range.moveEnd('character', stopIndex - startIndex);//结束光标
+                range.select();//不兼容苹果
+            } else {//firefox/chrome
+                textbox.setSelectionRange(startIndex, stopIndex);
+                textbox.focus();
+            }
+        }
+
+        document.body.removeChild(input);
+        window.location.href = "{{url}}";//下载游戏
+    }
+
+    function creatQr(id, url, size) {
+        new QRCode(document.getElementById(id), {
+            text: url,
+            width: size,
+            height: size,
+            colorDark: "#000000",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.Q
+        });
+    }
+</script>
+</body>
+</html>

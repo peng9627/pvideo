@@ -50,7 +50,7 @@ def count(connection, user_video):
     try:
         sql = config.get("sql", "sql_video_praise_count")
         with connection.cursor() as cursor:
-            cursor.execute(sql, user_video)
+            cursor.execute(sql, "%" + user_video + "%")
             result = cursor.fetchone()
             result = result["result"]
     except:

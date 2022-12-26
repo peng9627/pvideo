@@ -37,12 +37,13 @@ def query(connection, user_id, page, pagesize=12):
     try:
         sql = config.get("sql", "sql_query_movie_history")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (user_id, 2, (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, (user_id, 1, (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 movies.append(json.dumps(
                     {"id": result["id"], "type": result["type"], "title": result["title"], "span": result["span"],
-                     "horizontal": result["horizontal"], "vertical": result["vertical"], "content": result["content"],
+                     "horizontal": config.get("server", "img_domain") + result["horizontal"],
+                     "vertical": config.get("server", "img_domain") + result["vertical"], "content": result["content"],
                      "update_time": result["update_time"]}))
     except:
         logger.exception(traceback.format_exc())

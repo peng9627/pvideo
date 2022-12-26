@@ -1,5 +1,6 @@
 # coding=utf-8
 import json
+import random
 import traceback
 
 from pycore.data.entity import config
@@ -38,8 +39,30 @@ def query(connection, where, order, page, pagesize=12):
                 v.type = result["type"]
                 v.title = result["title"]
                 v.span = result["span"]
-                v.horizontal = result["horizontal"]
-                v.vertical = result["vertical"]
+                v.update_time = result["update_time"]
+                v.play_count = result["play_count"]
+                v.play_count *= 31
+                v.play_count += 1
+                v.horizontal = config.get("server", "img_domain") + result["horizontal"]
+                v.vertical = config.get("server", "img_domain") + result["vertical"]
+                movie_list.append(json.dumps(v.__dict__))
+    except:
+        logger.exception(traceback.format_exc())
+    return movie_list
+
+def query_short(connection):
+    movie_list = []
+    try:
+        with connection.cursor() as cursor:
+            sql = config.get("sql", "sql_movie_short") % (0, 6)
+            cursor.execute(sql)
+            r = cursor.fetchall()
+            for result in r:
+                v = Movie()
+                v.id = result["id"]
+                v.title = result["title"]
+                movies = result["address"].decode().split(',')
+                v.address = config.get("server", "video_domain") + movies[0]
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -51,7 +74,7 @@ def search(connection, content, page, pagesize=20):
     try:
         with connection.cursor() as cursor:
             sql = config.get("sql", "sql_movie_search")
-            cursor.execute(sql, ('%' + content + '%', (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, ('%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()
@@ -59,14 +82,12 @@ def search(connection, content, page, pagesize=20):
                 v.type = result["type"]
                 v.title = result["title"]
                 v.span = result["span"]
-                v.horizontal = result["horizontal"]
-                v.vertical = result["vertical"]
-                v.actor = result["actor"]
-                v.child_type = result["child_type"]
-                v.director = result["director"]
-                v.region = result["region"]
-                v.year = result["year"]
-                v.details = result["details"].decode()
+                v.update_time = result["update_time"]
+                v.play_count = result["play_count"]
+                v.play_count *= 31
+                v.play_count += 1
+                v.horizontal = config.get("server", "img_domain") + result["horizontal"]
+                v.vertical = config.get("server", "img_domain") + result["vertical"]
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -134,8 +155,10 @@ def info(connection, movie_id):
                 movie.total_part = result["total_part"]
                 movie.source = result["source"]
                 movie.address = result["address"].decode()
-                movie.details = result["details"].decode()
+                # movie.details = result["details"].decode()
                 movie.play_count = result["play_count"]
+                movie.play_count *= 31
+                movie.play_count += 1
     except:
         logger.exception(traceback.format_exc())
     return movie

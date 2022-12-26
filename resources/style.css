@@ -1,0 +1,725 @@
+html {
+    font-family: "Source Sans Pro", -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, sans-serif;
+    word-spacing: 0.133vw;
+    -ms-text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-font-smoothing: antialiased;
+    box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.installCloseButtonLine {
+    display: flex;
+    justify-content: center;
+    /*background-color: rgb(39,39,39);*/
+}
+
+.installCloseButton {
+    color: #fff;
+    background-color: rgb(223, 69, 113);
+    box-sizing: border-box;
+    padding: 14px 18px;
+    border-radius: 4px;
+    font-size: 14px;
+    margin: 0 auto 0 auto;
+    display: inline-block;
+}
+
+.installTextLine {
+    color: #fafafa;
+    opacity: .85;
+    font-size: 16px;
+    text-align: center;
+    padding: 10px 0;
+}
+
+.installPopupBox {
+    margin: unset !important;
+    /*background-color: rgb(39,39,39);*/
+    /*height: 100%;*/
+    /*position: fixed;*/
+    /*left: 0;*/
+    /*bottom: -120%;*/
+    width: 100%;
+    /*z-index: 99999;*/
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    transition: all ease-in-out .3s;
+}
+
+@media screen and (min-width: 960px) {
+    /*.installPopupBox{
+        width: 680px;
+        left:50%;
+        margin-left: -340px;
+    }
+    .installTextLine{
+        display: none;
+    }*/
+}
+
+/*.installPopupBox.active{
+    bottom: 0;
+}*/
+
+.installSignList {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+/*.installSignList>li:first-child {
+    margin-bottom: 40px;
+}*/
+.installSignStyle {
+    width: 100%;
+    height: auto;
+    overflow-x: hidden;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: unset !important;
+}
+
+.installSignStyle > .title {
+    color: #fafafa;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.installSignStyle > .icon {
+    width: 100%;
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    margin: 14px 0;
+}
+
+.installSignStyle > .icon img {
+    /*width: 20%;*/
+    width: 64px;
+    display: block;
+}
+
+.installSignStyle > .desc {
+    white-space: pre-wrap;
+    color: #fafafa;
+    font-size: 16px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0 10px;
+}
+
+@media screen and (max-width: 960px) {
+
+    html,
+    body,
+    #__nuxt,
+    #__layout,
+    .app,
+    .root {
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        overflow-x: hidden;
+    }
+}
+
+@media screen and (min-width: 960px) {
+
+    html,
+    body,
+    #__nuxt,
+    #__layout,
+    .app,
+    .root {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+}
+
+.flex {
+    display: flex
+}
+
+.img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain
+}
+
+.md-video {
+    margin: 10vw 0
+}
+
+.md-video video {
+    width: 88.8vw;
+    height: 49.867vw;
+    object-fit: cover;
+    overflow: hidden;
+    z-index: 9999
+}
+
+@media screen and (min-width: 960px) {
+
+    .mobileimg,
+    .mobile-mark {
+        display: none
+    }
+
+    .container::-webkit-scrollbar {
+        display: none
+    }
+
+    .container.pcm {
+        width: 100vw;
+        height: 100%;
+        min-height: 650px;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        justify-content: center;
+        overflow: scroll
+    }
+
+    .container.pcm .pc-video {
+        min-height: 650px;
+        position: fixed;
+        width: 100vw;
+        overflow: hidden;
+        z-index: -999;
+        background: #000;
+        background-position: 50% 100%;
+        background-repeat: no-repeat;
+        background-size: 1450px 2666px
+    }
+
+    .container.pcm .pc-video video {
+        width: 100vw;
+        min-width: 280px;
+        height: 100vh;
+        min-height: 650px;
+        object-fit: cover;
+        overflow: hidden
+    }
+
+    .container.pcm .header {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        padding: 15px 104px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center
+    }
+
+    .container.pcm .header .logo {
+        width: 8.2vw
+    }
+
+    .container.pcm .header .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container.pcm .header .contact {
+        display: flex
+    }
+
+    .container.pcm .header .contact-item {
+        margin: 0 25px
+    }
+
+    .container.pcm .header .contact img {
+        width: 2vw;
+        object-fit: contain
+    }
+
+    .container.pcm .main {
+        display: flex;
+        justify-content: center;
+        padding: 0 0 0 110px
+    }
+
+    .container.pcm .main .mobile {
+        width: 17.81vw;
+        height: auto;
+        margin-right: 104px;
+        overflow: hidden
+    }
+
+    .container.pcm .main .mobile .swiper-c-container {
+        width: 100%;
+        height: auto
+    }
+
+    .container.pcm .main .mobile img {
+        width: 100%;
+        height: 36.04vw;
+        object-fit: cover
+    }
+
+    .container.pcm .main .desc-warp {
+        padding: 42px 0 0 60px
+    }
+
+    .container.pcm .main .desc-warp .desc-top {
+        display: flex;
+        flex-flow: column wrap;
+        align-items: center
+    }
+
+    .container.pcm .main .desc-warp .desc-top-tit {
+        width: 36.51vw
+    }
+
+    .container.pcm .main .desc-warp .desc-top-tit img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container.pcm .main .desc-warp .desc-top-sub {
+        width: 30.15vw
+    }
+
+    .container.pcm .main .desc-warp .desc-top-sub img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container.pcm .main .desc-warp .md-video,
+    .container.pcm .main .desc-warp .btn-android,
+    .container.pcm .main .desc-warp .btn-ios,
+    .container.pcm .main .desc-warp .btn-h5,
+    .container.pcm .main .desc-warp .bottom-img {
+        display: none
+    }
+
+    .container.pcm .main .desc-warp-mid {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding-top: 50px
+    }
+
+    .container.pcm .main .desc-warp-mid .qr-code {
+        background-color: #faf8f8
+    }
+
+    .container.pcm .main .desc-warp-mid .qr-code img {
+        width: 9vw;
+        height: 9vw;
+        object-fit: contain
+    }
+
+    .container.pcm .main .desc-warp-mid-img {
+        margin: 0 35px
+    }
+
+    .container.pcm .main .desc-warp-mid-img img {
+        width: 10.41vw;
+        height: 6.19vw;
+        object-fit: contain
+    }
+
+    .container.pcm .main .desc-warp-open {
+        text-align: center;
+        margin-top: 50px;
+    }
+
+    .container.pcm .main .desc-warp-open span {
+        background: #FF1C6190;
+        padding: 5px 50px;
+        border-radius: 30px;
+        font-size: 30px;
+        color: #fff;
+        font-weight: bold;
+    }
+
+    .container.pcm .main .desc-warp-footer {
+        display: flex;
+        justify-content: center;
+        padding-top: 6.94vh
+    }
+
+    .container.pcm .main .desc-warp-footer-img {
+        width: 25vw;
+        height: 2.91vw
+    }
+
+    .container.pcm .main .desc-warp-footer-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container.pcm .pc-mark,
+    .container.pcm .pc-hezuo {
+        overflow: hidden;
+        width: 100vw;
+        height: 145px;
+        position: absolute;
+        bottom: -10px;
+        z-index: 9999;
+        pointer-events: none
+    }
+
+    .container.pcm .pc-mark video,
+    .container.pcm .pc-hezuo video {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: 0 90%
+    }
+
+    .container.pcm .pc-mark-c,
+    .container.pcm .pc-hezuo-c {
+        width: 100vw;
+        height: 155px;
+        filter: brightness(0.95);
+        background-color: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(15px);
+        background-position: 0 50%;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-origin: content-box
+    }
+
+    .container.pcm .pc-hezuo {
+        align-items: center;
+        justify-content: center;
+        display: flex;
+    }
+
+    .container.pcm .pc-hezuo .tit img {
+        width: 138px;
+        height: 68px;
+        object-fit: contain
+    }
+
+    .container.pcm .pc-hezuo div {
+        margin: 0 24px
+    }
+
+    .container.pcm .pc-hezuo div img {
+        width: 68px;
+        height: 68px;
+        object-fit: contain
+    }
+}
+
+@media screen and (max-width: 960px) {
+
+    .pcimg,
+    .pc-mark {
+        display: none
+    }
+
+    .container {
+        width: 100vw;
+        height: 100vh;
+        background-image: url(/resources/mobile_bg.png);
+        background-repeat: no-repeat;
+        background-size: cover;
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap
+    }
+
+    .container .pc-video {
+        display: none
+    }
+
+    .container .header {
+        width: 100%;
+        padding: 10.933vw 38.133vw 6.133vw 38.133vw;
+        display: flex;
+        justify-content: center;
+        align-items: center
+    }
+
+    .container .header .logo {
+        height: 35vw;
+    }
+
+    .container .header .logo img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container .header .contact {
+        position: absolute;
+        top: 2vw;
+        right: 4vw;
+        display: flex
+    }
+
+    .container .header .contact-item {
+        margin: 0 3.333vw
+    }
+
+    .container .header .contact img {
+        width: 6vw;
+        height: 6vw;
+        object-fit: contain
+    }
+
+    .container .main {
+        display: flex;
+        justify-content: center;
+        padding: 0px 0 0 0
+    }
+
+    .container .main .mobile {
+        display: none
+    }
+
+    .container .main .desc-warp {
+        padding: 0 0 0 0
+    }
+
+    .container .main .desc-warp .desc-top {
+        display: flex;
+        flex-flow: column wrap;
+        align-items: center
+    }
+
+    .container .main .desc-warp .desc-top-tit {
+        width: 86.533vw
+    }
+
+    .container .main .desc-warp .desc-top-tit img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container .main .desc-warp .desc-top-sub {
+        width: 82.667vw
+    }
+
+    .container .main .desc-warp .desc-top-sub img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container .main .desc-warp-mid,
+    .container .main .desc-warp-open {
+        display: none
+    }
+
+    .container .main .desc-warp-footer {
+        display: flex;
+        flex-flow: column wrap;
+        justify-content: center;
+        align-items: center;
+        padding: 0.533vw 0 0 0;
+        margin-top: 50px;
+        font-size: 5vw;
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 5px;
+    }
+
+    .container .main .desc-warp-footer-img {
+        width: 57.6vw;
+        height: 6.667vw
+    }
+
+    .container .main .desc-warp-footer-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container .main .desc-warp-footer .btn-ios,
+    .container .main .desc-warp-footer .btn-android,
+    .container .main .desc-warp-footer .btn-h5 {
+        cursor: pointer;
+        width: 66.667vw;
+        height: 10.667vw;
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfQAAABQBAMAAAAdApr1AAAABGdBTUEAALGPC/xhBQAAAAFzUkdCAK7OHOkAAAAYUExURUdwTN9EcOBEcN9EceNCcd9EcN9EcN9FcZJL02IAAAAHdFJOUwC5OogZ2l84KW8ZAAABk0lEQVR42u2cy07DMBBFgxO6pqKSt17w2BZV0G0BQbcIkLyNAKlr47jz+7SlSLET8gE+uX9wFM/MjT0zRRGrulpMrWSnMF18rIpBPWvJVu5rAFzdStZ6M/+RT6xkrlBTyXfsvd9daQHIGSp5L/tGINqm5KVgNE/QNQfdxeT3AtIssq+WhB7alvZJUHpnRnoS7aXANOfV9E5tV4KTYSa5dqLTPHSHPe9/J/6EiH52QL8mon9TQ/0Y7BMRarCfMtFfqKEu0uzQl0x0T81yhzxXCVQraoIXqZle7tfPranoDbW27a3shoq+JaMvqeiejK6p6K6wVPRQCFbkrw5GB6c5MPpoaYjoYA8P/mldU9Eb8gVVSUWvyZfRVCfr2A9P0OrWsB+ZFRPdsBtKyG1E4OYxZLAfpwGAld2P7cHgpnDwKAB5AAQ89kMe9oLdV0RbK1CObhYPtYJsjU+3NXDQO/sqLinkr52tBRXkyPuezTwVori73p1EygLIzbiSZ1zE1NJjxgE/uH5rr4fPmwzPfTi/u0hJfwBxiQtZZ0KIRwAAAABJRU5ErkJggg==);
+        background-size: contain;
+        background-repeat: no-repeat;
+        margin: 2.533vw 0
+    }
+
+    /*.container .main .desc-warp-footer .btn > div {*/
+    /*    display: none;*/
+    /*}*/
+    .container .main .desc-warp-footer .btn-ios > div,
+    .container .main .desc-warp-footer .btn-android > div,
+    .container .main .desc-warp-footer .btn-h5 > div {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%
+    }
+
+    .container .main .desc-warp-footer .bottom-img {
+        position: absolute;
+        bottom: 3.333vw;
+        width: 90vw;
+        z-index: 0
+    }
+
+    .container .main .desc-warp-footer .bottom-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain
+    }
+
+    .container .mobile-line {
+        text-align: center;
+        margin: 4vw 0
+    }
+
+    .container .mobile-line img {
+        width: 80vw
+    }
+
+    .container .mobile-mark,
+    .container .mobile-hezuo {
+        width: 92vw;
+        /*height: 62.667vw;*/
+        position: relative;
+        bottom: 0px;
+        z-index: 9999;
+        pointer-events: none
+    }
+
+    .container .mobile-mark video,
+    .container .mobile-hezuo video {
+        display: none
+    }
+
+    .container .mobile-mark-c,
+    .container .mobile-hezuo-c {
+        width: 92vw;
+        height: 125.667vw;
+        filter: brightness(0.95);
+        background-color: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(2vw);
+        position: absolute;
+        top: 0
+    }
+
+    .container .mobile-mark {
+        left: 4vw;
+        margin-bottom: 2.667vw;
+        margin-top: 2.667vw;
+        display: none;
+    }
+
+    .container .mobile-hezuo {
+        filter: brightness(0.95);
+        background-color: rgba(255, 255, 255, 0.22);
+        backdrop-filter: blur(2vw);
+        width: 92vw;
+        /*height: 62.667vw;*/
+        /*align-items: center;*/
+        /*flex-flow: row wrap;*/
+        padding: 5.333vw;
+        z-index: 9999;
+        /*display: flex;*/
+    }
+
+    .container .mobile-hezuo .tit {
+        display: none
+    }
+
+    /*.container .mobile-hezuo div {
+        margin: 0 3.2vw
+    }
+
+    .container .mobile-hezuo div img {
+        width: 13.733vw;
+        height: 13.733vw;
+        object-fit: contain
+    }*/
+}
+
+#qr {
+    padding: 10px;
+}
+
+.beforeDownloadPopupBg {
+    background-color: rgba(0, 0, 0, 0.85);
+    position: absolute;
+    z-index: 99999;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.beforeDownloadPopupBg.active {
+    display: flex;
+}
+
+.beforeDownloadPopup {
+    width: 280px;
+    background-color: #222222;
+    border: 1px solid #6B6861;
+    height: 160px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    padding: 14px;
+}
+
+.beforeDownloadPopup > p {
+    color: #fafafa;
+    font-size: 14px;
+}
+
+.beforeDownloadPopup > .buttonLine {
+    margin-top: 14px;
+    display: flex;
+    justify-content: center;
+}
+
+.beforeDownloadPopup > .buttonLine > div {
+    box-sizing: border-box;
+    padding: 10px 40px;
+    color: #fafafa;
+    border: 1px solid #6B6861;
+    border-radius: 4px;
+    display: inline-block;
+    font-size: 14px;
+}
+
+.beforeDownloadPopupBg .closeLine {
+    color: #fafafa;
+    opacity: .85;
+    font-size: 14px;
+    text-align: center;
+    padding: 20px 0;
+}

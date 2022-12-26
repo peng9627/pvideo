@@ -1,0 +1,23 @@
+<!DOCTYPE HTML>
+<html lang="zh_CN">
+<head>
+    <meta charset="utf-8">
+    <title>下载</title>
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no">
+    <link rel="stylesheet" href="/resources/download.css" type="text/css"/>
+    <script src="/resources/jquery.min.js"></script>
+</head>
+
+<body>
+</body>
+
+<script type="text/javascript">
+    var winHeight = typeof window.innerHeight != 'undefined' ? window.innerHeight : document.documentElement.clientHeight;
+    var weixinTip = $('<div class="weixinTip"><p><img src="/resources/live_weixin.png" alt="微信打开"/></p></div>');
+    $("body").append(weixinTip);
+    $(".weixinTip").css({
+        "height": winHeight,
+    });
+</script>
+</html>

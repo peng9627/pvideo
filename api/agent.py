@@ -1,5 +1,4 @@
 import time
-import time
 import traceback
 
 from flask import request
@@ -54,7 +53,8 @@ def my_agent_id():
                 connection = mysql_connection.get_conn()
                 agent_id = data_agent.get_parent_id(connection, account_id)
                 # contact = data_agent.agent_contact(connection, agent_id)
-                result = '{"state":0, "data":{"agent_id":"%s"}}' % agent_id
+                if agent_id is not None:
+                    result = '{"state":0, "data":{"agent_id":"%s"}}' % agent_id
             except:
                 logger.exception(traceback.format_exc())
             finally:
@@ -66,27 +66,27 @@ def my_agent_id():
     return result
 
 
-# def my_contact():
-#     result = '{"state":-1}'
-#     key = project_utils.get_key(request.headers.environ)
-#     if key is not None:
-#         code, sessions = project_utils.get_auth(request.headers.environ)
-#         if 0 == code:
-#             account_id = sessions["id"]
-#             connection = None
-#             try:
-#                 connection = mysql_connection.get_conn()
-#                 contact = data_agent.agent_contact(connection, account_id)
-#                 result = '{"state":0, "data":{"contact":"%s"}}' % contact
-#             except:
-#                 logger.exception(traceback.format_exc())
-#             finally:
-#                 if connection is not None:
-#                     connection.close()
-#         else:
-#             result = '{"state":%d}' % code
-#         return aes_utils.aes_encode(result, key)
-#     return result
+def my_contact():
+    result = '{"state":-1}'
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        code, sessions = project_utils.get_auth(request.headers.environ)
+        if 0 == code:
+            account_id = sessions["id"]
+            connection = None
+            try:
+                connection = mysql_connection.get_conn()
+                contact = data_agent.agent_contact(connection, account_id)
+                result = '{"state":0, "data":{"contact":"%s"}}' % contact
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
+        else:
+            result = '{"state":%d}' % code
+        return aes_utils.aes_encode(result, key)
+    return result
 
 
 def users():

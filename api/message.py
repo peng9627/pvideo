@@ -45,10 +45,11 @@ def on_message(data):
                 data_chat_history.create(connection, chat_history)
                 data_chat_history_list.add(connection, uid, to_id, chat_history.create_time, content, False)
                 data_chat_history_list.add(connection, to_id, uid, chat_history.create_time, content, True)
-                send({'type': 1, 'data': content, 'from': uid, 'time': chat_history.create_time},
-                     room=gl.get_v("onlines")[to_id])
-                message_count = data_chat_history.unread_count(connection, to_id)
-                send({'type': 0, 'data': message_count}, room=gl.get_v("onlines")[to_id])
+                if to_id in gl.get_v("onlines"):
+                    send({'type': 1, 'data': content, 'from': uid, 'time': chat_history.create_time},
+                         room=gl.get_v("onlines")[to_id])
+                    message_count = data_chat_history.unread_count(connection, to_id)
+                    send({'type': 0, 'data': message_count}, room=gl.get_v("onlines")[to_id])
             except:
                 logger.exception(traceback.format_exc())
             finally:

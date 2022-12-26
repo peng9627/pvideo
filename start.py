@@ -47,7 +47,10 @@ socketio.on_event('message', message.on_message)
 socketio.on_event('connect', message.on_connect)
 socketio.on_event('disconnect', message.on_disconnect)
 
-socketio.run(app, port=5555)
+# socketio.run(app, port=5555)
+
+
+socketio.run(app, host='0.0.0.0', port=5555)
 
 
 class RequestFormatter(logging.Formatter):

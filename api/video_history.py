@@ -34,7 +34,7 @@ def add():
                 try:
                     connection = mysql_connection.get_conn()
                     video_history.video_id = video_id
-                    video_history.video_type = 2
+                    video_history.video_type = 1
                     video_history.update_time = int(time.time())
                     video_history.content = content
                     data_video_history.create(connection, video_history)

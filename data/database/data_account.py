@@ -1,4 +1,5 @@
 # coding=utf-8
+import random
 import traceback
 
 from pycore.data.entity import config
@@ -13,13 +14,29 @@ def create(connection, account, last_address):
     try:
         sql = config.get("sql", "sql_create_account")
         with connection.cursor() as cursor:
-            cursor.execute(sql,
-                           (account.account_name, account.pwd, account.salt, account.nickname, account.create_time,
-                            account.code, account.create_time, last_address))
+            userid = 0
+            while userid == 0:
+                uid = random.randint(200000, 999999)
+                if query_by_id(connection, uid) is None:
+                    userid = uid
+            cursor.execute(sql, (userid, account.account_name, account.pwd, account.salt, account.nickname,
+                                 account.create_time, account.code, account.create_time, last_address, account.device))
             connection.commit()
     except:
         connection.rollback()
         logger.exception(traceback.format_exc())
+
+
+def device_count(connection, device):
+    try:
+        sql = config.get("sql", "sql_device_account_count")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, device)
+            result = cursor.fetchone()
+            return int(result["result"])
+    except:
+        logger.exception(traceback.format_exc())
+    return False
 
 
 def query_by_account_name(connection, account_name):

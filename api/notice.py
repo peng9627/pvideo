@@ -27,7 +27,7 @@ def query():
                 if notice is not None:
                     result = '{"state":0, "data":%s}' % json.dumps(notice.__dict__)
                 else:
-                    result = '{"state":1}'
+                    result = '{"state":3}'
             except:
                 logger.exception(traceback.format_exc())
             finally:

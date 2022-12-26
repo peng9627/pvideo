@@ -10,7 +10,7 @@ from pycore.utils.logger_utils import LoggerUtils
 from pycore.utils.stringutils import StringUtils
 
 from data.database import data_advertisement, data_app_version, \
-    data_notice, data_app_init, data_sign, data_account, data_gold
+    data_notice, data_app_init, data_sign, data_account, data_gold, data_agent
 from utils import project_utils
 
 logger = LoggerUtils('api.index').logger
@@ -68,14 +68,19 @@ def init_key():
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d')
                 # 今日没有签到
                 if not data_sign.exist(connection, account_id, time_stamp):
-                    # 昨天签到金币
-                    last_gold = data_sign.by_time(connection, account_id, time_stamp - 86400)
-                    sign_golds = json.loads(config.get("server", "sign_golds"))
-                    gold = 0
-                    for g in sign_golds:
-                        gold = g
-                        if g > last_gold:
+                    directly_count = data_agent.directly_count(connection, account_id)
+                    level_conf = json.loads(config.get("agent", "level_conf"))
+                    add_times = 0
+                    level = 1
+                    for lc in level_conf:
+                        if directly_count >= lc["value"] and (add_times < lc["times"] or lc["times"] == -1):
+                            add_times = lc["times"]
+                            level = lc["level"]
+                        else:
                             break
+                    # 签到金币
+                    sign_golds = json.loads(config.get("server", "sign_golds"))
+                    gold = sign_golds[level-1]
                     data_sign.sign(connection, account_id, time_stamp, gold)
                     data_account.update_gold(connection, gold, account_id)
                     data_gold.create(connection, 3, 0, account_id, gold)
