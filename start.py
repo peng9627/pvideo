@@ -38,7 +38,7 @@ gl.set_v("onlines", {})
 app.secret_key = "l0pgtb2k4lfstpuau672q4f67c7cyrsj"
 app.register_blueprint(api)
 
-reset_count.reset_count()
+# reset_count.reset_count()
 # 弹幕
 # threading.Thread(target=server.start, name='barrage_server').start()  # 线程对象.
 
@@ -50,7 +50,7 @@ socketio.on_event('disconnect', message.on_disconnect)
 # socketio.run(app, port=5555)
 
 
-socketio.run(app, host='0.0.0.0', port=5555)
+socketio.run(app, host='0.0.0.0', port=5555, allow_unsafe_werkzeug=True)
 
 
 class RequestFormatter(logging.Formatter):

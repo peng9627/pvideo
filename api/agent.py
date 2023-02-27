@@ -52,32 +52,8 @@ def my_agent_id():
             try:
                 connection = mysql_connection.get_conn()
                 agent_id = data_agent.get_parent_id(connection, account_id)
-                # contact = data_agent.agent_contact(connection, agent_id)
                 if agent_id is not None:
                     result = '{"state":0, "data":{"agent_id":"%s"}}' % agent_id
-            except:
-                logger.exception(traceback.format_exc())
-            finally:
-                if connection is not None:
-                    connection.close()
-        else:
-            result = '{"state":%d}' % code
-        return aes_utils.aes_encode(result, key)
-    return result
-
-
-def my_contact():
-    result = '{"state":-1}'
-    key = project_utils.get_key(request.headers.environ)
-    if key is not None:
-        code, sessions = project_utils.get_auth(request.headers.environ)
-        if 0 == code:
-            account_id = sessions["id"]
-            connection = None
-            try:
-                connection = mysql_connection.get_conn()
-                contact = data_agent.agent_contact(connection, account_id)
-                result = '{"state":0, "data":{"contact":"%s"}}' % contact
             except:
                 logger.exception(traceback.format_exc())
             finally:
@@ -131,34 +107,6 @@ def join_agent():
                 try:
                     connection = mysql_connection.get_conn()
                     data_agent.join(connection, user_id, account_id)
-                    result = '{"state":0}'
-                except:
-                    logger.exception(traceback.format_exc())
-                finally:
-                    if connection is not None:
-                        connection.close()
-            else:
-                result = '{"state":%d}' % code
-        return aes_utils.aes_encode(result, key)
-    return result
-
-
-def agent_set():
-    result = '{"state":-1}'
-    key = project_utils.get_key(request.headers.environ)
-    if key is not None:
-        data = request.form["data"]
-        data = project_utils.get_data(key, data)
-        if data is not None:
-            code, sessions = project_utils.get_auth(request.headers.environ)
-            if 0 == code:
-                account_id = sessions["id"]
-                contact = data["contact"]
-                connection = None
-                try:
-                    connection = mysql_connection.get_conn()
-                    old_contact = data_agent.agent_contact(connection, account_id)
-                    data_agent.agent_set(connection, account_id, contact, old_contact)
                     result = '{"state":0}'
                 except:
                     logger.exception(traceback.format_exc())

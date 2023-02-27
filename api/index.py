@@ -70,21 +70,17 @@ def init_key():
                 if not data_sign.exist(connection, account_id, time_stamp):
                     directly_count = data_agent.directly_count(connection, account_id)
                     level_conf = json.loads(config.get("agent", "level_conf"))
-                    add_times = 0
-                    level = 1
+                    sign_gold = 0
                     for lc in level_conf:
-                        if directly_count >= lc["value"] and (add_times < lc["times"] or lc["times"] == -1):
-                            add_times = lc["times"]
-                            level = lc["level"]
+                        if directly_count >= lc["value"] and (sign_gold < lc["gold"]):
+                            sign_gold = lc["gold"]
                         else:
                             break
                     # 签到金币
-                    sign_golds = json.loads(config.get("server", "sign_golds"))
-                    gold = sign_golds[level-1]
-                    data_sign.sign(connection, account_id, time_stamp, gold)
-                    data_account.update_gold(connection, gold, account_id)
-                    data_gold.create(connection, 3, 0, account_id, gold)
-                    result = '{"state":0,"uid":%d,"sign":%d}' % (account_id, gold)
+                    data_sign.sign(connection, account_id, time_stamp, sign_gold)
+                    data_account.update_gold(connection, sign_gold, account_id)
+                    data_gold.create(connection, 3, 0, account_id, sign_gold)
+                    result = '{"state":0,"uid":%d,"sign":%d}' % (account_id, sign_gold)
             else:
                 account_id = 0
             ip = http_utils.get_client_ip(request.headers.environ)

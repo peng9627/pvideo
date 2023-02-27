@@ -13,7 +13,7 @@ CREATE TABLE `movie`
     `address`     LONGBLOB,
     `horizontal`  VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `vertical`    VARCHAR(255) COLLATE utf8mb4_unicode_ci,
-    `actor`       VARCHAR(255) COLLATE utf8mb4_unicode_ci,/*演员*/
+    `actor`       VARCHAR(1024) COLLATE utf8mb4_unicode_ci,/*演员*/
     `child_type`  VARCHAR(255) COLLATE utf8mb4_unicode_ci,/*子类*/
     `director`    VARCHAR(255) COLLATE utf8mb4_unicode_ci,/*导演*/
     `region`      VARCHAR(255) COLLATE utf8mb4_unicode_ci,/*地区*/
@@ -21,7 +21,6 @@ CREATE TABLE `movie`
     `total_part`  INT(10) UNSIGNED DEFAULT 0,/*总集*/
     `details`     BLOB,/*描述*/
     `source`      VARCHAR(255) COLLATE utf8mb4_unicode_ci/*来源*/
-)
-    ENGINE = InnoDB
+) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;

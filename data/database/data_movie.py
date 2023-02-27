@@ -1,6 +1,5 @@
 # coding=utf-8
 import json
-import random
 import traceback
 
 from pycore.data.entity import config
@@ -50,19 +49,19 @@ def query(connection, where, order, page, pagesize=12):
         logger.exception(traceback.format_exc())
     return movie_list
 
+
 def query_short(connection):
     movie_list = []
     try:
         with connection.cursor() as cursor:
-            sql = config.get("sql", "sql_movie_short") % (0, 6)
-            cursor.execute(sql)
+            sql = config.get("sql", "sql_movie_short")
+            cursor.execute(sql, ("%小视频%", 0, 6))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()
                 v.id = result["id"]
                 v.title = result["title"]
-                movies = result["address"].decode().split(',')
-                v.address = config.get("server", "video_domain") + movies[0]
+                v.address = config.get("server", "server_url") + "/play_movie/" + str(v.id)
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -74,7 +73,7 @@ def search(connection, content, page, pagesize=20):
     try:
         with connection.cursor() as cursor:
             sql = config.get("sql", "sql_movie_search")
-            cursor.execute(sql, ('%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, ('%' + content + '%', '%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()

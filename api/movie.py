@@ -1,19 +1,18 @@
 import json
+import os
 import time
 import traceback
 
 import pymysql
-import requests
 from flask import request
 from pycore.data.database import mysql_connection
-from pycore.data.entity import config, globalvar as gl
+from pycore.data.entity import config
 from pycore.utils import aes_utils, time_utils
 from pycore.utils.logger_utils import LoggerUtils
-from pycore.utils.stringutils import StringUtils
 
-from data.database import data_movie, data_recommend_movie, data_vip, data_agent, data_video_history, data_play_details, \
+from data.database import data_movie, data_recommend_movie, data_vip, data_video_history, data_play_details, \
     data_video_praise, data_video_comment
-from utils import movie_get_rel_addr, project_utils
+from utils import project_utils
 
 logger = LoggerUtils('api.movie').logger
 
@@ -100,16 +99,16 @@ def index():
         try:
             connection = mysql_connection.get_conn()
             index_recommends = []
-            videos = data_movie.query(connection, '', "ORDER BY create_time DESC", 1, 8)
+            videos = data_movie.query(connection, '', "ORDER BY update_time DESC", 1, 2)
             index_recommend = '{"desc": "%s", "data": [%s]}' % ('最新', ",".join(videos))
             index_recommends.append(index_recommend)
-            videos = data_movie.query(connection, '', "ORDER BY play_count DESC", 1, 8)
+            videos = data_movie.query(connection, '', "ORDER BY play_count DESC", 1, 4)
             index_recommend = '{"desc": "%s", "data": [%s]}' % ('最热', ",".join(videos))
             index_recommends.append(index_recommend)
-            recommends = ['主播', '麻豆', 'SWAG']
+            recommends = ['麻豆', 'SWAG', '偷拍', '黑丝', '黑料', '网红']
             for r in recommends:
-                where = "WHERE span LIKE '%" + r + "%' OR title LIKE '%" + r + "%'"
-                videos = data_movie.query(connection, where, "ORDER BY create_time DESC", 1, 8)
+                where = "WHERE span LIKE '%" + r + "%' OR title LIKE '%" + r + "%' OR child_type LIKE '%" + r + "%' "
+                videos = data_movie.query(connection, where, "ORDER BY update_time DESC", 1, 4)
                 index_recommend = '{"desc": "%s", "data": [%s]}' % (r, ",".join(videos))
                 index_recommends.append(index_recommend)
             result = '{"state":0, "data":[%s]}' % ",".join(index_recommends)
@@ -262,24 +261,18 @@ def query_info():
                 time_stamp = time_utils.string_to_stamp(time_string, '%Y/%m/%d')
                 data_play_details.create(connection, movie_id, time_stamp)
                 movie = data_movie.info(connection, movie_id)
-                movies = movie.address.split(',')
-                movie.address = config.get("server", "video_domain") + movies[0]
                 movie.is_vip = False
                 if movie is not None:
                     code, sessions = project_utils.get_auth(request.headers.environ)
                     content = ''
+                    movie.is_vip = False
+                    # movie.address= "http://playertest.longtailvideo.com/adaptive/bipbop/gear4/prog_index.m3u8?a=1&n=2"
+                    movie.address = config.get("server", "server_url") + "/play_movie/" + movie_id
                     if 0 == code:
                         account_id = sessions["id"]
                         content = data_video_history.content(connection, account_id, movie_id)
                         if data_vip.is_vip(connection, account_id):
-                            # movie.address = config.get("server", "video_domain") + movies[1]
                             movie.is_vip = True
-                            random_str = StringUtils.randomStr(32)
-                            redis = gl.get_v("redis")
-                            redis.setexo("play_random_" + random_str, "1", 15)
-                            # movie.address= "http://playertest.longtailvideo.com/adaptive/bipbop/gear4/prog_index.m3u8?a=1&n=2"
-                            movie.address = config.get("server",
-                                                       "server_url") + "/play_movie.m3u8?movie_id=" + movie_id + "&random_str=" + random_str
                     result = '{"state":0, "data":%s,"content":"%s"}' % (json.dumps(movie.__dict__), content)
             except:
                 logger.exception(traceback.format_exc())
@@ -290,154 +283,47 @@ def query_info():
     return result
 
 
-def get_play_addr():
+def play(movie_id):
     result = '{"state":-1}'
-    key = project_utils.get_key(request.headers.environ)
-    if key is not None:
-        data = request.form["data"]
-        data = project_utils.get_data(key, data)
-        address = None
-        if data is not None:
-            redis = gl.get_v("redis")
-            check_time = 1
-            not_line = []
-            device_info = {}
-            code, sessions = project_utils.get_auth(request.headers.environ)
-            if 0 == code:
-                account_id = sessions["id"]
-                if data['switch'] and 'current_line' in sessions:
-                    if 'not_line' in sessions:
-                        not_line = sessions['not_line']
-                    not_line.append(sessions['current_line'])
-                    address = sessions['current_address']
-                    check_time = 0
-                else:
-                    address = data['addr']
-                    connection = None
-                    try:
-                        connection = mysql_connection.get_conn()
-                        if not data_vip.is_vip(connection, account_id):
-                            surplus_time = data_agent.query_times(connection, account_id)
-                            if surplus_time > 0:
-                                data_agent.use_times(connection, account_id, 1)
-                                check_time = 0
-                        else:
-                            check_time = 0
-                    except:
-                        logger.exception(traceback.format_exc())
-                    finally:
-                        if connection is not None:
-                            connection.close()
-            elif 1 == code:
-                if "HTTP_DEVICE" in request.headers.environ:
-                    device = request.headers.environ['HTTP_DEVICE']
-                    if redis.exists("device_info_" + device):
-                        device_info = redis.getobj("device_info_" + device)
-                    else:
-                        device_info = {}
-                        device_info["surplus_time"] = int(config.get("server", "default_times"))
-                    if data['switch'] and 'current_line' in device_info:
-                        if 'not_line' in device_info:
-                            not_line = device_info['not_line']
-                        not_line.append(device_info['current_line'])
-                        address = device_info['current_address']
-                        check_time = 0
-                    elif device_info["surplus_time"] > 0:
-                        device_info["surplus_time"] -= 1
-                        check_time = 0
-                        address = data['addr']
-                else:
-                    check_time = 1
-            else:
-                check_time = 2
-            if 0 == check_time:
-                url, url_id = movie_get_rel_addr.get_addr(address, not_line)
-                if len(url) == 0:
-                    not_line.clear()
-                    url, url_id = movie_get_rel_addr.get_addr(address, [])
-                if len(url) > 0:
-                    if 0 == code:
-                        sessions['current_line'] = url_id
-                        sessions['not_line'] = not_line
-                        sessions['current_address'] = address
-                        redis.setexo(request.headers.environ['HTTP_AUTH'], sessions, 604800)
-                    else:
-                        device_info['current_line'] = url_id
-                        device_info['not_line'] = not_line
-                        device_info['current_address'] = address
-                        redis.setobj("device_info_" + request.headers.environ['HTTP_DEVICE'], device_info)
-                    result = '{"state":0,"data":"%s"}' % url
-            else:
-                result = '{"state":%d}' % check_time
-        return aes_utils.aes_encode(result, key)
-    return result
-
-
-def play():
-    result = '{"state":-1}'
-    data = request.args
-    movie_id = data['movie_id']
-    random_str = data['random_str']
-    redis = gl.get_v("redis")
-    if redis.exists("play_random_" + random_str):
-        # redis.delobj("play_random_" + random_str)
+    code, sessions = project_utils.get_auth(request.headers.environ)
+    is_vip = False
+    if 0 == code:
+        account_id = sessions["id"]
         connection = None
-        url = ''
         try:
             connection = mysql_connection.get_conn()
-            movie = data_movie.info(connection, movie_id)
-            movies = movie.address.split(',')
-            url = config.get("server", "video_domain") + movies[1]
+            if data_vip.is_vip(connection, account_id):
+                is_vip = True
         except:
             logger.exception(traceback.format_exc())
         finally:
             if connection is not None:
                 connection.close()
-        if len(url) > 0:
-            header = {
-                'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
-            }
-            response = requests.get(url, headers=header)
-            text = response.text
-            text = text.replace('#EXT-X-KEY:METHOD=AES-128,URI="',
-                                '#EXT-X-KEY:METHOD=AES-128,URI="' + config.get("server",
-                                                                               "server_url") + '/movie.key?url=' + config.get(
-                                    "server", "video_domain"))
-            text = text.replace("https://v9cdn.snmovie.com/",
-                                config.get("server", "server_url") + '/get_url?url=https://v9cdn.snmovie.com/')
-            return text, response.status_code, {"Accept-Ranges": 'bytes',
-                                                "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8"}
-    return result
-
-
-def get_url():
-    result = '{"state":-1}'
-    data = request.args
-    url = data['url']
-    if len(url) > 0:
-        header = {
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
-            'origin': 'https://taimadou.com',
-            'referer': 'https://taimadou.com/'
-        }
-        response = requests.get(url, headers=header)
-        return response.content, response.status_code, {"Accept-Ranges": 'bytes',
-                                                        "Content-Type": "application/octet-stream"}
-    return result
-
-
-def get_key():
-    result = '{"state":-1}'
-    data = request.args
-    url = data['url']
-    if len(url) > 0:
-        header = {
-            'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 11_0_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.67 Safari/537.36',
-            'origin': 'https://taimadou.com',
-            'referer': 'https://taimadou.com/'
-        }
-        response = requests.get(url, headers=header)
-        return response.content, response.status_code, {"Accept-Ranges": 'bytes',
-                                                        "Content-Type": "application/octet-stream",
-                                                        "Cache-Control": "max-age=604800"}
+    if is_vip:
+        infile = open(config.get("server", "media_path") + str(movie_id) + "_1.m3u8")
+        text = infile.read()
+        infile.close()
+    else:
+        if os.path.exists(config.get("server", "media_path") + str(movie_id) + "_0.m3u8"):
+            infile = open(config.get("server", "media_path") + str(movie_id) + "_0.m3u8")
+            text = infile.read()
+            infile.close()
+        else:
+            infile = open(config.get("server", "media_path") + str(movie_id) + "_1.m3u8")
+            text = infile.read()
+            infile.close()
+            parts = text.count("#EXTINF:")
+            if parts > 2:
+                start1 = text.find("#EXTINF:", 0)
+                start2 = text.find("#EXTINF:", start1 + 1)
+                start3 = text.find("#EXTINF:", start2 + 1)
+                text = text[0:start3]
+                text += "#EXT-X-ENDLIST\n"
+    if text is not None:
+        s = text.index("https://")
+        e = text.index("/", s + 10)
+        domain_o = text[s: e]
+        text = text.replace(domain_o, config.get("server", "video_domain"))
+        text = text.replace("/api/app/media/enkey", config.get("server", "server_url") + "/resources/movie/enkey")
+        return text, 200, {"Accept-Ranges": 'bytes', "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8"}
     return result

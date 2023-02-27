@@ -6,13 +6,10 @@ CREATE TABLE `agent`
     `id`          INT(11) PRIMARY KEY NOT NULL AUTO_INCREMENT UNIQUE,
     `create_time` INT(10) UNSIGNED DEFAULT 0,
     `user_id`     INT(10) NOT NULL UNIQUE,
-    `parent_id`   INT(10),
-    `parent_ids`  VARCHAR(255) COLLATE utf8mb4_unicode_ci,
+    `agent_id`    INT(10),
+    `agent_ids`   VARCHAR(255) COLLATE utf8mb4_unicode_ci,
     `top_id`      INT(10) NOT NULL,
-    `times`       INT(11) NOT NULL DEFAULT 0,
-    `total_times` INT(11) NOT NULL DEFAULT 0,
-    `status`      INT(1) NOT NULL DEFAULT 0,
-    `contact`     VARCHAR(255) COLLATE utf8mb4_unicode_ci
+    `status`      INT(1) NOT NULL DEFAULT 0
 ) ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
     COLLATE = utf8mb4_unicode_ci;

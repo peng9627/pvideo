@@ -123,11 +123,11 @@ def register():
                                     # 通过ip找代理
                                     if pid is None and "share_code" in data:
                                         share_code = str(data['share_code'])
-                                    # 通过推广码找代理
-                                    if share_code is not None and 1 < len(share_code):
-                                        parent = data_account.query_id_by_code(connection, share_code)
-                                        if parent is not None:
-                                            pid = parent
+                                        # 通过推广码找代理
+                                        if share_code is not None and 1 < len(share_code):
+                                            parent = data_account.query_id_by_code(connection, share_code)
+                                            if parent is not None:
+                                                pid = parent
                                     # 通过ip找代理
                                     if pid is None and "share_ip" in data:
                                         share_ip = str(data['share_ip'])
@@ -144,36 +144,16 @@ def register():
                                     agent = Agent()
                                     agent.create_time = int(time.time())
                                     agent.user_id = account.id
-                                    init_count = int(config.get("server", "init_times"))
-                                    agent.commission = init_count
-                                    agent.total_commission = init_count
                                     agent.top_id = account.id
                                     create_time = int(time.time())
                                     if pagent is not None:
-                                        agent.parent_id = pagent.user_id
-                                        if len(pagent.parent_ids) < 1:
-                                            agent.parent_ids = str(pagent.user_id)
+                                        agent.agent_id = pagent.user_id
+                                        if len(pagent.agent_ids) < 1:
+                                            agent.agent_ids = str(pagent.user_id)
                                         else:
-                                            agent.parent_ids = pagent.parent_ids + ',' + str(pagent.user_id)
+                                            agent.agent_ids = pagent.agent_ids + ',' + str(pagent.user_id)
                                         agent.top_id = pagent.top_id
-                                        agent.contact = pagent.contact
-                                        directly_count = data_agent.directly_count(connection, pagent.user_id)
-                                        # vip等级
-                                        level_conf = json.loads(config.get("agent", "level_conf"))
-                                        add_times = 0
-                                        for lc in level_conf:
-                                            if directly_count >= lc["value"] and (
-                                                    add_times < lc["times"] or lc["times"] == -1):
-                                                add_times = lc["times"]
-                                            else:
-                                                break
-                                        if pagent.times < add_times:
-                                            data_agent.add_times(connection, pagent.user_id,
-                                                                 add_times - pagent.total_times,
-                                                                 add_times - pagent.total_times)
-                                        elif add_times == -1:
-                                            data_agent.add_times(connection, pagent.user_id, -1 - pagent.times,
-                                                                 -1 - pagent.total_times)
+                                        # 推广送积分
                                         add_gold = int(config.get("server", "share_add_gold"))
                                         if 0 < add_gold:
                                             data_account.update_gold(connection, add_gold, pagent.user_id)
@@ -196,38 +176,23 @@ def register():
                                             vip.operation_account = account.id
                                             data_vip.create(connection, vip)
 
-                                            # # 注册送vip天数
-                                            # last_end_time = data_vip.end_time(connection, account.id)
-                                            # if last_end_time > create_time:
-                                            #     start_time = last_end_time
-                                            # else:
-                                            #     start_time = create_time
-                                            # end_time = share_add_vip_day * 86400 + start_time
-                                            # vip = Vip()
-                                            # vip.account_id = account.id
-                                            # vip.create_time = create_time
-                                            # vip.start_time = start_time
-                                            # vip.end_time = end_time
-                                            # vip.order_no = ''
-                                            # vip.operation_account = account.id
-                                            # data_vip.create(connection, vip)
-                                            # 注册送vip天数
-                                            register_vip_day = int(config.get("server", "register_vip_day"))
-                                            if 0 < register_vip_day:
-                                                last_end_time = data_vip.end_time(connection, account.id)
-                                                if last_end_time > create_time:
-                                                    start_time = last_end_time
-                                                else:
-                                                    start_time = create_time
-                                                end_time = register_vip_day * 86400 + start_time
-                                                vip = Vip()
-                                                vip.account_id = account.id
-                                                vip.create_time = create_time
-                                                vip.start_time = start_time
-                                                vip.end_time = end_time
-                                                vip.order_no = ''
-                                                vip.operation_account = account.id
-                                                data_vip.create(connection, vip)
+                                        # 注册送vip天数
+                                        register_vip_day = int(config.get("server", "register_vip_day"))
+                                        if 0 < register_vip_day:
+                                            last_end_time = data_vip.end_time(connection, account.id)
+                                            if last_end_time > create_time:
+                                                start_time = last_end_time
+                                            else:
+                                                start_time = create_time
+                                            end_time = register_vip_day * 86400 + start_time
+                                            vip = Vip()
+                                            vip.account_id = account.id
+                                            vip.create_time = create_time
+                                            vip.start_time = start_time
+                                            vip.end_time = end_time
+                                            vip.order_no = ''
+                                            vip.operation_account = account.id
+                                            data_vip.create(connection, vip)
                                     data_agent.create(connection, agent)
                             result = '{"state":0}'
             except:
@@ -350,21 +315,20 @@ def info():
                             vip = u"SVIP会员有效期:%.0f分钟" % math.ceil((end_time - this_time) / 60.0)
                     directly_count = data_agent.directly_count(connection, account.id)
                     level_conf = json.loads(config.get("agent", "level_conf"))
-                    add_times = 0
+                    sign_gold = 0
                     level = 1
                     next = 0
                     for lc in level_conf:
-                        if directly_count >= lc["value"] and (add_times < lc["times"] or lc["times"] == -1):
-                            add_times = lc["times"]
+                        if directly_count >= lc["value"] and sign_gold < lc["gold"]:
+                            sign_gold = lc["gold"]
                             level = lc["level"]
                             next = lc["value"]
                         else:
                             next = lc["value"] - next
                             break
-                    result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, ' \
-                             '"times":%d, "total_times":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
+                    result = '{"state":0, "data":{"id":%d, "head":"%s", "nickname":"%s", "sex":%d, "gold":%d, "status":%d, "vip":"%s", "level":%d, "next":%d, "code":"%s"}}' % (
                                  account_id, "" if account.head is None else account.head, account.nickname,
-                                 account.sex, account.gold, agent.times, agent.total_times, agent.status, vip, level,
+                                 account.sex, account.gold, agent.status, vip, level,
                                  next, account.code)
             except:
                 logger.exception(traceback.format_exc())

@@ -15,7 +15,6 @@ def cors(environ):
     environ.headers['Access-Control-Allow-Origin'] = '*'
     environ.headers['Access-Control-Allow-Methods'] = '*'
     environ.headers['Access-Control-Allow-Headers'] = '*'
-    print(request.url)
     headers = []
     if 'auth' in environ.headers:
         headers.append('auth')
@@ -60,16 +59,6 @@ def download():
                            h5_url=config.get("server", "h5_url"))
 
 
-@api.route('/play_movie.m3u8')
-def play_movie():
-    return movie.play()
-
-
-@api.route('/get_url')
-def get_url():
-    return movie.get_url()
-
-
-@api.route('/movie.key')
-def movie_key():
-    return movie.get_key()
+@api.route('/play_movie/<movie_id>')
+def play_movie(movie_id):
+    return movie.play(movie_id)
