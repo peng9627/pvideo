@@ -95,28 +95,32 @@ def index():
     result = '{"state":-1}'
     key = project_utils.get_key(request.headers.environ)
     if key is not None:
-        connection = None
-        try:
-            connection = mysql_connection.get_conn()
-            index_recommends = []
-            videos = data_movie.query(connection, '', "ORDER BY update_time DESC", 1, 2)
-            index_recommend = '{"desc": "%s", "data": [%s]}' % ('最新', ",".join(videos))
-            index_recommends.append(index_recommend)
-            videos = data_movie.query(connection, '', "ORDER BY play_count DESC", 1, 4)
-            index_recommend = '{"desc": "%s", "data": [%s]}' % ('最热', ",".join(videos))
-            index_recommends.append(index_recommend)
-            recommends = ['麻豆', 'SWAG', '偷拍', '黑丝', '黑料', '网红']
-            for r in recommends:
-                where = "WHERE span LIKE '%" + r + "%' OR title LIKE '%" + r + "%' OR child_type LIKE '%" + r + "%' "
-                videos = data_movie.query(connection, where, "ORDER BY update_time DESC", 1, 4)
-                index_recommend = '{"desc": "%s", "data": [%s]}' % (r, ",".join(videos))
+        data = request.form["data"]
+        data = project_utils.get_data(key, data)
+        if data is not None:
+            connection = None
+            try:
+                count = int(data['count'])
+                connection = mysql_connection.get_conn()
+                index_recommends = []
+                videos = data_movie.query(connection, '', "ORDER BY update_time DESC", 1, count)
+                index_recommend = '{"desc": "%s", "data": [%s]}' % ('最新', ",".join(videos))
                 index_recommends.append(index_recommend)
-            result = '{"state":0, "data":[%s]}' % ",".join(index_recommends)
-        except:
-            logger.exception(traceback.format_exc())
-        finally:
-            if connection is not None:
-                connection.close()
+                videos = data_movie.query(connection, '', "ORDER BY play_count DESC", 1, count)
+                index_recommend = '{"desc": "%s", "data": [%s]}' % ('最热', ",".join(videos))
+                index_recommends.append(index_recommend)
+                recommends = ['麻豆', 'SWAG', '偷拍', '黑丝', '黑料', '网红']
+                for r in recommends:
+                    where = "WHERE span LIKE '%" + r + "%' OR title LIKE '%" + r + "%' OR child_type LIKE '%" + r + "%' "
+                    videos = data_movie.query(connection, where, "ORDER BY update_time DESC", 1, count)
+                    index_recommend = '{"desc": "%s", "data": [%s]}' % (r, ",".join(videos))
+                    index_recommends.append(index_recommend)
+                result = '{"state":0, "data":[%s]}' % ",".join(index_recommends)
+            except:
+                logger.exception(traceback.format_exc())
+            finally:
+                if connection is not None:
+                    connection.close()
         return aes_utils.aes_encode(result, key)
     return result
 

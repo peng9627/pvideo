@@ -55,7 +55,7 @@ def query_short(connection):
     try:
         with connection.cursor() as cursor:
             sql = config.get("sql", "sql_movie_short")
-            cursor.execute(sql, ("%小视频%", 0, 6))
+            cursor.execute(sql, ("%小视频%", 0, 3))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()

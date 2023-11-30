@@ -1,8 +1,0 @@
-Requires-Dist: pycore_utils
-Requires-Dist: flask-socketio
-Requires-Dist: pillow
-Requires-Dist: cryptography
-Requires-Dist: pycryptodome
-Requires-Dist: requests
-Requires-Dist: boto3
-
