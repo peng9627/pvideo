@@ -12,3 +12,4 @@ class Order(object):
         self.pay_type = 0
         self.details = None
         self.status = 0
+        self.out_order_no = None

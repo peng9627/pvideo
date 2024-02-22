@@ -42,8 +42,8 @@ def query(connection, where, order, page, pagesize=12):
                 v.play_count = result["play_count"]
                 v.play_count *= 31
                 v.play_count += 1
-                v.horizontal = config.get("server", "img_domain") + result["horizontal"]
-                v.vertical = config.get("server", "img_domain") + result["vertical"]
+                v.horizontal = result["vertical"]
+                v.vertical = result["vertical"]
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -73,7 +73,8 @@ def search(connection, content, page, pagesize=20):
     try:
         with connection.cursor() as cursor:
             sql = config.get("sql", "sql_movie_search")
-            cursor.execute(sql, ('%' + content + '%', '%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, (
+            '%' + content + '%', '%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()
@@ -85,8 +86,8 @@ def search(connection, content, page, pagesize=20):
                 v.play_count = result["play_count"]
                 v.play_count *= 31
                 v.play_count += 1
-                v.horizontal = config.get("server", "img_domain") + result["horizontal"]
-                v.vertical = config.get("server", "img_domain") + result["vertical"]
+                v.horizontal = result["vertical"]
+                v.vertical = result["vertical"]
                 movie_list.append(json.dumps(v.__dict__))
     except:
         logger.exception(traceback.format_exc())
@@ -153,7 +154,7 @@ def info(connection, movie_id):
                 movie.year = result["year"]
                 movie.total_part = result["total_part"]
                 movie.source = result["source"]
-                movie.address = result["address"].decode()
+                # movie.address = result["address"].decode()
                 # movie.details = result["details"].decode()
                 movie.play_count = result["play_count"]
                 movie.play_count *= 31
@@ -161,6 +162,22 @@ def info(connection, movie_id):
     except:
         logger.exception(traceback.format_exc())
     return movie
+
+
+def get_url(connection, movie_id):
+    movie_url = None
+    source = None
+    try:
+        sql = config.get("sql", "sql_get_movie_url")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, movie_id)
+            result = cursor.fetchone()
+            if result is not None:
+                movie_url = result["address"].decode()
+                source = result["source"]
+    except:
+        logger.exception(traceback.format_exc())
+    return movie_url, source
 
 
 def exist(connection, movie):

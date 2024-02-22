@@ -59,6 +59,6 @@ def download():
                            h5_url=config.get("server", "h5_url"))
 
 
-@api.route('/play_movie/<movie_id>')
+@api.route('/play_movie/<movie_id>', methods=['GET'])
 def play_movie(movie_id):
     return movie.play(movie_id)

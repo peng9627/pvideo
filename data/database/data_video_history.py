@@ -42,8 +42,8 @@ def query(connection, user_id, page, pagesize=12):
             for result in r:
                 movies.append(json.dumps(
                     {"id": result["id"], "type": result["type"], "title": result["title"], "span": result["span"],
-                     "horizontal": config.get("server", "img_domain") + result["horizontal"],
-                     "vertical": config.get("server", "img_domain") + result["vertical"], "content": result["content"],
+                     "horizontal": result["horizontal"],
+                     "vertical": result["vertical"], "content": result["content"],
                      "update_time": result["update_time"]}))
     except:
         logger.exception(traceback.format_exc())

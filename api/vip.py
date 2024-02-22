@@ -4,6 +4,7 @@ import traceback
 
 from flask import request
 from pycore.data.database import mysql_connection
+from pycore.data.entity import config
 from pycore.utils import aes_utils
 from pycore.utils.logger_utils import LoggerUtils
 
@@ -86,5 +87,21 @@ def use_history():
                         connection.close()
             else:
                 result = '{"state":%d}' % code
+        return aes_utils.aes_encode(result, key)
+    return result
+
+
+def leave_config():
+    result = '{"state":-1}'
+    key = project_utils.get_key(request.headers.environ)
+    if key is not None:
+        try:
+            connection = mysql_connection.get_conn()
+            result = '{"state":0, "data":%s}' % config.get("agent", "level_conf")
+        except:
+            logger.exception(traceback.format_exc())
+        finally:
+            if connection is not None:
+                connection.close()
         return aes_utils.aes_encode(result, key)
     return result

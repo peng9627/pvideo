@@ -51,7 +51,7 @@ def my_agent_id():
             connection = None
             try:
                 connection = mysql_connection.get_conn()
-                agent_id = data_agent.get_parent_id(connection, account_id)
+                agent_id = data_agent.get_agent_id(connection, account_id)
                 if agent_id is not None:
                     result = '{"state":0, "data":{"agent_id":"%s"}}' % agent_id
             except:

@@ -12,7 +12,8 @@ CREATE TABLE `t_order`
     `status`      INT(10) UNSIGNED                                 DEFAULT 0,/* 0.创建 1.已支付 2.已使用 */
     `pay_time`    INT(10) UNSIGNED                                 DEFAULT 0,
     `pay_type`    INT(10) UNSIGNED                                 DEFAULT 0,
-    `details`     VARCHAR(128) COLLATE utf8mb4_unicode_ci
+    `details`     VARCHAR(128) COLLATE utf8mb4_unicode_ci,
+    `out_order_no`     VARCHAR(128) COLLATE utf8mb4_unicode_ci
 )
     ENGINE = InnoDB
     DEFAULT CHARSET = utf8mb4
