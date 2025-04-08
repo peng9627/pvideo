@@ -55,7 +55,7 @@ def content(connection, user_id, video_id):
     try:
         sql = config.get("sql", "sql_movie_history_content")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (user_id, video_id, 2))
+            cursor.execute(sql, (user_id, video_id, 1))
             result = cursor.fetchone()
             if result is not None:
                 content = result["content"]

@@ -76,9 +76,10 @@ def use_history():
                 account_id = sessions["id"]
                 connection = None
                 page = int(data["page"])
+                page_size = int(data["pageSize"])
                 try:
                     connection = mysql_connection.get_conn()
-                    vips = data_vip.use_history(connection, account_id, page)
+                    vips = data_vip.use_history(connection, account_id, page, page_size)
                     result = '{"state":0, "data":[%s]}' % ",".join(vips)
                 except:
                     logger.exception(traceback.format_exc())

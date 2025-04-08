@@ -63,8 +63,9 @@ def query():
             try:
                 connection = mysql_connection.get_conn()
                 page = int(data["page"])
+                page_size = int(data["pageSize"])
                 connection = mysql_connection.get_conn()
-                feedback = data_feedback.query(connection, account_id, device, page)
+                feedback = data_feedback.query(connection, account_id, device, page, page_size)
                 result = '{"state":0,"data":[%s]}' % (",".join(feedback))
             except:
                 logger.exception(traceback.format_exc())
