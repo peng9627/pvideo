@@ -1,7 +1,7 @@
 import time
 import traceback
 
-from flask import request, session
+from flask import session, request
 from flask_socketio import send
 from pycore.data.database import mysql_connection
 from pycore.data.entity import globalvar as gl

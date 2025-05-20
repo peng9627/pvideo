@@ -14,5 +14,6 @@ class Account(object):
         self.last_address = None
         self.account_status = 0
         self.device = None
+        self.platform = ''
         self.code = None
         self.gold = 0

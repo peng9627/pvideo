@@ -20,7 +20,8 @@ def create(connection, account, last_address):
                 if query_by_id(connection, uid) is None:
                     userid = uid
             cursor.execute(sql, (userid, account.account_name, account.pwd, account.salt, account.nickname,
-                                 account.create_time, account.code, account.create_time, last_address, account.device))
+                                 account.create_time, account.code, account.create_time, last_address, account.device,
+                                 account.platform))
             connection.commit()
     except:
         connection.rollback()

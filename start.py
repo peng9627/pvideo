@@ -49,6 +49,7 @@ socketio.on_event('disconnect', message.on_disconnect)
 
 # socketio.run(app, port=5555)
 
+init_logger()
 
 socketio.run(app, host='0.0.0.0', port=5555, allow_unsafe_werkzeug=True)
 

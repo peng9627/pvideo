@@ -98,6 +98,7 @@ def register():
                             account.pwd = StringUtils.md5(pwd + account.salt)
                             account.code = StringUtils.randomStr(4).upper()
                             account.device = device
+                            account.platform = http_utils.get_client_platform(request.headers.environ)
                             while data_account.exist_code(connection, account.code):
                                 account.code = StringUtils.randomStr(4).upper()
                             last_address = http_utils.get_client_ip(request.headers.environ)

@@ -84,7 +84,8 @@ def init_key():
             else:
                 account_id = 0
             ip = http_utils.get_client_ip(request.headers.environ)
-            data_app_init.init(connection, int(time.time()), account_id, device, ip)
+            platform = http_utils.get_client_platform(request.headers.environ)
+            data_app_init.init(connection, int(time.time()), account_id, device, ip, platform)
         else:
             result = '{"state":1}'
     except:
