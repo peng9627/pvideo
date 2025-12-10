@@ -74,7 +74,8 @@ def search(connection, content, page, pagesize=20):
     try:
         with connection.cursor() as cursor:
             sql = config.get("sql", "sql_movie_search")
-            cursor.execute(sql, ('%' + content + '%', '%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
+            cursor.execute(sql, (
+            '%' + content + '%', '%' + content + '%', '%' + content + '%', (page - 1) * pagesize, pagesize))
             r = cursor.fetchall()
             for result in r:
                 v = Movie()
@@ -162,6 +163,22 @@ def info(connection, movie_id):
     except:
         logger.exception(traceback.format_exc())
     return movie
+
+
+def get_url(connection, movie_id):
+    movie_url = None
+    source = None
+    try:
+        sql = config.get("sql", "sql_get_movie_url")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, movie_id)
+            result = cursor.fetchone()
+            if result is not None:
+                movie_url = result["address"].decode()
+                source = result["source"]
+    except:
+        logger.exception(traceback.format_exc())
+    return movie_url, source
 
 
 def exist(connection, movie):

@@ -4,6 +4,7 @@ import time
 import traceback
 
 import pymysql
+import requests
 from flask import request
 from pycore.data.database import mysql_connection
 from pycore.data.entity import config
@@ -13,6 +14,7 @@ from pycore.utils.logger_utils import LoggerUtils
 from data.database import data_movie, data_recommend_movie, data_vip, data_video_history, data_play_details, \
     data_video_praise, data_video_comment
 from utils import project_utils
+from utils.project_utils import get_rel_url
 
 logger = LoggerUtils('api.movie').logger
 
@@ -310,43 +312,46 @@ def play(movie_id):
     result = '{"state":-1}'
     code, sessions = project_utils.get_auth(request.headers.environ)
     is_vip = False
-    if 0 == code:
-        account_id = sessions["id"]
-        connection = None
-        try:
-            connection = mysql_connection.get_conn()
+    url = None
+    source = None
+    connection = None
+    try:
+        connection = mysql_connection.get_conn()
+        url, source = data_movie.get_url(connection, movie_id)
+        if 0 == code:
+            account_id = sessions["id"]
             if data_vip.is_vip(connection, account_id):
                 is_vip = True
-        except:
-            logger.exception(traceback.format_exc())
-        finally:
-            if connection is not None:
-                connection.close()
+    except:
+        logger.exception(traceback.format_exc())
+    finally:
+        if connection is not None:
+            connection.close()
+    if url is None:
+        return "error"
+    rel_url = get_rel_url(url.strip(), source)
+    infile = requests.get(rel_url).text
     if is_vip:
-        infile = open(config.get("server", "media_path") + str(movie_id) + "_1.m3u8")
-        text = infile.read()
-        infile.close()
+        text = infile
     else:
-        if os.path.exists(config.get("server", "media_path") + str(movie_id) + "_0.m3u8"):
-            infile = open(config.get("server", "media_path") + str(movie_id) + "_0.m3u8")
-            text = infile.read()
-            infile.close()
+        parts = infile.count('#EXTINF:')
+        if parts > 2:
+            start1 = infile.find("#EXTINF:", 0)
+            start2 = infile.find("#EXTINF:", start1 + 1)
+            start3 = infile.find("#EXTINF:", start2 + 1)
+            text = infile[0:start3]
+            text += "#EXT-X-ENDLIST\n"
         else:
-            infile = open(config.get("server", "media_path") + str(movie_id) + "_1.m3u8")
-            text = infile.read()
-            infile.close()
-            parts = text.count("#EXTINF:")
-            if parts > 2:
-                start1 = text.find("#EXTINF:", 0)
-                start2 = text.find("#EXTINF:", start1 + 1)
-                start3 = text.find("#EXTINF:", start2 + 1)
-                text = text[0:start3]
-                text += "#EXT-X-ENDLIST\n"
-    if text is not None:
-        s = text.index("https://")
-        e = text.index("/", s + 10)
-        domain_o = text[s: e]
-        text = text.replace(domain_o, config.get("server", "video_domain"))
-        text = text.replace("/api/app/media/enkey", config.get("server", "server_url") + "/resources/movie/enkey")
-        return text, 200, {"Accept-Ranges": 'bytes', "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8"}
+            text = infile
+    lines = text.splitlines(True)
+    url_end_index = len(rel_url) - list(reversed(rel_url)).index('/')
+    rel_content = ''
+    for line in lines:
+        if '.ts' in line:
+            rel_content += rel_url[:url_end_index] + line
+        else:
+            rel_content += line
+    if rel_content is not None:
+        return rel_content, 200, {"Accept-Ranges": 'bytes',
+                                  "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8"}
     return result

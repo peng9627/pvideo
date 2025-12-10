@@ -42,8 +42,8 @@ def query(connection, user_id, page, pagesize=12):
             for result in r:
                 movies.append(json.dumps(
                     {"id": result["id"], "type": result["type"], "title": result["title"], "span": result["span"],
-                     "horizontal": config.get("server", "img_domain") + result["horizontal"],
-                     "vertical": config.get("server", "img_domain") + result["vertical"], "content": result["content"],
+                     "horizontal": result["horizontal"],
+                     "vertical": result["vertical"], "content": result["content"],
                      "update_time": result["update_time"]}))
     except:
         logger.exception(traceback.format_exc())
@@ -55,7 +55,7 @@ def content(connection, user_id, video_id):
     try:
         sql = config.get("sql", "sql_movie_history_content")
         with connection.cursor() as cursor:
-            cursor.execute(sql, (user_id, video_id, 2))
+            cursor.execute(sql, (user_id, video_id, 1))
             result = cursor.fetchone()
             if result is not None:
                 content = result["content"]

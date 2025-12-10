@@ -79,3 +79,13 @@ def list(connection, user_id, page, page_size=20):
     except:
         logger.exception(traceback.format_exc())
     return orders
+
+
+def change_out_order_no(connection, out_order_no):
+    try:
+        sql = config.get("sql", "sql_change_out_order_no")
+        with connection.cursor() as cursor:
+            cursor.execute(sql, out_order_no)
+            connection.commit()
+    except:
+        logger.exception(traceback.format_exc())

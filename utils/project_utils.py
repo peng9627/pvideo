@@ -43,3 +43,9 @@ def get_key(environ):
 def get_data(key, data):
     data = aes_utils.aes_decode(data, key)
     return json.loads(data)
+
+
+def get_rel_url(url, source):
+    if source == 'sw':
+        return url[3:]
+    return url

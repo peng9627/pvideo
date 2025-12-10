@@ -1,0 +1,7 @@
+pycore_utils
+flask-socketio
+pillow
+cryptography
+pycryptodome
+requests
+boto3
