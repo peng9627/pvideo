@@ -16,6 +16,12 @@ from utils import project_utils
 
 logger = LoggerUtils('api.movie').logger
 
+# recommends = ['麻豆', 'SWAG', '偷拍', '黑丝', '黑料', '网红']
+recommends = ['电影', '电视剧', '短剧', '动漫', '综艺', '体育', '纪录片']
+types = [20, 60, 120, 80, 82, 84, 86]
+recommendsKey = ['movie', 'tv_drama', 'short_drama', 'cartoon', 'variety_show', 'physical_education',
+                 'documentary']
+
 
 def query():
     result = '{"state":-1}'
@@ -30,7 +36,10 @@ def query():
                 wheres = []
                 if "span" in data:
                     move_span = data["span"]
-                    if len(move_span) > 0:
+                    if move_span in recommendsKey:
+                        idx = recommendsKey.index(move_span)
+                        wheres.append("type = %d" % types[idx])
+                    elif len(move_span) > 0:
                         wheres.append("span LIKE '%" + move_span + "%'")
                 if "type" in data:
                     move_type = data["type"]
@@ -49,12 +58,19 @@ def query():
                 if "year" in data:
                     year = data["year"]
                     if len(year) < 5:
-                        wheres.append("year LIKE '" + year + "%'")
+                        wheres.append("year LIKE '%" + year + "%'")
+                if "content" in data:
+                    content = data["content"]
+                    c = pymysql.converters.escape_string(content)
+                    wheres.append("(title LIKE '%" + c + "%' OR span LIKE '%" + c + "%' OR child_type LIKE '%" + c + "%')")
                 if len(wheres) > 0:
                     where = "WHERE " + " AND ".join(wheres)
                 page = int(data["page"])
+                page_size = 12
+                if 'count' in data:
+                    page_size = int(data["count"])
                 connection = mysql_connection.get_conn()
-                videos = data_movie.query(connection, where, "ORDER BY update_time DESC", page)
+                videos = data_movie.query(connection, where, "ORDER BY update_time DESC", page, page_size)
                 result = '{"state":0, "data":[%s]}' % ",".join(videos)
             except:
                 logger.exception(traceback.format_exc())
@@ -104,16 +120,16 @@ def index():
                 connection = mysql_connection.get_conn()
                 index_recommends = []
                 videos = data_movie.query(connection, '', "ORDER BY update_time DESC", 1, count)
-                index_recommend = '{"desc": "%s", "data": [%s]}' % ('最新', ",".join(videos))
+                index_recommend = '{"desc": "%s", "data": [%s]}' % ('last_updated', ",".join(videos))
                 index_recommends.append(index_recommend)
                 videos = data_movie.query(connection, '', "ORDER BY play_count DESC", 1, count)
-                index_recommend = '{"desc": "%s", "data": [%s]}' % ('最热', ",".join(videos))
+                index_recommend = '{"desc": "%s", "data": [%s]}' % ('most_popular', ",".join(videos))
                 index_recommends.append(index_recommend)
-                recommends = ['麻豆', 'SWAG', '偷拍', '黑丝', '黑料', '网红']
-                for r in recommends:
-                    where = "WHERE span LIKE '%" + r + "%' OR title LIKE '%" + r + "%' OR child_type LIKE '%" + r + "%' "
+                for i in range(0, len(recommends)):
+                    where = "WHERE span LIKE '%" + recommends[i] + "%' OR title LIKE '%" + recommends[
+                        i] + "%' OR child_type LIKE '%" + recommends[i] + "%' "
                     videos = data_movie.query(connection, where, "ORDER BY update_time DESC", 1, count)
-                    index_recommend = '{"desc": "%s", "data": [%s]}' % (r, ",".join(videos))
+                    index_recommend = '{"desc": "%s", "data": [%s]}' % (recommendsKey[i], ",".join(videos))
                     index_recommends.append(index_recommend)
                 result = '{"state":0, "data":[%s]}' % ",".join(index_recommends)
             except:
@@ -180,8 +196,11 @@ def search():
             try:
                 content = data["content"]
                 page = int(data["page"])
+                page_size = 12
+                if 'count' in data:
+                    page_size = int(data["count"])
                 connection = mysql_connection.get_conn()
-                videos = data_movie.search(connection, pymysql.converters.escape_string(content), page)
+                videos = data_movie.search(connection, pymysql.converters.escape_string(content), page, page_size)
                 result = '{"state":0, "data":[%s]}' % ",".join(videos)
             except:
                 logger.exception(traceback.format_exc())

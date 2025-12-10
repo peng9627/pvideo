@@ -53,7 +53,7 @@ def init_key():
                 device_info = redis.getobj("device_info_" + device)
             else:
                 device_info = {'surplus_time': int(config.get("server", "default_times"))}
-            device_info['aes_key'] = StringUtils.randomStr(16)
+            device_info['aes_key'] = StringUtils.randomStr(32)
             redis.setexo("device_info_" + device, device_info, 18000)
             headers['auth_key'] = device_info['aes_key']
             result = '{"state":0}'

@@ -44,7 +44,8 @@ def query(connection, where, order, page, pagesize=12):
                 v.play_count += 1
                 v.horizontal = config.get("server", "img_domain") + result["horizontal"]
                 v.vertical = config.get("server", "img_domain") + result["vertical"]
-                movie_list.append(json.dumps(v.__dict__))
+                ss = json.dumps(v.__dict__)
+                movie_list.append(ss)
     except:
         logger.exception(traceback.format_exc())
     return movie_list
