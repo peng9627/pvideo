@@ -48,4 +48,6 @@ def get_data(key, data):
 def get_rel_url(url, source):
     if source == 'sw':
         return url[3:]
-    return url
+    else:
+        url1 = url.split('#')[0].split('$')[1]
+        return url1

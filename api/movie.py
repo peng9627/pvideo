@@ -1,5 +1,6 @@
 import json
 import os
+import re
 import time
 import traceback
 
@@ -92,14 +93,19 @@ def query_short():
         if data is not None:
             connection = None
             try:
-                code, sessions = project_utils.get_auth(request.headers.environ)
-                result = '{"state":3}'
-                if 0 == code:
-                    connection = mysql_connection.get_conn()
-                    account_id = sessions["id"]
-                    if data_vip.is_vip(connection, account_id):
-                        videos = data_movie.query_short(connection)
-                        result = '{"state":0, "data":[%s]}' % ",".join(videos)
+                connection = mysql_connection.get_conn()
+                videos = data_movie.query_short(connection)
+                result = '{"state":0, "data":[%s]}' % ",".join(videos)
+                #
+                #
+                # code, sessions = project_utils.get_auth(request.headers.environ)
+                # result = '{"state":3}'
+                # if 0 == code:
+                #     connection = mysql_connection.get_conn()
+                #     account_id = sessions["id"]
+                #     if data_vip.is_vip(connection, account_id):
+                #         videos = data_movie.query_short(connection)
+                #         result = '{"state":0, "data":[%s]}' % ",".join(videos)
             except:
                 logger.exception(traceback.format_exc())
             finally:
@@ -334,13 +340,22 @@ def play(movie_id):
     if is_vip:
         text = infile
     else:
-        parts = infile.count('#EXTINF:')
-        if parts > 2:
-            start1 = infile.find("#EXTINF:", 0)
-            start2 = infile.find("#EXTINF:", start1 + 1)
-            start3 = infile.find("#EXTINF:", start2 + 1)
-            text = infile[0:start3]
-            text += "#EXT-X-ENDLIST\n"
+        parts = infile.count('\n')
+        if parts > 100:
+            matches = [m.start() for m in re.finditer('\n', infile)]
+            if len(matches) > 100:
+                start1 = matches[100]
+                start2 = infile.find("#EXTINF:", start1)
+                text = infile[0:start2]
+                text += "#EXT-X-ENDLIST\n"
+
+        # parts = infile.count('#EXTINF:')
+        # if parts > 2:
+        #     start1 = infile.find("#EXTINF:", 0)
+        #     start2 = infile.find("#EXTINF:", start1 + 1)
+        #     start3 = infile.find("#EXTINF:", start2 + 1)
+        #     text = infile[0:start3]
+        #     text += "#EXT-X-ENDLIST\n"
         else:
             text = infile
     lines = text.splitlines(True)
@@ -352,6 +367,7 @@ def play(movie_id):
         else:
             rel_content += line
     if rel_content is not None:
+        print(rel_content)
         return rel_content, 200, {"Accept-Ranges": 'bytes',
                                   "Content-Type": "application/vnd.apple.mpegurl; charset=utf-8"}
     return result
