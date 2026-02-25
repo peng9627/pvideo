@@ -1,5 +1,4 @@
 import json
-import os
 import re
 import time
 import traceback
@@ -19,7 +18,6 @@ from utils.project_utils import get_rel_url
 
 logger = LoggerUtils('api.movie').logger
 
-# recommends = ['麻豆', 'SWAG', '偷拍', '黑丝', '黑料', '网红']
 recommends = ['电影', '电视剧', '短剧', '动漫', '综艺', '体育', '纪录片']
 types = [20, 60, 120, 80, 82, 84, 86]
 recommendsKey = ['movie', 'tv_drama', 'short_drama', 'cartoon', 'variety_show', 'physical_education',
